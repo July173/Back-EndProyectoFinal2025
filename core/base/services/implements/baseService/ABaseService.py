@@ -42,3 +42,6 @@ class ABaseService(IBaseService[T], ABC):
 
     def delete(self, id: int) -> bool:
         return self.repository.delete(id)
+
+    def soft_delete(self, id: int) -> bool:
+        return self.repository.soft_delete(id)

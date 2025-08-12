@@ -29,4 +29,10 @@ class IBaseViewSet(ABC):
 
     @abstractmethod
     def destroy(self, request: Request, pk: Any = None) -> Response:
+        """Elimina completamente el registro por id."""
+        pass
+
+    @abstractmethod
+    def soft_destroy(self, request: Request, pk: Any = None) -> Response:
+        """Elimina lógicamente el registro por id (cambia active y delete_at)."""
         pass
