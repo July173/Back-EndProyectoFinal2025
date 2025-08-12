@@ -25,4 +25,10 @@ class IBaseRepository(ABC, Generic[T]):
 
     @abstractmethod
     def delete(self, id: int) -> bool:
+        """Elimina completamente el registro por id."""
+        pass
+
+    @abstractmethod
+    def soft_delete(self, id: int) -> bool:
+        """Elimina lógicamente el registro por id (cambia active y delete_at)."""
         pass

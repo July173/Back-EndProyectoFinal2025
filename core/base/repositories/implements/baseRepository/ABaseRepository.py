@@ -27,8 +27,18 @@ class ABaseRepository(IBaseRepository[T], ABC):
         return entity
 
     def delete(self, id: int) -> bool:
-        obj = self.get_by_id(id)
-        if obj:
-            obj.delete()  # Elimina físicamente el registro de la base de datos
+        instance = self.model.objects.filter(pk=id).first()
+        if instance:
+            instance.delete()
+            return True
+        return False
+
+    def soft_delete(self, id: int) -> bool:
+        instance = self.model.objects.filter(pk=id).first()
+        if instance and hasattr(instance, 'active') and hasattr(instance, 'delete_at'):
+            from django.utils import timezone
+            instance.active = False
+            instance.delete_at = timezone.now()
+            instance.save()
             return True
         return False
