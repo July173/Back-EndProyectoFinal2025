@@ -5,6 +5,7 @@ from typing import Type, Any
 from core.base.view.interfaces.IBaseViewset import IBaseViewSet
 from core.base.services.interfaces.IBaseService import IBaseService
 from rest_framework.serializers import Serializer
+from rest_framework.decorators import action
 
 
 class BaseViewSet(viewsets.ViewSet, IBaseViewSet):
@@ -88,9 +89,12 @@ class BaseViewSet(viewsets.ViewSet, IBaseViewSet):
     def destroy(self, request: Request, pk: Any = None) -> Response:
         deleted = self.service.delete(pk)
         if deleted:
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        else:
-            return Response(
-                {"detail": "No encontrado"},
-                status=status.HTTP_404_NOT_FOUND
-            )
+            return Response({"detail": "Eliminado correctamente."}, status=status.HTTP_204_NO_CONTENT)
+        return Response({"detail": "No encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
+    @action(detail=True, methods=['delete'], url_path='soft-delete')
+    def soft_destroy(self, request: Request, pk: Any = None) -> Response:
+        deleted = self.service.soft_delete(pk)
+        if deleted:
+            return Response({"detail": "Eliminado lógicamente correctamente."}, status=status.HTTP_204_NO_CONTENT)
+        return Response({"detail": "No encontrado."}, status=status.HTTP_404_NOT_FOUND)
