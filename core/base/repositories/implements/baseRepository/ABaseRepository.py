@@ -37,8 +37,12 @@ class ABaseRepository(IBaseRepository[T], ABC):
         instance = self.model.objects.filter(pk=id).first()
         if instance and hasattr(instance, 'active') and hasattr(instance, 'delete_at'):
             from django.utils import timezone
-            instance.active = False
-            instance.delete_at = timezone.now()
+            if instance.active:
+                instance.active = False
+                instance.delete_at = timezone.now()
+            else:
+                instance.active = True
+                instance.delete_at = None
             instance.save()
             return True
         return False
