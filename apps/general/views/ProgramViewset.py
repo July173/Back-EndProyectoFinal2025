@@ -5,20 +5,20 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
 from core.base.view.implements.BaseViewset import BaseViewSet
-from apps.security.services.PermissionService import PermissionService
-from apps.security.entity.serializers.PermissionSerializer import PermissionSerializer
+from apps.general.services.ProgramService import ProgramService
+from apps.general.entity.serializers.ProgramSerializer import ProgramSerializer
 
 
-class PermissionViewSet(BaseViewSet):
-    service_class = PermissionService
-    serializer_class = PermissionSerializer
+class ProgramViewset(BaseViewSet):
+    service_class = ProgramService
+    serializer_class = ProgramSerializer
 
     # ----------- LIST -----------
     @swagger_auto_schema(
         operation_description=(
-            "Obtiene una lista de todos los permisos registrados."
+            "Obtiene una lista de todos los programas registrados."
         ),
-        tags=["Permission"]
+        tags=["Programas"]
     )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
@@ -26,9 +26,9 @@ class PermissionViewSet(BaseViewSet):
     # ----------- CREATE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Crea un nuevo permiso con la información proporcionada."
+            "Crea un nuevo programa con la información proporcionada."
         ),
-        tags=["Permission"]
+        tags=["Programas"]
     )
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
@@ -36,9 +36,9 @@ class PermissionViewSet(BaseViewSet):
     # ----------- RETRIEVE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Obtiene la información de un permiso específico."
+            "Obtiene la información de un programa específico."
         ),
-        tags=["Permission"]
+        tags=["Programas"]
     )
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
@@ -46,9 +46,9 @@ class PermissionViewSet(BaseViewSet):
     # ----------- UPDATE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Actualiza la información completa de un permiso."
+            "Actualiza la información completa de un programa."
         ),
-        tags=["Permission"]
+        tags=["Programas"]
     )
     def update(self, request, *args, **kwargs):
         return super().update(request, *args, **kwargs)
@@ -56,9 +56,9 @@ class PermissionViewSet(BaseViewSet):
     # ----------- PARTIAL UPDATE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Actualiza solo algunos campos de un permiso."
+            "Actualiza solo algunos campos de un programa."
         ),
-        tags=["Permission"]
+        tags=["Programas"]
     )
     def partial_update(self, request, *args, **kwargs):
         return super().partial_update(request, *args, **kwargs)
@@ -66,9 +66,9 @@ class PermissionViewSet(BaseViewSet):
     # ----------- DELETE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Elimina físicamente un permiso de la base de datos."
+            "Elimina físicamente un programa de la base de datos."
         ),
-        tags=["Permission"]
+        tags=["Programas"]
     )
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)
@@ -77,9 +77,9 @@ class PermissionViewSet(BaseViewSet):
     @swagger_auto_schema(
         method='delete',
         operation_description=(
-            "Realiza un borrado lógico (soft delete) del permiso especificado."
+            "Realiza un borrado lógico (soft delete) del programa especificado."
         ),
-        tags=["Permission"],
+        tags=["Programas"],
         responses={
             204: openapi.Response("Eliminado lógicamente correctamente."),
             404: openapi.Response("No encontrado.")

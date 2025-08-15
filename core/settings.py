@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'corsheaders',
     # Apps locales
     'apps.security',  # reemplaza 'api' por tu app de seguridad
+    'apps.general',  # reemplaza 'general' por tu app general
 ]
 
 # ============================
