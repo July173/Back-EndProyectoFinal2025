@@ -16,39 +16,9 @@ class PersonViewSet(BaseViewSet):
 
     @action(detail=False, methods=['post'], url_path='register-aprendiz')
     def register_aprendiz(self, request):
-        data = request.data
-        email = data.get('email')
-        password = data.get('password')
-        # Validar correo institucional
-        if not email or not email.endswith('@soy.sena.edu.co'):
-            return Response({'error': 'Solo se permiten correos institucionales'}, status=status.HTTP_400_BAD_REQUEST)
-        # Crear persona
-        person_serializer = self.get_serializer(data=data)
-        if person_serializer.is_valid():
-            person = person_serializer.save()
-            # Crear usuario asociado
-            user_data = {
-                'email': email,
-                'password': password,
-                'person': person.id,  # Si tienes relación en el modelo User
-                'is_active': False,   # Usuario inactivo por defecto
-                'role': 1,            # Rol aprendiz por defecto
-            }
-            user_service = UserService()
-            user_serializer = UserSerializer(data=user_data)
-            if user_serializer.is_valid():
-                user = user_serializer.save()
-                # Solo enviar correo si ambos se crearon correctamente
-                fecha_registro = datetime.now().strftime('%d/%m/%Y')
-                enviar_registro_pendiente(email, person.first_name + ' ' + person.first_last_name, fecha_registro)
-                return Response({
-                    'persona': person_serializer.data,
-                    'usuario': user_serializer.data,
-                    'success': 'Usuario registrado correctamente. Tu cuenta está pendiente de activación.'
-                }, status=status.HTTP_201_CREATED)
-            else:
-                person.delete()  # Rollback si falla usuario
-                return Response({'error': 'No se pudo crear el usuario', 'detalle': user_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            # Retornar errores detallados del serializer
-            return Response({'error': 'Datos inválidos', 'detalle': person_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        """
+        Orquesta el registro de aprendiz, delegando toda la lógica al servicio.
+        Solo retorna la respuesta del servicio, sin lógica adicional.
+        """
+        result = self.service.register_aprendiz(request.data)
+        return Response(result['data'], status=result['status'])
