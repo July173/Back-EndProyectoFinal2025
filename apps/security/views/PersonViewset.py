@@ -6,6 +6,7 @@ from drf_yasg import openapi
 from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.security.services.PersonService import PersonService
 from apps.security.entity.serializers.PersonSerializer import PersonSerializer
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 from apps.security.services.UserService import UserService
@@ -41,6 +42,7 @@ class PersonViewSet(BaseViewSet):
             400: openapi.Response("Datos inválidos")
         }
     )
+    @action(detail=False, methods=['post'], url_path='register-aprendiz')
     def register_aprendiz(self, request):
         """
         Orquesta el registro de aprendiz, delegando toda la lógica al servicio.
