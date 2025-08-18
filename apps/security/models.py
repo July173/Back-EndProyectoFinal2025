@@ -1,6 +1,6 @@
 # apps/security/models.py
 from apps.security.entity.models.User import User
-from apps.security.entity.models.Role import Role  # o Role si así se llama
+from apps.security.entity.models.Role import Role
 from apps.security.entity.models.Person import Person
 from apps.security.entity.models.Form import Form
 from apps.security.entity.models.Permission import Permission
