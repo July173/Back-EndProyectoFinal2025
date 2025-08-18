@@ -4,12 +4,6 @@ from rest_framework.decorators import action
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.decorators import action
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
-
 from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.security.services.UserService import UserService
 from apps.security.entity.serializers.UserSerializer import UserSerializer
@@ -20,6 +14,25 @@ from rest_framework import status
 
 class UserViewSet(BaseViewSet):
 
+    @swagger_auto_schema(
+        operation_description=(
+            "Restablece la contraseña usando email, código y nueva contraseña."
+        ),
+        tags=["User"],
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'email': openapi.Schema(type=openapi.TYPE_STRING, description='Correo institucional'),
+                'code': openapi.Schema(type=openapi.TYPE_STRING, description='Código de recuperación'),
+                'new_password': openapi.Schema(type=openapi.TYPE_STRING, description='Nueva contraseña'),
+            },
+            required=['email', 'code', 'new_password']
+        ),
+        responses={
+            200: openapi.Response("Contraseña restablecida"),
+            400: openapi.Response("Datos inválidos")
+        }
+    )
     @action(detail=False, methods=['post'], url_path='reset-password')
     def reset_password(self, request):
         """
@@ -34,6 +47,24 @@ class UserViewSet(BaseViewSet):
     serializer_class = UserSerializer
 
 
+    @swagger_auto_schema(
+        operation_description=(
+            "Valida correo institucional y contraseña, retorna JWT si es válido."
+        ),
+        tags=["User"],
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'email': openapi.Schema(type=openapi.TYPE_STRING, description='Correo institucional'),
+                'password': openapi.Schema(type=openapi.TYPE_STRING, description='Contraseña'),
+            },
+            required=['email', 'password']
+        ),
+        responses={
+            200: openapi.Response("Login exitoso"),
+            400: openapi.Response("Datos inválidos")
+        }
+    )
     @action(detail=False, methods=['post'], url_path='validate-institutional-login')
     def validate_institutional_login(self, request):
         """
@@ -44,6 +75,23 @@ class UserViewSet(BaseViewSet):
         result = self.service.validate_institutional_login(email, password)
         return Response(result['data'], status=result['status'])
 
+    @swagger_auto_schema(
+        operation_description=(
+            "Solicita código de recuperación de contraseña, lo envía por email y lo retorna al frontend."
+        ),
+        tags=["User"],
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'email': openapi.Schema(type=openapi.TYPE_STRING, description='Correo institucional'),
+            },
+            required=['email']
+        ),
+        responses={
+            200: openapi.Response("Código enviado"),
+            400: openapi.Response("Datos inválidos")
+        }
+    )
     @action(detail=False, methods=['post'], url_path='request-password-reset')
     def request_password_reset(self, request):
         """
