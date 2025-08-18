@@ -11,9 +11,9 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from apps.security.entity.models import User
 class UserService(BaseService):
-    def reset_password(self, email, code, new_password):
-        # Validar correo
-        if not email or not code or not new_password:
+    def reset_password(self, email, new_password):
+        # Validar correo y nueva contraseña
+        if not email or not new_password:
             return {
                 'data': {'error': 'Faltan datos requeridos.'},
                 'status': status.HTTP_400_BAD_REQUEST
@@ -25,17 +25,6 @@ class UserService(BaseService):
                 'data': {'error': 'No existe un usuario con ese correo.'},
                 'status': status.HTTP_404_NOT_FOUND
             }
-        # Validar código y expiración
-        if user.reset_code != code:
-            return {
-                'data': {'error': 'Código incorrecto.'},
-                'status': status.HTTP_400_BAD_REQUEST
-            }
-        if not user.reset_code_expiration or timezone.now() > user.reset_code_expiration:
-            return {
-                'data': {'error': 'El código ha expirado.'},
-                'status': status.HTTP_400_BAD_REQUEST
-            }
         # Cambiar contraseña
         user.set_password(new_password)
         user.reset_code = None
@@ -46,46 +35,54 @@ class UserService(BaseService):
             'status': status.HTTP_200_OK
         }
     def send_password_reset_code(self, email):
-        # Validar correo institucional
-        if not email or not (email.endswith('@soy.sena.edu.co') or email.endswith('@sena.edu.co')):
-            return {
-                'data': {'error': 'Solo se permiten correos institucionales (@soy.sena.edu.co o @sena.edu.co)'},
-                'status': status.HTTP_400_BAD_REQUEST
-            }
-        # Buscar usuario
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
-            return {
-                'data': {'error': 'No existe un usuario con ese correo.'},
-                'status': status.HTTP_404_NOT_FOUND
-            }
-        # Generar código y expiración
-        code = get_random_string(length=6, allowed_chars='0123456789')
-        expiration = timezone.now() + timedelta(minutes=15)
-        user.reset_code = code
-        user.reset_code_expiration = expiration
-        user.save()
-        # Renderizar email
-        nombre = user.person.first_name if user.person else user.email
-        fecha_expiracion = expiration.strftime('%d/%m/%Y %H:%M')
-        html_content = render_to_string('RestablecerContraseña.html', {
-            'nombre': nombre,
-            'codigo': code,
-            'fecha_expiracion': fecha_expiracion
-        })
-        subject = 'Recuperación de Contraseña SENA'
-        email_msg = EmailMultiAlternatives(subject, '', to=[email])
-        email_msg.attach_alternative(html_content, "text/html")
-        email_msg.send()
-        return {
-            'data': {
-                'code': code,
-                'fecha_expiracion': fecha_expiracion,
-                'success': 'Código enviado correctamente al correo institucional.'
-            },
-            'status': status.HTTP_200_OK
-        }
+            # Validar correo institucional
+            if not email or not (email.endswith('@soy.sena.edu.co') or email.endswith('@sena.edu.co')):
+                return {
+                    'data': {'error': 'Solo se permiten correos institucionales (@soy.sena.edu.co o @sena.edu.co)'},
+                    'status': status.HTTP_400_BAD_REQUEST
+                }
+            # Buscar usuario
+            try:
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                return {
+                    'data': {'error': 'No existe un usuario con ese correo.'},
+                    'status': status.HTTP_404_NOT_FOUND
+                }
+            # Generar código y expiración
+            code = get_random_string(length=6, allowed_chars='0123456789')
+            expiration = timezone.now() + timedelta(minutes=15)
+            user.reset_code = code
+            user.reset_code_expiration = expiration
+            user.save()
+            # Verificar que se guardó correctamente
+            user_refresh = User.objects.get(email=email)
+            if user_refresh.reset_code == code and user_refresh.reset_code_expiration == expiration:
+                # Renderizar email solo si se guardó correctamente
+                nombre = user.person.first_name if user.person else user.email
+                fecha_expiracion = expiration.strftime('%d/%m/%Y %H:%M')
+                html_content = render_to_string('RestablecerContraseña.html', {
+                    'nombre': nombre,
+                    'codigo': code,
+                    'fecha_expiracion': fecha_expiracion
+                })
+                subject = 'Recuperación de Contraseña SENA'
+                email_msg = EmailMultiAlternatives(subject, '', to=[email])
+                email_msg.attach_alternative(html_content, "text/html")
+                email_msg.send()
+                return {
+                    'data': {
+                        'code': code,
+                        'fecha_expiracion': fecha_expiracion,
+                        'success': 'Código enviado correctamente al correo institucional.'
+                    },
+                    'status': status.HTTP_200_OK
+                }
+            else:
+                return {
+                    'data': {'error': 'No se pudo registrar el código de recuperación.'},
+                    'status': status.HTTP_500_INTERNAL_SERVER_ERROR
+                }
     
 
     def __init__(self):
