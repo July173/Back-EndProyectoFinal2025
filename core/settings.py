@@ -157,6 +157,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8000",
     # Frontend - diferentes puertos comunes
     "http://localhost:3000",    # React/Next.js
+    "http://localhost:8080",    # React/Next.js
+
     "http://localhost:5173",    # Vite
     "http://localhost:8080",    # Otros dev servers
     "http://127.0.0.1:3000",
