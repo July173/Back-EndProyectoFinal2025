@@ -2,7 +2,6 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from apps.general.repositories.CreateInstructorRepository import CreateInstructorRepository
 from apps.general.entity.models import Sede, Center, Regional, PersonSede
-from apps.general.entity.serializers import CreateInstructorSerializer
 
 
 class CreateInstructorService:
@@ -10,7 +9,7 @@ class CreateInstructorService:
         self.repo = CreateInstructorRepository(db)
         self.db = db
 
-    def create_instructor(self, dto: CreateInstructorSerializer):
+    def create_instructor(self, dto):
         try:
             with self.db.begin():
                 # Validar y obtener entidades relacionadas
@@ -39,14 +38,14 @@ class CreateInstructorService:
                 person = self.repo.create_person(person_data)
 
                 # Relacionar Person con Sede (tabla pivote)
-                sede_person = PersonSede(person_id=person.id, sede_id=sede.id)
+                sede_person = PersonSede(PersonId=person.id, SedeId=sede.id)
                 self.db.add(sede_person)
 
-                # Crear User
+                # Crear User (role_id=3, password=number_identification)
                 user_data = {
                     "email": dto.email,
-                    "password": dto.password,
-                    "role_id": dto.role_id,
+                    "password": dto.number_identification,
+                    "role_id": 3,
                     "person_id": person.id
                 }
                 user = self.repo.create_user(user_data)

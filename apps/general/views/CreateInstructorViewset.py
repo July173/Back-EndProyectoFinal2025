@@ -22,7 +22,12 @@ class CreateInstructorViewset(viewsets.ViewSet):
             'first_name', 'second_name', 'first_last_name', 'second_last_name',
             'phone_number', 'type_identification', 'number_identification'
         ]}
-        user_data = {k: data[k] for k in ['email', 'password', 'role_id']}
+        # Asignar password y rol por defecto
+        user_data = {
+            'email': data['email'],
+            'password': data['number_identification'],
+            'role_id': 3
+        }
         instructor_data = {k: data[k] for k in [
             'contractType', 'contractStartDate', 'contractEndDate', 'knowledgeArea'
         ]}

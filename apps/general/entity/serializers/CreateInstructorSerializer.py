@@ -12,8 +12,6 @@ class CreateInstructorSerializer(serializers.Serializer):
     number_identification = serializers.CharField()
     # Campos de User
     email = serializers.EmailField()
-    password = serializers.CharField()
-    role_id = serializers.IntegerField()
     # Campos de Instructor
     contractType = serializers.CharField()
     contractStartDate = serializers.CharField()
