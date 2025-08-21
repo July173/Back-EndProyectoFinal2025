@@ -6,3 +6,4 @@ class InstructorSerializer(BaseSerializer):
     class Meta:
         model = Instructor
         fields = ['id', 'contractType', 'contractStartDate', 'contractEndDate', 'knowledgeArea', 'active']
+        ref_name = "InstructorModelSerializer"

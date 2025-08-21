@@ -16,3 +16,4 @@ class PersonSerializer(BaseSerializer):
             'number_identification',
             'active',
         ]
+        ref_name = "PersonModelSerializer"  # <-- Agregado

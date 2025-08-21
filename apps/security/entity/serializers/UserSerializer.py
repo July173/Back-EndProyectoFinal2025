@@ -7,3 +7,4 @@ class UserSerializer(BaseSerializer):
     class Meta:
         model = User
         fields = ['email', 'password', 'person', 'role']
+        ref_name = "UserModelSerializer"  # <-- Agregado
