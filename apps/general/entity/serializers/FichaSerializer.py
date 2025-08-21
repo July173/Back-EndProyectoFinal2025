@@ -1,8 +1,15 @@
-from apps.general.entity.models import Ficha
-from core.base.serializers.implements.baseSerializer.BaseSerializer import BaseSerializer
+from apps.general.entity.models import Ficha, Program
+from rest_framework import serializers
 
 
-class FichaSerializer(BaseSerializer):
+class FichaSerializer(serializers.ModelSerializer):
+    program = serializers.PrimaryKeyRelatedField(queryset=Program.objects.all())
+
     class Meta:
         model = Ficha
-        fields = ['id', 'numeroFicha', 'active']
+        fields = [
+            'id',
+            'numeroFicha',
+            'program',
+            'active'
+        ]

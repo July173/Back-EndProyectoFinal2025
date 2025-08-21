@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 
-class CreateInstructorFlatSerializer(serializers.Serializer):
+class CreateInstructorSerializer(serializers.Serializer):
     # Campos de Person
     first_name = serializers.CharField()
     second_name = serializers.CharField(required=False, allow_blank=True)
@@ -19,6 +19,10 @@ class CreateInstructorFlatSerializer(serializers.Serializer):
     contractStartDate = serializers.CharField()
     contractEndDate = serializers.CharField()
     knowledgeArea = serializers.CharField()
+    # IDs de relación
+    center_id = serializers.IntegerField()
+    sede_id = serializers.IntegerField()
+    regional_id = serializers.IntegerField()
 
     class Meta:
-        ref_name = "CreateInstructorFlatInputSerializer"
+        ref_name = "CreateInstructorInputSerializer"

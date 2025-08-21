@@ -1,5 +1,5 @@
-from apps.general.entity.serializers.CreateInstructorSerializer import CreateInstructorFlatSerializer
-from apps.general.services.InstructorService import InstructorService
+from apps.general.entity.serializers.CreateInstructorSerializer import CreateInstructorSerializer
+from apps.general.services.CreateInstructorService import CreateInstructorService
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
@@ -8,12 +8,12 @@ from django.db import transaction
 
 class CreateInstructorViewset(viewsets.ViewSet):
     @swagger_auto_schema(
-        request_body=CreateInstructorFlatSerializer,
+        request_body=CreateInstructorSerializer,
         operation_description="Crea un nuevo instructor con todos los campos al mismo nivel.",
         tags=["Instructor"]
     )
     def create(self, request, *args, **kwargs):
-        serializer = CreateInstructorFlatSerializer(data=request.data)
+        serializer = CreateInstructorSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
@@ -26,11 +26,17 @@ class CreateInstructorViewset(viewsets.ViewSet):
         instructor_data = {k: data[k] for k in [
             'contractType', 'contractStartDate', 'contractEndDate', 'knowledgeArea'
         ]}
+        # Extraer los IDs de relación
+        sede_id = data['sede_id']
+        center_id = data['center_id']
+        regional_id = data['regional_id']
 
-        service = InstructorService()
+        service = CreateInstructorService(self.request.db)  # Pasa la sesión si usas SQLAlchemy
         try:
             with transaction.atomic():
-                result = service.create_instructor(person_data, user_data, instructor_data)
+                result = service.create_instructor(
+                    person_data, user_data, instructor_data, sede_id, center_id, regional_id
+                )
             return Response(result, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
