@@ -25,18 +25,15 @@ class PersonViewSet(BaseViewSet):
             "Orquesta el registro de aprendiz, delegando toda la lógica al servicio. Solo retorna la respuesta del servicio, sin lógica adicional."
         ),
         tags=["Person"],
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'email': openapi.Schema(type=openapi.TYPE_STRING, description='Correo institucional'),
-                'names': openapi.Schema(type=openapi.TYPE_STRING, description='Nombres'),
-                'surnames': openapi.Schema(type=openapi.TYPE_STRING, description='Apellidos'),
-                'documentNumber': openapi.Schema(type=openapi.TYPE_STRING, description='Número de documento'),
-                'phone': openapi.Schema(type=openapi.TYPE_STRING, description='Teléfono'),
-                # Agrega aquí los campos relevantes
-            },
-            required=['email', 'names', 'surnames', 'documentNumber', 'phone']
-        ),
+            request_body=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    **{field: openapi.Schema(type=openapi.TYPE_STRING) for field in PersonSerializer().get_fields().keys() if field != 'id'},
+                    'email': openapi.Schema(type=openapi.TYPE_STRING, description='Correo institucional'),
+                    'active': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Activo'),
+                },
+                required=list(PersonSerializer().get_fields().keys()) + ['email']
+            ),
         responses={
             201: openapi.Response("Registro exitoso"),
             400: openapi.Response("Datos inválidos")

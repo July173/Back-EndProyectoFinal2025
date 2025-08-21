@@ -6,20 +6,35 @@ from apps.security.services.UserService import UserService
 from apps.security.emails.SendEmails import enviar_registro_pendiente
 from rest_framework import status
 from datetime import datetime
-
+from django.contrib.auth.hashers import make_password
+from apps.security.entity.models import Person
+from apps.security.entity.models import User
 
 class PersonService(BaseService):
     def __init__(self):
         super().__init__(PersonRepository())
 
     def register_aprendiz(self, data):
-        from django.contrib.auth.hashers import make_password
+
         email = data.get('email')
         password = data.get('password')
+        numero_identificacion = data.get('number_identification')
         # Validar correo institucional
         if not email or not email.endswith('@soy.sena.edu.co'):
             return {
                 'data': {'error': 'Solo se permiten correos institucionales'},
+                'status': status.HTTP_400_BAD_REQUEST
+            }
+        # Validar que el correo institucional no esté repetido en User
+        if User.objects.filter(email=email).exists():
+            return {
+                'data': {'error': 'El correo institucional ya está registrado.'},
+                'status': status.HTTP_400_BAD_REQUEST
+            }
+        # Validar que el número de identificación no esté repetido en Person
+        if Person.objects.filter(number_identification=numero_identificacion).exists():
+            return {
+                'data': {'error': 'El número de identificación ya está registrado.'},
                 'status': status.HTTP_400_BAD_REQUEST
             }
         # Crear persona usando método base del repositorio
