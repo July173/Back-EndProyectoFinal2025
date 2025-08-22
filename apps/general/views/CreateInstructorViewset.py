@@ -36,12 +36,11 @@ class CreateInstructorViewset(viewsets.ViewSet):
         center_id = data['center_id']
         regional_id = data['regional_id']
 
-        service = CreateInstructorService(self.request.db)  # Pasa la sesión si usas SQLAlchemy
+        service = CreateInstructorService()
         try:
-            with transaction.atomic():
-                result = service.create_instructor(
-                    person_data, user_data, instructor_data, sede_id, center_id, regional_id
-                )
+            result = service.create_instructor(
+                person_data, user_data, instructor_data, sede_id, center_id, regional_id
+            )
             return Response(result, status=status.HTTP_201_CREATED)
-        except Exception as e:
+        except ValueError as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
