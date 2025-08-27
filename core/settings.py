@@ -65,8 +65,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
+
 # ============================
-# BASE DE DATOS (MySQL)
+# BASE DE DATOS (MySQL) y configuración normal sin despliegue de docker
 # ============================
 DATABASES = {
     'default': {
@@ -77,6 +78,25 @@ DATABASES = {
         'HOST': '127.0.0.1',
         'PORT': '3306',
         'OPTIONS': {'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"},
+    },
+    'postgresql': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'bdautogestion',
+        'USER': 'postgres',
+        'PASSWORD': '123456',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    },
+    'sqlserver': {
+        'ENGINE': 'mssql',
+        'NAME': 'bdautogestion',
+        'USER': 'sa',
+        'PASSWORD': 'Password123!',
+        'HOST': 'localhost',
+        'PORT': '1433',
+        'OPTIONS': {
+            'driver': 'ODBC Driver 17 for SQL Server',
+        },
     }
 }
 # ============================
@@ -100,7 +120,7 @@ AUTH_PASSWORD_VALIDATORS = [
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
-       # 'rest_framework.permissions.IsAuthenticated',
+        # 'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
@@ -153,16 +173,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # ==============================
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
-     # Backend
+    # Backend
     "http://127.0.0.1:8000",
     # Frontend - diferentes puertos comunes
     "http://localhost:3000",    # React/Next.js
     "http://localhost:8080",    # React/Next.js
-
+    "http://localhost:82",      # Otros dev servers
     "http://localhost:5173",    # Vite
     "http://localhost:8080",    # Otros dev servers
     "http://127.0.0.1:3000",
-    "http://127.0.0.1:5173", 
+    "http://localhost:8085",
+    "http://127.0.0.1:5173",
     "http://127.0.0.1:8080",
 ]
 
@@ -171,7 +192,7 @@ EMAILS_ENABLED = True
 EMAILS_FROM_NAME = "AutoGestion SENA"
 EMAILS_FROM_EMAIL: str = "bscl20062007@gmail.com"
 SMTP_USER: str = "bscl20062007@gmail.com"  # Tu correo completo
-SMTP_PASSWORD: str = "giux eley mwzw zape" 
+SMTP_PASSWORD: str = "giux eley mwzw zape"
 SMTP_HOST: str = "smtp.gmail.com"
 SMTP_PORT: int = 587
 SMTP_TLS: bool = True
@@ -187,5 +208,5 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'bscl20062007@gmail.com'  # Tu correo completo
-EMAIL_HOST_PASSWORD = 'giux eley mwzw zape' # Tu contraseña de aplicación de Gmail
+EMAIL_HOST_PASSWORD = 'giux eley mwzw zape'  # Tu contraseña de aplicación de Gmail
 DEFAULT_FROM_EMAIL = 'bscl20062007@gmail.com'
