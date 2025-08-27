@@ -27,8 +27,9 @@ INSTALLED_APPS = [
     'drf_yasg',
     'corsheaders',
     # Apps locales
-    'apps.security',  # reemplaza 'api' por tu app de seguridad
-    'apps.general',  # reemplaza 'general' por tu app general
+    'apps.security',
+    'apps.general',
+    'apps.assign',
 ]
 
 # ============================
@@ -78,25 +79,6 @@ DATABASES = {
         'HOST': '127.0.0.1',
         'PORT': '3306',
         'OPTIONS': {'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"},
-    },
-    'postgresql': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'bdautogestion',
-        'USER': 'postgres',
-        'PASSWORD': '123456',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    },
-    'sqlserver': {
-        'ENGINE': 'mssql',
-        'NAME': 'bdautogestion',
-        'USER': 'sa',
-        'PASSWORD': 'Password123!',
-        'HOST': 'localhost',
-        'PORT': '1433',
-        'OPTIONS': {
-            'driver': 'ODBC Driver 17 for SQL Server',
-        },
     }
 }
 # ============================

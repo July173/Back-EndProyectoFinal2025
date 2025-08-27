@@ -13,14 +13,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Aprendiz',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('active', models.BooleanField(default=True)),
-                ('delete_at', models.DateTimeField(blank=True, null=True)),
-            ],
-        ),
-        migrations.CreateModel(
             name='AsignationInstructor',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
@@ -29,85 +21,75 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name='Center',
+            name='Boss',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('name_boss', models.CharField(max_length=100)),
+                ('phone_number', models.CharField(max_length=20)),
+                ('email_boss', models.EmailField(max_length=100)),
+                ('position', models.CharField(max_length=100)),
+                ('active', models.BooleanField(default=True)),
+                ('delete_at', models.DateTimeField(blank=True, null=True)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='Enterprise',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('name_enterprise', models.CharField(max_length=100)),
+                ('locate', models.CharField(max_length=255)),
+                ('nit_enterprise', models.CharField(max_length=50)),
+                ('active', models.BooleanField(default=True)),
+                ('email_enterprise', models.EmailField(max_length=100)),
+                ('delete_at', models.DateTimeField(blank=True, null=True)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='HumanTalent',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=100)),
-                ('codeCenter', models.CharField(max_length=50)),
-                ('address', models.CharField(max_length=255)),
+                ('email', models.EmailField(max_length=100)),
+                ('phone_number', models.CharField(max_length=20)),
                 ('active', models.BooleanField(default=True)),
                 ('delete_at', models.DateTimeField(blank=True, null=True)),
             ],
         ),
         migrations.CreateModel(
-            name='Ficha',
+            name='ModalityProductiveStage',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('numeroFicha', models.CharField(max_length=50)),
-                ('active', models.BooleanField(default=True)),
-                ('delete_at', models.DateTimeField(blank=True, null=True)),
-            ],
-        ),
-        migrations.CreateModel(
-            name='Instructor',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('contractType', models.CharField(max_length=50)),
-                ('contractStartDate', models.DateField()),
-                ('contractEndDate', models.DateField()),
-                ('knowledgeArea', models.CharField(max_length=100)),
-                ('active', models.BooleanField(default=True)),
-                ('delete_at', models.DateTimeField(blank=True, null=True)),
-            ],
-        ),
-        migrations.CreateModel(
-            name='PersonSede',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('DeleteAt', models.DateTimeField(blank=True, null=True)),
-            ],
-            options={
-                'verbose_name': 'Person Sede',
-                'verbose_name_plural': 'Person Sedes',
-                'db_table': 'PersonSede',
-            },
-        ),
-        migrations.CreateModel(
-            name='Program',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('codeProgram', models.CharField(max_length=50)),
-                ('name', models.CharField(max_length=100)),
-                ('typeProgram', models.CharField(max_length=50)),
+                ('name_modality', models.CharField(max_length=100)),
                 ('description', models.TextField(max_length=255)),
                 ('active', models.BooleanField(default=True)),
                 ('delete_at', models.DateTimeField(blank=True, null=True)),
             ],
         ),
         migrations.CreateModel(
-            name='Regional',
+            name='RequestAsignation',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('codeRegional', models.CharField(max_length=50)),
-                ('description', models.TextField(max_length=255)),
-                ('active', models.BooleanField(default=True)),
-                ('address', models.CharField(max_length=255)),
+                ('request_date', models.DateField()),
+                ('date_start_production_stage', models.DateField()),
+                ('pdf_request', models.FileField(blank=True, null=True, upload_to='requests/')),
+                ('request_state', models.CharField(max_length=50)),
                 ('delete_at', models.DateTimeField(blank=True, null=True)),
             ],
         ),
         migrations.CreateModel(
-            name='Sede',
+            name='VisitFollowing',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('codeSede', models.CharField(max_length=50)),
-                ('address', models.CharField(max_length=255)),
-                ('phoneSede', models.CharField(max_length=20)),
-                ('emailContact', models.EmailField(max_length=100)),
+                ('visit_number', models.IntegerField()),
+                ('observations', models.TextField(blank=True, null=True)),
+                ('state_visit', models.CharField(max_length=50)),
+                ('scheduled_date', models.DateField()),
+                ('date_visit_made', models.DateField(blank=True, null=True)),
                 ('active', models.BooleanField(default=True)),
                 ('delete_at', models.DateTimeField(blank=True, null=True)),
-                ('center', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sedes', to='general.center')),
+                ('name_visit', models.CharField(max_length=100)),
+                ('observation_state_visit', models.TextField(blank=True, null=True)),
+                ('asignation_instructor', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='visits', to='assign.asignationinstructor')),
             ],
         ),
     ]

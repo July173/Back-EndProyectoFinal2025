@@ -3,7 +3,7 @@ from apps.security.entity.models import Person
 
 
 class Instructor(models.Model):
-    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='instructores')  # <-- Relación agregada
+    person = models.OneToOneField(Person, on_delete=models.CASCADE, related_name='instructor')  # Relación 1:1
     contractType = models.CharField(max_length=50)
     contractStartDate = models.DateField()
     contractEndDate = models.DateField()
