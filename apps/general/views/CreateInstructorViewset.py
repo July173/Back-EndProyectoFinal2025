@@ -41,7 +41,7 @@ class CreateInstructorViewset(viewsets.ViewSet):
         User.objects.create(
             person=person,
             email=data['email'],
-            role_id=3  # O el rol que corresponda
+            role_id=data['role_id']  # <-- Usa el rol seleccionado
         )
 
         # 4. Crear el instructor
