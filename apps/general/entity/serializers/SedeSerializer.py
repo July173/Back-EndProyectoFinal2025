@@ -1,8 +1,19 @@
-from apps.general.entity.models import Sede
-from core.base.serializers.implements.baseSerializer.BaseSerializer import BaseSerializer
+from apps.general.entity.models import Sede, Center
+from rest_framework import serializers
 
 
-class SedeSerializer(BaseSerializer):
+class SedeSerializer(serializers.ModelSerializer):
+    center = serializers.PrimaryKeyRelatedField(queryset=Center.objects.all())
+
     class Meta:
         model = Sede
-        fields = ['id', 'name', 'codeSede', 'address', 'phoneSede', 'emailContact', 'active']
+        fields = [
+            'id',
+            'name',
+            'codeSede',
+            'address',
+            'phoneSede',
+            'emailContact',
+            'active',
+            'center'
+        ]
