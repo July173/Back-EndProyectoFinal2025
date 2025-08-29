@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .entity.models import Aprendiz, Center, Ficha, Instructor, Program, Regional, Sede, AsignationInstructor, PersonSede
+from .entity.models import Aprendiz, Center, Ficha, Instructor, Program, Regional, Sede, AsignationInstructor, PersonSede, KnowledgeArea
 
 admin.site.register(Aprendiz)
 admin.site.register(AsignationInstructor)
@@ -10,3 +10,4 @@ admin.site.register(Program)
 admin.site.register(Regional)
 admin.site.register(Sede)
 admin.site.register(PersonSede)
+admin.site.register(KnowledgeArea)

@@ -1,22 +1,17 @@
 from rest_framework import serializers
-from apps.assign.entity.models import RequestAsignation, Enterprise, ModalityProductiveStage
-from apps.general.entity.models import Aprendiz
+from apps.assign.entity.models import AsignationInstructor, RequestAsignation
+from apps.general.entity.models import Instructor
 
 
-class RequestAsignationSerializer(serializers.ModelSerializer):
-    aprendiz = serializers.PrimaryKeyRelatedField(queryset=Aprendiz.objects.all())
-    enterprise = serializers.PrimaryKeyRelatedField(queryset=Enterprise.objects.all())
-    modality_productive_stage = serializers.PrimaryKeyRelatedField(queryset=ModalityProductiveStage.objects.all())
+class AsignationInstructorSerializer(serializers.ModelSerializer):
+    instructor = serializers.PrimaryKeyRelatedField(queryset=Instructor.objects.all())
+    request_asignation = serializers.PrimaryKeyRelatedField(queryset=RequestAsignation.objects.all())
 
     class Meta:
-        model = RequestAsignation
+        model = AsignationInstructor
         fields = [
             'id',
-            'aprendiz',
-            'enterprise',
-            'modality_productive_stage',
-            'request_date',
-            'date_start_production_stage',
-            'pdf_request',
-            'request_state'
+            'instructor',
+            'request_asignation',
+            'date_asignation'
         ]

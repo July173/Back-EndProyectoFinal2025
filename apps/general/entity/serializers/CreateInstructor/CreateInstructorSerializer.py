@@ -14,9 +14,9 @@ class CreateInstructorSerializer(serializers.Serializer):
     email = serializers.EmailField()
     # Campos de Instructor
     contractType = serializers.CharField()
-    contractStartDate = serializers.CharField()
-    contractEndDate = serializers.CharField()
-    knowledgeArea = serializers.CharField()
+    contractStartDate = serializers.DateField()
+    contractEndDate = serializers.DateField()
+    knowledgeArea = serializers.IntegerField()
     # IDs de relación
     center_id = serializers.IntegerField()
     sede_id = serializers.IntegerField()

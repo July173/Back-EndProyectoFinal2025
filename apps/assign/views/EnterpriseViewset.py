@@ -15,42 +15,42 @@ class EnterpriseViewset(BaseViewSet):
 
     @swagger_auto_schema(
         operation_description="Obtiene una lista de todas las empresas registradas.",
-        tags=["Empresa"]
+        tags=["Enterprise"]
     )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
     @swagger_auto_schema(
         operation_description="Crea una nueva empresa con la información proporcionada.",
-        tags=["Empresa"]
+        tags=["Enterprise"]
     )
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
 
     @swagger_auto_schema(
         operation_description="Obtiene la información de una empresa específica.",
-        tags=["Empresa"]
+        tags=["Enterprise"]
     )
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
     @swagger_auto_schema(
         operation_description="Actualiza la información completa de una empresa.",
-        tags=["Empresa"]
+        tags=["Enterprise"]
     )
     def update(self, request, *args, **kwargs):
         return super().update(request, *args, **kwargs)
 
     @swagger_auto_schema(
         operation_description="Actualiza solo algunos campos de una empresa.",
-        tags=["Empresa"]
+        tags=["Enterprise"]
     )
     def partial_update(self, request, *args, **kwargs):
         return super().partial_update(request, *args, **kwargs)
 
     @swagger_auto_schema(
         operation_description="Elimina físicamente una empresa de la base de datos.",
-        tags=["Empresa"]
+        tags=["Enterprise"]
     )
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)
@@ -58,7 +58,7 @@ class EnterpriseViewset(BaseViewSet):
     @swagger_auto_schema(
         method='delete',
         operation_description="Realiza un borrado lógico (soft delete) de la empresa especificada.",
-        tags=["Empresa"],
+        tags=["Enterprise"],
         responses={
             204: openapi.Response("Eliminado lógicamente correctamente."),
             404: openapi.Response("No encontrado.")

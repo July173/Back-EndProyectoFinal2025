@@ -7,8 +7,9 @@ from .Program import Program
 from .Regional import Regional
 from .Sede import Sede
 from .PersonSede import PersonSede
+from .KnowledgeArea import KnowledgeArea
 
 __all__ = [
     'Aprendiz', 'AsignationInstructor', 'Center', 'Ficha',
-    'Instructor', 'Program', 'Regional', 'Sede', 'PersonSede'
+    'Instructor', 'Program', 'Regional', 'Sede', 'PersonSede', 'KnowledgeArea'
 ]
