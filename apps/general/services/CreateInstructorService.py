@@ -1,6 +1,8 @@
 from django.db import transaction
 from apps.general.repositories.CreateInstructorRepository import CreateInstructorRepository
-from apps.general.entity.models import Sede, Center, Regional, PersonSede
+from apps.general.entity.models import Sede, Center, Regional, PersonSede, KnowledgeArea
+from apps.security.entity.models import User
+from apps.general.entity.models import Instructor
 
 
 class CreateInstructorService:
@@ -24,6 +26,11 @@ class CreateInstructorService:
             user_data['person_id'] = person.id
             user = self.repo.create_user(user_data)
 
+            # Obtener instancia de KnowledgeArea
+            knowledge_area_id = instructor_data.pop('knowledgeArea')
+            knowledge_area_instance = KnowledgeArea.objects.get(pk=knowledge_area_id)
+            instructor_data['knowledgeArea'] = knowledge_area_instance
+
             # Crear Instructor
             instructor_data['person'] = person  # Relación correcta
             instructor_data.pop('user_id', None)  # Elimina si existe
@@ -37,3 +44,73 @@ class CreateInstructorService:
                 "center_id": center.id,
                 "regional_id": regional.id
             }
+
+    def update_instructor(self, instructor_id, person_data, user_data, instructor_data, sede_id):
+        with transaction.atomic():
+            instructor = Instructor.objects.get(pk=instructor_id)
+            person = instructor.person
+            user = User.objects.filter(person=person).first()
+
+            self.repo.update_person(person, person_data)
+            if user:
+                self.repo.update_user(user, user_data)
+
+            # Convierte el ID en instancia si existe en instructor_data
+            if 'knowledgeArea' in instructor_data:
+                knowledge_area_id = instructor_data.pop('knowledgeArea')
+                instructor_data['knowledgeArea'] = KnowledgeArea.objects.get(pk=knowledge_area_id)
+
+            self.repo.update_instructor(instructor, instructor_data)
+            if sede_id:
+                self.repo.update_person_sede(person, sede_id)
+
+            return {
+                "person_id": person.id,
+                "user_id": user.id if user else None,
+                "instructor_id": instructor.id,
+                "sede_id": sede_id
+            }
+
+    def delete_instructor(self, instructor_id):
+        with transaction.atomic():
+            instructor = Instructor.objects.get(pk=instructor_id)
+            person = instructor.person
+
+            self.repo.delete_instructor(instructor)
+            self.repo.delete_user_by_person(person)
+            self.repo.delete_person_sede_by_person(person)
+            self.repo.delete_person(person)
+
+    def logical_delete_instructor(self, instructor_id):
+        with transaction.atomic():
+            instructor = Instructor.objects.get(pk=instructor_id)
+            person = instructor.person
+
+            # Si está desactivado, reactívalo y borra la fecha de eliminación
+            if not instructor.active:
+                instructor.active = True
+                instructor.delete_at = None
+                instructor.save()
+
+                user = User.objects.filter(person=person).first()
+                if user:
+                    user.is_active = True
+                    user.deleted_at = None
+                    user.save()
+
+                person.active = True
+                person.delete_at = None
+                person.save()
+
+                person_sede = PersonSede.objects.filter(PersonId=person)
+                for ps in person_sede:
+                    ps.DeleteAt = None
+                    ps.save()
+                return "Instructor reactivado correctamente."
+
+            # Si está activo, desactívalo y registra la fecha de eliminación
+            self.repo.deactivate_instructor(instructor)
+            self.repo.deactivate_user_by_person(person)
+            self.repo.deactivate_person(person)
+            self.repo.deactivate_person_sede_by_person(person)
+            return "Eliminación lógica realizada correctamente."

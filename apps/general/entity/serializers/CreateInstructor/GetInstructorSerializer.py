@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from apps.general.entity.models import Instructor
-from apps.security.entity.models import User  # Ajusta el import si tu modelo User está en otro lugar
+from apps.security.entity.models import User
 
 
 class GetInstructorSerializer(serializers.ModelSerializer):
