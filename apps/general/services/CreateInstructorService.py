@@ -24,6 +24,7 @@ class CreateInstructorService:
 
             # Crear User (role_id=3, password=number_identification)
             user_data['person_id'] = person.id
+            user_data['password'] = person_data['number_identification']  # Asigna la contraseña automáticamente
             user = self.repo.create_user(user_data)
 
             # Obtener instancia de KnowledgeArea
