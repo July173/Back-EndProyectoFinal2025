@@ -120,6 +120,7 @@ class UserService(BaseService):
                 'data': {'error': 'Credenciales inválidas.'},
                 'status': status.HTTP_401_UNAUTHORIZED
             }
+        print("userrr **** info xxxx : ", user.person.id)
         # Generar JWT
         refresh = RefreshToken.for_user(user)
         return {
@@ -129,7 +130,8 @@ class UserService(BaseService):
                 'user': {
                     'email': user.email,
                     'id': user.id,
-                    'role': user.role.id if user.role else None,  # Solo el id
+                    'role': user.role.id if user.role else None,
+                    'person': user.person.id if user.person else None, # Solo el id
                 }
             },
             'status': status.HTTP_200_OK
