@@ -70,6 +70,18 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # ============================
 # BASE DE DATOS (MySQL) y configuración normal sin despliegue de docker
 # ============================
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME':  'bdautogestion',
+#         'USER': 'root',
+#         'PASSWORD': '123456',
+#         'HOST': '127.0.0.1',
+#         'PORT': '3306',
+#         'OPTIONS': {'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"},
+#     }
+# }
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -79,6 +91,25 @@ DATABASES = {
         'HOST': '127.0.0.1',
         'PORT': '3306',
         'OPTIONS': {'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"},
+    },
+    'postgresql': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'bdautogestion',
+        'USER': 'postgres',
+        'PASSWORD': '123456',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    },
+    'sqlserver': {
+        'ENGINE': 'django_mssql_backend',
+        'NAME': 'bdautogestion',
+        'USER': 'sa',
+        'PASSWORD': 'SqlServer2025!',
+        'HOST': 'localhost',
+        'PORT': '1433',
+        'OPTIONS': {
+            'driver': 'ODBC Driver 17 for SQL Server',
+        },
     }
 }
 # ============================
