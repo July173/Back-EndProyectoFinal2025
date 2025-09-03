@@ -1,6 +1,6 @@
 from core.base.repositories.implements.baseRepository.BaseRepository import BaseRepository
 from apps.security.entity.models import Person
-from apps.security.entity.serializers.PersonSerializer import PersonSerializer
+from apps.security.entity.serializers.person.PersonSerializer import PersonSerializer
 
 
 class PersonRepository(BaseRepository):

@@ -1,6 +1,6 @@
 from core.base.services.implements.baseService.BaseService import BaseService
 from apps.security.repositories.PersonRepository import PersonRepository
-from apps.security.entity.serializers.PersonSerializer import PersonSerializer
+from apps.security.entity.serializers.person.PersonSerializer import PersonSerializer
 from apps.security.entity.serializers.UserSerializer import UserSerializer
 from apps.security.services.UserService import UserService
 from apps.security.emails.SendEmails import enviar_registro_pendiente

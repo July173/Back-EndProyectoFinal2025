@@ -28,8 +28,9 @@ INSTALLED_APPS = [
     'drf_yasg',
     'corsheaders',
     # Apps locales
-    'apps.security',  # reemplaza 'api' por tu app de seguridad
-    'apps.general',  # reemplaza 'general' por tu app general
+    'apps.security',
+    'apps.general',
+    'apps.assign',
 ]
 
 # ============================
@@ -52,7 +53,7 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -66,9 +67,22 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
+
 # ============================
-# BASE DE DATOS (MySQL)
+# BASE DE DATOS (MySQL) y configuración normal sin despliegue de docker
 # ============================
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME':  'bdautogestion',
+#         'USER': 'root',
+#         'PASSWORD': '123456',
+#         'HOST': '127.0.0.1',
+#         'PORT': '3306',
+#         'OPTIONS': {'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"},
+#     }
+# }
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -78,50 +92,27 @@ DATABASES = {
         'HOST': '127.0.0.1',
         'PORT': '3306',
         'OPTIONS': {'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"},
+    },
+    'postgresql': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'bdautogestion',
+        'USER': 'postgres',
+        'PASSWORD': '123456',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    },
+    'sqlserver': {
+        'ENGINE': 'django_mssql_backend',
+        'NAME': 'bdautogestion',
+        'USER': 'sa',
+        'PASSWORD': 'SqlServer2025!',
+        'HOST': 'localhost',
+        'PORT': '1433',
+        'OPTIONS': {
+            'driver': 'ODBC Driver 17 for SQL Server',
+        },
     }
 }
-
-
-# DATABASE_ENGINE = os.getenv('DB_ENGINE', 'mysql')  # postgresql, mysql, sqlserver
-
-# if DATABASE_ENGINE == 'postgresql':
-#     DATABASES = {
-#         'default': {
-#             'ENGINE': 'django.db.backends.postgresql',
-#             'NAME': os.getenv('POSTGRES_DB', 'dbautogestion-P'),
-#             'USER': os.getenv('POSTGRES_USER', 'postgres'),
-#             'PASSWORD': os.getenv('POSTGRES_PASSWORD', '123456'),
-#             'HOST': os.getenv('POSTGRES_HOST', 'postgres-db'),
-#             'PORT': os.getenv('POSTGRES_PORT', '5432'),
-#         }
-#     }
-# elif DATABASE_ENGINE == 'mysql':
-#     DATABASES = {
-#         'default': {
-#             'ENGINE': 'django.db.backends.mysql',
-#             'NAME': os.getenv('MYSQL_DATABASE', 'dbautogestionM'),
-#             'USER': os.getenv('MYSQL_USER', 'root'),
-#             'PASSWORD': os.getenv('MYSQL_PASSWORD', '123456'),
-#             'HOST': os.getenv('MYSQL_HOST', 'localhost'),
-#             'PORT': os.getenv('MYSQL_PORT', '3306'),
-#             'OPTIONS': {'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"},
-#         }
-#     }
-# elif DATABASE_ENGINE == 'sqlserver':
-#     DATABASES = {
-#         'default': {
-#             'ENGINE': 'sql_server.pyodbc',
-#             'NAME': os.getenv('MSSQL_DATABASE', 'dbautogestion-S'),
-#             'USER': os.getenv('MSSQL_USER', 'sa'),
-#             'PASSWORD': os.getenv('MSSQL_PASSWORD', 'Abc123$%'),
-#             'HOST': os.getenv('MSSQL_HOST', 'mssql-db'),
-#             'PORT': os.getenv('MSSQL_PORT', '1433'),
-#             'OPTIONS': {
-#                 'driver': 'ODBC Driver 18 for SQL Server',
-#             },
-#         }
-#     }
-
 # ============================
 # MODELO DE USUARIO PERSONALIZADO
 # ============================
@@ -200,11 +191,14 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8000",
     # Frontend - diferentes puertos comunes
     "http://localhost:3000",    # React/Next.js
+    "http://localhost:8080",    # React/Next.js
+    "http://localhost:82",      # Otros dev servers
     "http://localhost:5173",    # Vite
     "http://127.0.0.1:3000",
     "http://localhost:8080",    # Otros dev servers
-    "http://localhost:8081",    # Otros dev servers
-    "http://127.0.0.1:5173", 
+    "http://127.0.0.1:3000",
+    "http://localhost:8085",
+    "http://127.0.0.1:5173",
     "http://127.0.0.1:8080",
 ]
 
@@ -213,7 +207,7 @@ EMAILS_ENABLED = True
 EMAILS_FROM_NAME = "AutoGestion SENA"
 EMAILS_FROM_EMAIL: str = "bscl20062007@gmail.com"
 SMTP_USER: str = "bscl20062007@gmail.com"  # Tu correo completo
-SMTP_PASSWORD: str = "giux eley mwzw zape" 
+SMTP_PASSWORD: str = "giux eley mwzw zape"
 SMTP_HOST: str = "smtp.gmail.com"
 SMTP_PORT: int = 587
 SMTP_TLS: bool = True
@@ -229,7 +223,7 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'bscl20062007@gmail.com'  # Tu correo completo
-EMAIL_HOST_PASSWORD = 'giux eley mwzw zape' # Tu contraseña de aplicación de Gmail
+EMAIL_HOST_PASSWORD = 'giux eley mwzw zape'  # Tu contraseña de aplicación de Gmail
 DEFAULT_FROM_EMAIL = 'bscl20062007@gmail.com'
 
 LOGGING = {

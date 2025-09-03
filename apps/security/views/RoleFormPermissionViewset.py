@@ -77,10 +77,10 @@ class RolFormPermissionViewSet(BaseViewSet):
     @swagger_auto_schema(
         method='delete',
         operation_description=(
-            "Realiza un borrado lógico (soft delete) del permiso de formulario por rol especificado."
-        ),
-        tags=["RoleFormPermission"],
-        responses={
+                "Realiza un borrado lógico (soft delete) del permiso de formulario por rol especificado."
+            ),
+            tags=["RoleFormPermission"],
+            responses={
             204: openapi.Response("Eliminado lógicamente correctamente."),
             404: openapi.Response("No encontrado.")
         }
@@ -97,3 +97,24 @@ class RolFormPermissionViewSet(BaseViewSet):
             {"detail": "No encontrado."},
             status=status.HTTP_404_NOT_FOUND
         )
+    
+    
+    @swagger_auto_schema(
+        operation_description="Obtiene el menú para el usuario especificado.",
+        tags=["RoleFormPermission"],
+        responses={
+            200: openapi.Response("Menú obtenido correctamente."),
+            404: openapi.Response("No se encontró menú para este usuario.")
+        }
+    )
+    @action(detail=True, methods=['get'], url_path='get-menu')
+    def get_menu(self, request, pk=None):
+        menu = self.service.get_menu(pk)
+
+        if not menu:
+            return Response(
+                {"detail": "No menu found for this user."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        return Response(menu, status=status.HTTP_200_OK)

@@ -8,9 +8,23 @@ class AuthService:
         if not user:
             return None
         refresh = RefreshToken.for_user(user)
+        # Obtener el campo person, asumiendo que user.person existe
+        person = None
+        if hasattr(user, 'person'):
+            # Si es una relación, puedes serializar el objeto o solo el id
+            try:
+                person = user.person.id
+            except Exception:
+                person = None
+                print('user:', user, 'person:', person)
         return {
             'access': str(refresh.access_token),
             'refresh': str(refresh),
-            'user_id': user.id,
-            'email': user.email
+            'user': {
+                'id': user.id,
+                'email': user.email,
+                'role': user.role.id if hasattr(user, 'role') else None,
+                'person': person
+            }
         }
+    
