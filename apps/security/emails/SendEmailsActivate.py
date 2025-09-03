@@ -2,13 +2,15 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.conf import settings
 
-def enviar_desactivacion_usuario(email_destino, nombre, fecha_desactivacion):
-    asunto = "Cuenta desactivada"
+
+def enviar_activacion_usuario(email_destino, nombre, email_usuario, password_temporal):
+    asunto = "Cuenta Activada - Credenciales de Acceso"
     html_content = render_to_string(
-        'DesactivacionUsuario.html',  # Debes crear esta plantilla
+        'ActivacionUsuario.html',
         {
             'nombre': nombre,
-            'fecha_desactivacion': fecha_desactivacion,
+            'email_usuario': email_usuario,
+            'password_temporal': password_temporal,
         }
     )
     msg = EmailMultiAlternatives(

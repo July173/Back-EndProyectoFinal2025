@@ -1,9 +1,8 @@
 from django.db import transaction
-from django.utils import timezone
-from apps.general.email.SendEmailsDesactivate import enviar_desactivacion_usuario
 from apps.general.repositories.CreateAprendizRepository import CreateAprendizRepository
 from apps.security.entity.models import User, Role
 from apps.general.entity.models import Aprendiz, Ficha
+
 
 class CreateAprendizService:
     def __init__(self):
@@ -57,12 +56,4 @@ class CreateAprendizService:
                 self.repo.deactivate_aprendiz(aprendiz)
                 self.repo.deactivate_user_by_person(person)
                 self.repo.deactivate_person(person)
-                # Enviar correo de desactivación si existe usuario
-                if user:
-                    nombre = f"{person.first_name} {person.second_name} {person.first_last_name} {person.second_last_name}"
-                    enviar_desactivacion_usuario(
-                        user.email,
-                        nombre,
-                        timezone.now()
-                    )
                 return "Eliminación lógica realizada correctamente."
