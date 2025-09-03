@@ -6,7 +6,8 @@ from rest_framework.parsers import MultiPartParser, FormParser
 
 from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.security.services.PersonService import PersonService
-from apps.security.entity.serializers.PersonSerializer import PersonSerializer
+from apps.security.entity.serializers.person.PatchPersonSerializer import PatchPersonSerializer
+from apps.security.entity.serializers.person.PersonSerializer import PersonSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
@@ -20,6 +21,11 @@ class PersonViewSet(BaseViewSet):
     parser_classes = (MultiPartParser, FormParser)
     service_class = PersonService
     serializer_class = PersonSerializer
+
+    def get_serializer_class(self):
+        if self.action == 'partial_update':
+            return PatchPersonSerializer
+        return PersonSerializer
 
     #--- REGISTRO APRENDIZ ---
     @swagger_auto_schema(
