@@ -10,6 +10,8 @@ from datetime import timedelta
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from apps.security.entity.models import User
+
+
 class UserService(BaseService):
     def reset_password(self, email, new_password):
         # Validar correo y nueva contraseña
@@ -34,6 +36,7 @@ class UserService(BaseService):
             'data': {'success': 'Contraseña actualizada correctamente.'},
             'status': status.HTTP_200_OK
         }
+
     def send_password_reset_code(self, email):
             # Validar correo institucional
             if not email or not (email.endswith('@soy.sena.edu.co') or email.endswith('@sena.edu.co')):
@@ -88,8 +91,28 @@ class UserService(BaseService):
     def __init__(self):
         self.repository = UserRepository()
 
+    def _validate_email(self, email):
+        if not email or not email.endswith('@soy.sena.edu.co'):
+            return {
+                'data': {'error': 'Solo se permiten correos institucionales (@soy.sena.edu.co)'},
+                'status': status.HTTP_400_BAD_REQUEST
+            }
+        if User.objects.filter(email=email).exists():
+            return {
+                'data': {'error': 'El correo ya está registrado.'},
+                'status': status.HTTP_409_CONFLICT
+            }
+        return None
+
     def create(self, data):
+        email = data.get('email')
         pwd = data.get('password')
+
+        # Validación unificada
+        error = self._validate_email(email)
+        if error:
+            return error
+
         if pwd:
             data['password'] = make_password(pwd)
         return super().create(data)
@@ -101,10 +124,10 @@ class UserService(BaseService):
         return inst
 
     def validate_institutional_login(self, email, password):
-        # Validar correo institucional
-        if not email or not (email.endswith('@soy.sena.edu.co') or email.endswith('@sena.edu.co')):
+        # Validación institucional
+        if not email or not email.endswith('@soy.sena.edu.co'):
             return {
-                'data': {'error': 'Solo se permiten correos institucionales (@soy.sena.edu.co o @sena.edu.co)'},
+                'data': {'error': 'Solo se permiten correos institucionales (@soy.sena.edu.co)'},
                 'status': status.HTTP_400_BAD_REQUEST
             }
         # Validar contraseña (mínimo 8 caracteres)
