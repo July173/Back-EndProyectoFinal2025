@@ -1,5 +1,20 @@
+# configuraciones iniciales sin docker
+# Django>=4.2,<5.0
+# djangorestframework>=3.15
+# drf-yasg>=1.21
+# djangorestframework-simplejwt>=5.3
+# mysqlclient>=2.2
+
+# Django y dependencias principales
 Django>=4.2,<5.0
 djangorestframework>=3.15
 drf-yasg>=1.21
 djangorestframework-simplejwt>=5.3
-mysqlclient>=2.2
+
+# corsheaders
+django-cors-headers
+# Conectores de BD
+mysqlclient>=2.1.1          # MySQL
+psycopg2-binary>=2.9.0      # PostgreSQL
+django-mssql-backend>=2.8.1 # SQL Server
+pyodbc>=4.0.0               # SQL Server

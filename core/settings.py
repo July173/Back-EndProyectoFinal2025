@@ -1,5 +1,6 @@
 from pathlib import Path
 from datetime import timedelta
+import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -8,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ============================
 SECRET_KEY = 'django-insecure-igo_*_$d=s2s+x#u=!whln50*b2(+(9a=3z5rv)tr$v!1h%ty&'
 DEBUG = True
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 # ============================
 # APPS INSTALADAS
@@ -79,6 +80,48 @@ DATABASES = {
         'OPTIONS': {'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"},
     }
 }
+
+
+# DATABASE_ENGINE = os.getenv('DB_ENGINE', 'mysql')  # postgresql, mysql, sqlserver
+
+# if DATABASE_ENGINE == 'postgresql':
+#     DATABASES = {
+#         'default': {
+#             'ENGINE': 'django.db.backends.postgresql',
+#             'NAME': os.getenv('POSTGRES_DB', 'dbautogestion-P'),
+#             'USER': os.getenv('POSTGRES_USER', 'postgres'),
+#             'PASSWORD': os.getenv('POSTGRES_PASSWORD', '123456'),
+#             'HOST': os.getenv('POSTGRES_HOST', 'postgres-db'),
+#             'PORT': os.getenv('POSTGRES_PORT', '5432'),
+#         }
+#     }
+# elif DATABASE_ENGINE == 'mysql':
+#     DATABASES = {
+#         'default': {
+#             'ENGINE': 'django.db.backends.mysql',
+#             'NAME': os.getenv('MYSQL_DATABASE', 'dbautogestionM'),
+#             'USER': os.getenv('MYSQL_USER', 'root'),
+#             'PASSWORD': os.getenv('MYSQL_PASSWORD', '123456'),
+#             'HOST': os.getenv('MYSQL_HOST', 'localhost'),
+#             'PORT': os.getenv('MYSQL_PORT', '3306'),
+#             'OPTIONS': {'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"},
+#         }
+#     }
+# elif DATABASE_ENGINE == 'sqlserver':
+#     DATABASES = {
+#         'default': {
+#             'ENGINE': 'sql_server.pyodbc',
+#             'NAME': os.getenv('MSSQL_DATABASE', 'dbautogestion-S'),
+#             'USER': os.getenv('MSSQL_USER', 'sa'),
+#             'PASSWORD': os.getenv('MSSQL_PASSWORD', 'Abc123$%'),
+#             'HOST': os.getenv('MSSQL_HOST', 'mssql-db'),
+#             'PORT': os.getenv('MSSQL_PORT', '1433'),
+#             'OPTIONS': {
+#                 'driver': 'ODBC Driver 18 for SQL Server',
+#             },
+#         }
+#     }
+
 # ============================
 # MODELO DE USUARIO PERSONALIZADO
 # ============================
@@ -95,12 +138,12 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # ============================
-# DJANGO REST FRAMEWORK (DRF)
+# DJANGO REST FRAMEWORK (DRF) #
 # ============================
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
-       # 'rest_framework.permissions.IsAuthenticated',
+        # 'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
@@ -153,13 +196,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # ==============================
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
-     # Backend
+    # Backend
     "http://127.0.0.1:8000",
     # Frontend - diferentes puertos comunes
     "http://localhost:3000",    # React/Next.js
     "http://localhost:5173",    # Vite
-    "http://localhost:8080",    # Otros dev servers
     "http://127.0.0.1:3000",
+    "http://localhost:8080",    # Otros dev servers
+    "http://localhost:8081",    # Otros dev servers
     "http://127.0.0.1:5173", 
     "http://127.0.0.1:8080",
 ]
@@ -187,3 +231,22 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'bscl20062007@gmail.com'  # Tu correo completo
 EMAIL_HOST_PASSWORD = 'giux eley mwzw zape' # Tu contraseña de aplicación de Gmail
 DEFAULT_FROM_EMAIL = 'bscl20062007@gmail.com'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'django.log',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+    },
+}
