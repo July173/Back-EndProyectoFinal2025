@@ -2,6 +2,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from rest_framework.parsers import MultiPartParser, FormParser
 
 from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.security.services.PersonService import PersonService
@@ -16,6 +17,7 @@ from datetime import datetime
 
 
 class PersonViewSet(BaseViewSet):
+    parser_classes = (MultiPartParser, FormParser)
     service_class = PersonService
     serializer_class = PersonSerializer
 
@@ -25,15 +27,7 @@ class PersonViewSet(BaseViewSet):
             "Orquesta el registro de aprendiz, delegando toda la lógica al servicio. Solo retorna la respuesta del servicio, sin lógica adicional."
         ),
         tags=["Person"],
-            request_body=openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={
-                    **{field: openapi.Schema(type=openapi.TYPE_STRING) for field in PersonSerializer().get_fields().keys() if field != 'id'},
-                    'email': openapi.Schema(type=openapi.TYPE_STRING, description='Correo institucional'),
-                    'active': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Activo'),
-                },
-                required=list(PersonSerializer().get_fields().keys()) + ['email']
-            ),
+        request_body=PersonSerializer,  # <-- Usa el serializer aquí
         responses={
             201: openapi.Response("Registro exitoso"),
             400: openapi.Response("Datos inválidos")
