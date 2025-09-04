@@ -223,3 +223,9 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'bscl20062007@gmail.com'  # Tu correo completo
 EMAIL_HOST_PASSWORD = 'giux eley mwzw zape'  # Tu contraseña de aplicación de Gmail
 DEFAULT_FROM_EMAIL = 'bscl20062007@gmail.com'
+
+# ============================
+# ARCHIVOS MEDIA (IMÁGENES, ETC)
+# ============================
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'personImages'
