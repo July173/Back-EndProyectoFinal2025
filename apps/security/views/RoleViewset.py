@@ -7,6 +7,7 @@ from drf_yasg import openapi
 from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.security.services.RoleService import RoleService
 from apps.security.entity.serializers.RoleSerializer import RoleSerializer
+from apps.security.entity.models import Role, User  # Asegúrate de importar User y Role
 
 
 class RoleViewSet(BaseViewSet):
@@ -97,3 +98,22 @@ class RoleViewSet(BaseViewSet):
             {"detail": "No encontrado."},
             status=status.HTTP_404_NOT_FOUND
         )
+
+    @swagger_auto_schema(
+        operation_description="Lista roles con cantidad de usuarios asignados.",
+        tags=["Role"],
+        responses={200: openapi.Response("Lista de roles con cantidad de usuarios")}
+    )
+    @action(detail=False, methods=['get'], url_path='roles-with-user-count')
+    def roles_with_user_count(self, request):
+        roles = Role.objects.filter(active=True)
+        data = []
+        for role in roles:
+            user_count = User.objects.filter(role=role, is_active=True).count()
+            data.append({
+                "id": role.id,
+                "nombre": role.type_role,
+                "descripcion": role.description,
+                "cantidad_usuarios": user_count
+            })
+        return Response(data, status=status.HTTP_200_OK)
