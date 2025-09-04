@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
 from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.security.services.PersonService import PersonService
@@ -18,7 +18,7 @@ from datetime import datetime
 
 
 class PersonViewSet(BaseViewSet):
-    parser_classes = (MultiPartParser, FormParser)
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
     service_class = PersonService
     serializer_class = PersonSerializer
 
