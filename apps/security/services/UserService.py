@@ -10,6 +10,7 @@ from datetime import timedelta
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from apps.security.entity.models import User
+from apps.security.emails.SendEmailsDesactivate import enviar_desactivacion_usuario
 
 
 class UserService(BaseService):
@@ -36,55 +37,56 @@ class UserService(BaseService):
             'data': {'success': 'Contraseña actualizada correctamente.'},
             'status': status.HTTP_200_OK
         }
+
     def send_password_reset_code(self, email):
-            # Validar correo institucional
-            if not email or not (email.endswith('@soy.sena.edu.co') or email.endswith('@sena.edu.co')):
-                return {
-                    'data': {'error': 'Solo se permiten correos institucionales (@soy.sena.edu.co o @sena.edu.co)'},
-                    'status': status.HTTP_400_BAD_REQUEST
-                }
-            # Buscar usuario
-            try:
-                user = User.objects.get(email=email)
-            except User.DoesNotExist:
-                return {
-                    'data': {'error': 'No existe un usuario con ese correo.'},
-                    'status': status.HTTP_404_NOT_FOUND
-                }
-            # Generar código y expiración
-            code = get_random_string(length=6, allowed_chars='0123456789')
-            expiration = timezone.now() + timedelta(minutes=15)
-            user.reset_code = code
-            user.reset_code_expiration = expiration
-            user.save()
-            # Verificar que se guardó correctamente
-            user_refresh = User.objects.get(email=email)
-            if user_refresh.reset_code == code and user_refresh.reset_code_expiration == expiration:
-                # Renderizar email solo si se guardó correctamente
-                nombre = user.person.first_name if user.person else user.email
-                fecha_expiracion = expiration.strftime('%d/%m/%Y %H:%M')
-                html_content = render_to_string('RestablecerContraseña.html', {
-                    'nombre': nombre,
-                    'codigo': code,
-                    'fecha_expiracion': fecha_expiracion
-                })
-                subject = 'Recuperación de Contraseña SENA'
-                email_msg = EmailMultiAlternatives(subject, '', to=[email])
-                email_msg.attach_alternative(html_content, "text/html")
-                email_msg.send()
-                return {
-                    'data': {
-                        'code': code,
-                        'fecha_expiracion': fecha_expiracion,
-                        'success': 'Código enviado correctamente al correo institucional.'
-                    },
-                    'status': status.HTTP_200_OK
-                }
-            else:
-                return {
-                    'data': {'error': 'No se pudo registrar el código de recuperación.'},
-                    'status': status.HTTP_500_INTERNAL_SERVER_ERROR
-                }
+        # Validar correo institucional
+        if not email or not (email.endswith('@soy.sena.edu.co') or email.endswith('@sena.edu.co')):
+            return {
+                'data': {'error': 'Solo se permiten correos institucionales (@soy.sena.edu.co o @sena.edu.co)'},
+                'status': status.HTTP_400_BAD_REQUEST
+            }
+        # Buscar usuario
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return {
+                'data': {'error': 'No existe un usuario con ese correo.'},
+                'status': status.HTTP_404_NOT_FOUND
+            }
+        # Generar código y expiración
+        code = get_random_string(length=6, allowed_chars='0123456789')
+        expiration = timezone.now() + timedelta(minutes=15)
+        user.reset_code = code
+        user.reset_code_expiration = expiration
+        user.save()
+        # Verificar que se guardó correctamente
+        user_refresh = User.objects.get(email=email)
+        if user_refresh.reset_code == code and user_refresh.reset_code_expiration == expiration:
+            # Renderizar email solo si se guardó correctamente
+            nombre = user.person.first_name if user.person else user.email
+            fecha_expiracion = expiration.strftime('%d/%m/%Y %H:%M')
+            html_content = render_to_string('RestablecerContraseña.html', {
+                'nombre': nombre,
+                'codigo': code,
+                'fecha_expiracion': fecha_expiracion
+            })
+            subject = 'Recuperación de Contraseña SENA'
+            email_msg = EmailMultiAlternatives(subject, '', to=[email])
+            email_msg.attach_alternative(html_content, "text/html")
+            email_msg.send()
+            return {
+                'data': {
+                    'code': code,
+                    'fecha_expiracion': fecha_expiracion,
+                    'success': 'Código enviado correctamente al correo institucional.'
+                },
+                'status': status.HTTP_200_OK
+            }
+        else:
+            return {
+                'data': {'error': 'No se pudo registrar el código de recuperación.'},
+                'status': status.HTTP_500_INTERNAL_SERVER_ERROR
+            }
 
     def __init__(self):
         self.repository = UserRepository()
@@ -132,8 +134,25 @@ class UserService(BaseService):
                     'email': user.email,
                     'id': user.id,
                     'role': user.role.id if user.role else None,
-                    'person': user.person.id if user.person else None, # Solo el id
+                    'person': user.person.id if user.person else None,  # Solo el id
                 }
             },
             'status': status.HTTP_200_OK
         }
+
+    def soft_delete(self, pk, motivo="Desactivación de cuenta"):
+        try:
+            user = User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            return False
+
+        user.soft_delete()
+        nombre = f"{user.person.first_name} {user.person.first_last_name}" if user.person else user.email
+        fecha_desactivacion = timezone.now().strftime('%d/%m/%Y')
+        enviar_desactivacion_usuario(
+            user.email,
+            nombre,
+            fecha_desactivacion,
+            motivo
+        )
+        return True

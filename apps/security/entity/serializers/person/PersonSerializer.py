@@ -3,6 +3,8 @@ from apps.security.entity.models import Person
 
 
 class PersonSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField(use_url=True)
+
     class Meta:
         model = Person
         fields = [

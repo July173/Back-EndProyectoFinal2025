@@ -1,10 +1,8 @@
 from django.db import transaction
-from django.utils import timezone
 from apps.general.repositories.CreateInstructorRepository import CreateInstructorRepository
 from apps.general.entity.models import Sede, Center, Regional, PersonSede, KnowledgeArea
 from apps.security.entity.models import User
 from apps.general.entity.models import Instructor
-from apps.general.email.SendEmailsDesactivate import enviar_desactivacion_usuario
 
 
 class CreateInstructorService:
@@ -90,7 +88,6 @@ class CreateInstructorService:
             person = instructor.person
             user = User.objects.filter(person=person).first()
 
-            # Si está desactivado, reactívalo y borra la fecha de eliminación
             if not instructor.active:
                 instructor.active = True
                 instructor.delete_at = None
@@ -111,17 +108,8 @@ class CreateInstructorService:
                     ps.save()
                 return "Instructor reactivado correctamente."
 
-            # Si está activo, desactívalo y registra la fecha de eliminación
             self.repo.deactivate_instructor(instructor)
             self.repo.deactivate_user_by_person(person)
             self.repo.deactivate_person(person)
             self.repo.deactivate_person_sede_by_person(person)
-            # Enviar correo de desactivación si existe usuario
-            if user:
-                nombre = f"{person.first_name} {person.second_name} {person.first_last_name} {person.second_last_name}"
-                enviar_desactivacion_usuario(
-                    user.email,
-                    nombre,
-                    timezone.now()
-                )
             return "Eliminación lógica realizada correctamente."
