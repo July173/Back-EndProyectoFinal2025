@@ -1,5 +1,6 @@
 from pathlib import Path
 from datetime import timedelta
+import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -8,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ============================
 SECRET_KEY = 'django-insecure-igo_*_$d=s2s+x#u=!whln50*b2(+(9a=3z5rv)tr$v!1h%ty&'
 DEBUG = True
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 # ============================
 # APPS INSTALADAS
@@ -128,7 +129,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # ============================
-# DJANGO REST FRAMEWORK (DRF)
+# DJANGO REST FRAMEWORK (DRF) #
 # ============================
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
@@ -193,6 +194,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8080",    # React/Next.js
     "http://localhost:82",      # Otros dev servers
     "http://localhost:5173",    # Vite
+    "http://127.0.0.1:3000",
     "http://localhost:8080",    # Otros dev servers
     "http://127.0.0.1:3000",
     "http://localhost:8085",
@@ -229,3 +231,22 @@ DEFAULT_FROM_EMAIL = 'bscl20062007@gmail.com'
 # ============================
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'personImages'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'django.log',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+    },
+}
