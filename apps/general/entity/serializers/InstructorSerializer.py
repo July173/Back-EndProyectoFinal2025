@@ -1,8 +1,19 @@
 from apps.general.entity.models import Instructor
-from core.base.serializers.implements.baseSerializer.BaseSerializer import BaseSerializer
+from apps.security.entity.models import Person
+from rest_framework import serializers
 
 
-class InstructorSerializer(BaseSerializer):
+class InstructorSerializer(serializers.ModelSerializer):
+    person = serializers.PrimaryKeyRelatedField(queryset=Person.objects.all())
+
     class Meta:
         model = Instructor
-        fields = ['id', 'contractType', 'contractStartDate', 'contractEndDate', 'knowledgeArea', 'active']
+        fields = [
+            'id',
+            'person',
+            'contractType',
+            'contractStartDate',
+            'contractEndDate',
+            'knowledgeArea',
+            'active'
+        ]

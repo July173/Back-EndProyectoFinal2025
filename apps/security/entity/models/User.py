@@ -45,6 +45,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # Campos para recuperación de contraseña
+    reset_code = models.CharField(max_length=10, null=True, blank=True)
+    reset_code_expiration = models.DateTimeField(null=True, blank=True)
+
     # Agregar related_name para evitar conflictos
     groups = models.ManyToManyField(
         'auth.Group',

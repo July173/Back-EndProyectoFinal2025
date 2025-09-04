@@ -1,8 +1,15 @@
 from apps.general.entity.models import Regional
-from core.base.serializers.implements.baseSerializer.BaseSerializer import BaseSerializer
+from rest_framework import serializers
 
 
-class RegionalSerializer(BaseSerializer):
+class RegionalSerializer(serializers.ModelSerializer):
     class Meta:
         model = Regional
-        fields = ['id', 'name', 'codeRegional', 'description', 'active', 'address']
+        fields = [
+            'id',
+            'name',
+            'codeRegional',
+            'description',
+            'active',
+            'address'
+        ]

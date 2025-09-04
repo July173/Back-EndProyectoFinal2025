@@ -1,8 +1,17 @@
-from apps.general.entity.models import Center
-from core.base.serializers.implements.baseSerializer.BaseSerializer import BaseSerializer
+from apps.general.entity.models import Center, Regional
+from rest_framework import serializers
 
 
-class CenterSerializer(BaseSerializer):
+class CenterSerializer(serializers.ModelSerializer):
+    regional = serializers.PrimaryKeyRelatedField(queryset=Regional.objects.all())
+
     class Meta:
         model = Center
-        fields = ['id', 'name', 'codeCenter', 'address', 'active']
+        fields = [
+            'id',
+            'name',
+            'codeCenter',
+            'address',
+            'active',
+            'regional'
+        ]

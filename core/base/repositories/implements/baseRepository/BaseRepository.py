@@ -10,8 +10,8 @@ class BaseRepository(ABaseRepository[T]):
 
     def get_queryset(self):
         qs = self.model.objects.all()
-        if hasattr(self.model, 'is_deleted'):
-            qs = qs.filter(is_deleted=False)
+        if hasattr(self.model, 'delete_at'):
+            qs = qs.filter(delete_at=None)
         return qs
 
     def get_all(self) -> List[T]:

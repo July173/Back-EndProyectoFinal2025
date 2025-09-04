@@ -1,4 +1,5 @@
 from pathlib import Path
+from datetime import timedelta
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -26,8 +27,9 @@ INSTALLED_APPS = [
     'drf_yasg',
     'corsheaders',
     # Apps locales
-    'apps.security',  # reemplaza 'api' por tu app de seguridad
-    'apps.general',  # reemplaza 'general' por tu app general
+    'apps.security',
+    'apps.general',
+    'apps.assign',
 ]
 
 # ============================
@@ -50,7 +52,7 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -64,18 +66,50 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
+
 # ============================
-# BASE DE DATOS (MySQL)
+# BASE DE DATOS (MySQL) y configuración normal sin despliegue de docker
 # ============================
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME':  'bdautogestion',
+#         'USER': 'root',
+#         'PASSWORD': '123456',
+#         'HOST': '127.0.0.1',
+#         'PORT': '3306',
+#         'OPTIONS': {'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"},
+#     }
+# }
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME':  'bdautogestion',
         'USER': 'root',
-        'PASSWORD': '123456789',
+        'PASSWORD': '123456',
         'HOST': '127.0.0.1',
         'PORT': '3306',
         'OPTIONS': {'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"},
+    },
+    'postgresql': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'bdautogestion',
+        'USER': 'postgres',
+        'PASSWORD': '123456',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    },
+    'sqlserver': {
+        'ENGINE': 'django_mssql_backend',
+        'NAME': 'bdautogestion',
+        'USER': 'sa',
+        'PASSWORD': 'SqlServer2025!',
+        'HOST': 'localhost',
+        'PORT': '1433',
+        'OPTIONS': {
+            'driver': 'ODBC Driver 17 for SQL Server',
+        },
     }
 }
 # ============================
@@ -99,13 +133,21 @@ AUTH_PASSWORD_VALIDATORS = [
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
-       # 'rest_framework.permissions.IsAuthenticated',
+        # 'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+}
+
+# Configuración de JWT
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
 # ============================
@@ -139,7 +181,51 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+# =============================
+# CORS configuration
+# ==============================
 CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8000",
+    # Backend
     "http://127.0.0.1:8000",
-    # "http://localhost:8000",
+    # Frontend - diferentes puertos comunes
+    "http://localhost:3000",    # React/Next.js
+    "http://localhost:8080",    # React/Next.js
+    "http://localhost:82",      # Otros dev servers
+    "http://localhost:5173",    # Vite
+    "http://localhost:8080",    # Otros dev servers
+    "http://127.0.0.1:3000",
+    "http://localhost:8085",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:8080",
 ]
+
+# Email settings
+EMAILS_ENABLED = True
+EMAILS_FROM_NAME = "AutoGestion SENA"
+EMAILS_FROM_EMAIL: str = "bscl20062007@gmail.com"
+SMTP_USER: str = "bscl20062007@gmail.com"  # Tu correo completo
+SMTP_PASSWORD: str = "giux eley mwzw zape"
+SMTP_HOST: str = "smtp.gmail.com"
+SMTP_PORT: int = 587
+SMTP_TLS: bool = True
+SMTP_SSL: bool = False
+
+EMAIL_RESET_TOKEN_EXPIRE_MINUTES: int = 5
+EMAIL_VERIFICATION_TOKEN_EXPIRE_MINUTES: int = 5
+FRONTEND_HOST: str = ""
+BACKEND_HOST: str = "http://localhost:8000"
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'bscl20062007@gmail.com'  # Tu correo completo
+EMAIL_HOST_PASSWORD = 'giux eley mwzw zape'  # Tu contraseña de aplicación de Gmail
+DEFAULT_FROM_EMAIL = 'bscl20062007@gmail.com'
+
+# ============================
+# ARCHIVOS MEDIA (IMÁGENES, ETC)
+# ============================
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'personImages'

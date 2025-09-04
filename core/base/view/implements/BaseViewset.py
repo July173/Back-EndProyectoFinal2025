@@ -70,16 +70,7 @@ class BaseViewSet(viewsets.ViewSet, IBaseViewSet):
         return Response(output_serializer.data)
 
     def partial_update(self, request: Request, pk: Any = None) -> Response:
-        if not request.data:  # Si el cuerpo está vacío
-            instance = self.service.get(pk)
-            if not instance:
-                return Response(
-                    {"detail": "No encontrado"},
-                    status=status.HTTP_404_NOT_FOUND
-                )
-            response_serializer = self.get_serializer(instance)
-            return Response(response_serializer.data)
-        # Si hay datos, actualiza normalmente
+        # Solo delega la petición al service
         serializer = self.get_serializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         updated_instance = self.service.partial_update(pk, serializer.validated_data)

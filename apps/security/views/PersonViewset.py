@@ -1,18 +1,52 @@
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.decorators import action
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from rest_framework.parsers import MultiPartParser, FormParser
 
 from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.security.services.PersonService import PersonService
-from apps.security.entity.serializers.PersonSerializer import PersonSerializer
+from apps.security.entity.serializers.person.PatchPersonSerializer import PatchPersonSerializer
+from apps.security.entity.serializers.person.PersonSerializer import PersonSerializer
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework import status
+from apps.security.services.UserService import UserService
+from apps.security.entity.serializers.UserSerializer import UserSerializer
+from apps.security.emails.SendEmails import enviar_registro_pendiente
+from datetime import datetime
 
 
 class PersonViewSet(BaseViewSet):
+    parser_classes = (MultiPartParser, FormParser)
     service_class = PersonService
     serializer_class = PersonSerializer
 
+    def get_serializer_class(self):
+        if self.action == 'partial_update':
+            return PatchPersonSerializer
+        return PersonSerializer
+
+    #--- REGISTRO APRENDIZ ---
+    @swagger_auto_schema(
+        operation_description=(
+            "Orquesta el registro de aprendiz, delegando toda la lógica al servicio. Solo retorna la respuesta del servicio, sin lógica adicional."
+        ),
+        tags=["Person"],
+        request_body=PersonSerializer,  # <-- Usa el serializer aquí
+        responses={
+            201: openapi.Response("Registro exitoso"),
+            400: openapi.Response("Datos inválidos")
+        }
+    )
+    @action(detail=False, methods=['post'], url_path='register-aprendiz')
+    def register_aprendiz(self, request):
+        """
+        Orquesta el registro de aprendiz, delegando toda la lógica al servicio.
+        Solo retorna la respuesta del servicio, sin lógica adicional.
+        """
+        result = self.service.register_aprendiz(request.data)
+        return Response(result['data'], status=result['status'])
     # ----------- LIST -----------
     @swagger_auto_schema(
         operation_description=(

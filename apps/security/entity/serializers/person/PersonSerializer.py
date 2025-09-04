@@ -1,8 +1,10 @@
+from rest_framework import serializers
 from apps.security.entity.models import Person
-from core.base.serializers.implements.baseSerializer.BaseSerializer import BaseSerializer
 
 
-class PersonSerializer(BaseSerializer):
+class PersonSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField(use_url=True)
+
     class Meta:
         model = Person
         fields = [
@@ -15,4 +17,6 @@ class PersonSerializer(BaseSerializer):
             'type_identification',
             'number_identification',
             'active',
+            'image'
         ]
+        ref_name = "PersonModelSerializer"
