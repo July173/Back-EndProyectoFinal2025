@@ -3,9 +3,10 @@ from apps.security.entity.models import Person
 
 
 class PersonSerializer(serializers.ModelSerializer):
+
+    
     # Permitir que la imagen sea opcional cuando se registra una persona
     image = serializers.ImageField(use_url=True, allow_null=True, required=False)
-
     class Meta:
         model = Person
         fields = [
