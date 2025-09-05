@@ -3,6 +3,7 @@ from apps.general.repositories.CreateInstructorRepository import CreateInstructo
 from apps.general.entity.models import Sede, Center, Regional, PersonSede, KnowledgeArea
 from apps.security.entity.models import User
 from apps.general.entity.models import Instructor
+from apps.security.emails.CreacionCuentaUsers import send_account_created_email
 
 
 class CreateInstructorService:
@@ -25,7 +26,16 @@ class CreateInstructorService:
             # Crear User (role_id=3, password=number_identification)
             user_data['person_id'] = person.id
             user_data['password'] = person_data['number_identification']  # Asigna la contraseña automáticamente
+            # capture email and temp password before repo pops them
+            email_to_send = user_data.get('email')
+            temp_password = user_data.get('password')
             user = self.repo.create_user(user_data)
+            # send creation email (non-blocking)
+            try:
+                full_name = f"{person.first_name} {person.first_last_name}"
+                send_account_created_email(email_to_send or user.email, full_name, temp_password)
+            except Exception:
+                pass
 
             # Obtener instancia de KnowledgeArea
             knowledge_area_id = instructor_data.pop('knowledgeArea')
