@@ -146,7 +146,47 @@ class UserService(BaseService):
         except User.DoesNotExist:
             return False
 
-        user.soft_delete()
+        # Si el usuario está desactivado (deleted_at lleno o is_active False) -> restaurar
+        is_deactivated = False
+        if hasattr(user, 'is_active'):
+            is_deactivated = not user.is_active
+        elif hasattr(user, 'active'):
+            is_deactivated = not user.active
+        else:
+            is_deactivated = getattr(user, 'deleted_at', None) is not None
+
+        if is_deactivated:
+            # Restaurar
+            if hasattr(user, 'restore'):
+                user.restore()
+            else:
+                # Fallback manual
+                if hasattr(user, 'is_active'):
+                    user.is_active = True
+                if hasattr(user, 'active'):
+                    user.active = True
+                if hasattr(user, 'deleted_at'):
+                    user.deleted_at = None
+                if hasattr(user, 'delete_at'):
+                    user.delete_at = None
+                user.save()
+            return True
+
+        # Si estaba activo -> desactivar y enviar correo
+        # Usar método del modelo si existe
+        if hasattr(user, 'soft_delete'):
+            user.soft_delete()
+        else:
+            if hasattr(user, 'is_active'):
+                user.is_active = False
+            if hasattr(user, 'active'):
+                user.active = False
+            if hasattr(user, 'deleted_at'):
+                user.deleted_at = timezone.now()
+            if hasattr(user, 'delete_at'):
+                user.delete_at = timezone.now()
+            user.save()
+
         nombre = f"{user.person.first_name} {user.person.first_last_name}" if user.person else user.email
         fecha_desactivacion = timezone.now().strftime('%d/%m/%Y')
         enviar_desactivacion_usuario(
