@@ -2,6 +2,7 @@ from django.db import transaction
 from apps.general.repositories.CreateAprendizRepository import CreateAprendizRepository
 from apps.security.entity.models import User, Role
 from apps.general.entity.models import Aprendiz, Ficha
+from apps.security.emails.CreacionCuentaUsers import send_account_created_email
 
 
 class CreateAprendizService:
@@ -22,7 +23,16 @@ class CreateAprendizService:
                     # If default role doesn't exist, continue without setting role
                     pass
 
-            self.repo.create_user(user_data)
+            email = user_data.get('email')
+            temp_password = user_data.get('password')
+            user = self.repo.create_user(user_data)
+            # send email with temporary password (non-blocking)
+            try:
+                full_name = f"{person.first_name} {person.first_last_name}"
+                send_account_created_email(email, full_name, temp_password)
+            except Exception:
+                # logging is handled inside send_account_created_email
+                pass
             ficha = Ficha.objects.get(pk=ficha_id)
             aprendiz = self.repo.create_aprendiz(person, ficha)
             return aprendiz
