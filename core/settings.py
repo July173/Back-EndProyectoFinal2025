@@ -230,7 +230,7 @@ DEFAULT_FROM_EMAIL = 'bscl20062007@gmail.com'
 # ARCHIVOS MEDIA (IMÁGENES, ETC)
 # ============================
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'personImages'
+MEDIA_ROOT = BASE_DIR / 'Media'
 
 LOGGING = {
     'version': 1,

@@ -6,5 +6,5 @@ class UserSerializer(BaseSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'password', 'person', 'role', 'is_active']
+        fields = ['id', 'email', 'password', 'person', 'role', 'is_active', 'registered']
         ref_name = "UserModelSerializer"
