@@ -195,7 +195,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:82",      # Otros dev servers
     "http://localhost:5173",    # Vite
     "http://127.0.0.1:3000",
-    "http://localhost:8080",    # Otros dev servers
+    "http://localhost:8081",    # Otros dev servers
     "http://127.0.0.1:3000",
     "http://localhost:8085",
     "http://127.0.0.1:5173",
