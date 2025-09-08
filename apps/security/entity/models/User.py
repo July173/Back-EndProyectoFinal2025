@@ -23,6 +23,7 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
+    registered = models.BooleanField(default=True, help_text="True si el usuario está registrado pero no activado. False si ya fue activado.")
     email = models.EmailField(max_length=100, unique=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)

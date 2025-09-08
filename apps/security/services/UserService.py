@@ -176,6 +176,9 @@ class UserService(BaseService):
                 if hasattr(user, 'delete_at'):
                     user.delete_at = None
                 user.save()
+            # Marcar como activado
+            user.registered = False
+            user.save()
             # Enviar correo de activación con el correo y contraseña actual
             from apps.security.emails.SendEmailsActivate import enviar_activacion_usuario
             nombre = f"{user.person.first_name} {user.person.first_last_name}" if user.person else user.email
