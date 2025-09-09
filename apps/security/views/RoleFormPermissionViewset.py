@@ -7,7 +7,6 @@ from drf_yasg import openapi
 from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.security.services.RoleFormPermissionService import RolFormPermissionService
 from apps.security.entity.serializers.RolFormPermission.RoleFormPermissionSerializer import RolFormPermissionSerializer
-from apps.security.entity.serializers.RolFormPermission.RoleFormPermissionCreateSerializer import RoleFormPermissionCreateSerializer
 
 
 class RolFormPermissionViewSet(BaseViewSet):
@@ -26,20 +25,12 @@ class RolFormPermissionViewSet(BaseViewSet):
 
     # ----------- CREATE -----------
     @swagger_auto_schema(
-        request_body=RoleFormPermissionCreateSerializer,
-        operation_description="Crea permisos por formulario para un rol (puede crear role).",
+        request_body=RolFormPermissionSerializer,
+        operation_description="Crea un nuevo permiso de formulario para un rol.",
         tags=["RoleFormPermission"]
     )
     def create(self, request, *args, **kwargs):
-        serializer = RoleFormPermissionCreateSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        try:
-            result = self.service_class().create_permissions_for_role(serializer.validated_data)
-            return Response(result, status=status.HTTP_201_CREATED)
-        except ValueError as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({"detail": "Internal error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return super().create(request, *args, **kwargs)
 
     # ----------- RETRIEVE -----------
     @swagger_auto_schema(
