@@ -9,6 +9,19 @@ from apps.general.entity.models import Aprendiz
 from apps.general.entity.serializers.CreateAprendiz.UpdateAprendizSerializer import UpdateAprendizSerializer
 
 class CreateAprendizViewset(viewsets.ViewSet):
+
+    @swagger_auto_schema(
+        operation_description="Obtiene un aprendiz por su ID.",
+        responses={200: GetAprendizSerializer},
+        tags=["Aprendiz"]
+    )
+    def retrieve(self, request, pk=None):
+        try:
+            aprendiz = Aprendiz.objects.get(pk=pk)
+            serializer = GetAprendizSerializer(aprendiz)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Aprendiz.DoesNotExist:
+            return Response({"detail": "Aprendiz no encontrado."}, status=status.HTTP_404_NOT_FOUND)
     service = CreateAprendizService()
 
     @swagger_auto_schema(
