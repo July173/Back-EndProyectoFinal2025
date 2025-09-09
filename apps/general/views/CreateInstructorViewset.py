@@ -9,6 +9,19 @@ from rest_framework.decorators import action
 
 
 class CreateInstructorViewset(viewsets.ViewSet):
+
+    @swagger_auto_schema(
+        operation_description="Obtiene un instructor por su ID.",
+        responses={200: GetInstructorSerializer},
+        tags=["Instructor"]
+    )
+    def retrieve(self, request, pk=None):
+        try:
+            instructor = Instructor.objects.get(pk=pk)
+            serializer = GetInstructorSerializer(instructor)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Instructor.DoesNotExist:
+            return Response({"detail": "Instructor no encontrado."}, status=status.HTTP_404_NOT_FOUND)
     service = CreateInstructorService()
 
     @swagger_auto_schema(
