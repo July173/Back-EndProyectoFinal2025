@@ -1,4 +1,4 @@
-from apps.security.entity.serializers.MenuSerializer import MenuSerializer
+from apps.security.entity.serializers.RolFormPermission.MenuSerializer import MenuSerializer
 from core.base.services.implements.baseService.BaseService import BaseService
 from apps.security.repositories.RoleFormPermissionRepository import RolFormPermissionRepository
 from apps.security.entity.serializers.RolFormPermission.MenuSerializer import MenuSerializer
