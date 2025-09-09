@@ -114,6 +114,7 @@ class RoleViewSet(BaseViewSet):
                 "id": role.id,
                 "nombre": role.type_role,
                 "descripcion": role.description,
+                "active": role.active,
                 "cantidad_usuarios": user_count
             })
         return Response(data, status=status.HTTP_200_OK)

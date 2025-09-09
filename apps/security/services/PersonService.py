@@ -78,6 +78,11 @@ class PersonService(BaseService):
                 'status': status.HTTP_400_BAD_REQUEST
             }
         user = user_serializer.save()
+
+        # Crear Aprendiz vinculado a la persona y ficha vacía
+        from apps.general.entity.models import Aprendiz
+        aprendiz = Aprendiz.objects.create(person=person, ficha=None)
+
         # Si todo es exitoso, enviar correo
         fecha_registro = datetime.now().strftime('%d/%m/%Y')
         enviar_registro_pendiente(email, person.first_name + ' ' + person.first_last_name, fecha_registro)
@@ -85,6 +90,7 @@ class PersonService(BaseService):
             'data': {
                 'persona': person_data,
                 'usuario': user_serializer.data,
+                'aprendiz_id': aprendiz.id,
                 'success': 'Usuario registrado correctamente. Tu cuenta está pendiente de activación.'
             },
             'status': status.HTTP_201_CREATED

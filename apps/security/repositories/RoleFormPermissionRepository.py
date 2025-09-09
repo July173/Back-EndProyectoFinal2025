@@ -1,12 +1,12 @@
 from core.base.repositories.implements.baseRepository.BaseRepository import BaseRepository
 from apps.security.entity.models import RolFormPermission
 
-
 class RolFormPermissionRepository(BaseRepository):
     def __init__(self):
         super().__init__(RolFormPermission)
 
     def get_menu(self, user_id: int):
+            
             """
             Retorna la estructura de menú para un usuario dado.
             Usamos directamente la relación User -> Role -> RolFormPermission.

@@ -7,10 +7,71 @@ from drf_yasg import openapi
 from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.security.services.RoleFormPermissionService import RolFormPermissionService
 from apps.security.entity.serializers.RolFormPermission.RoleFormPermissionSerializer import RolFormPermissionSerializer
-from apps.security.entity.serializers.RolFormPermission.RoleFormPermissionCreateSerializer import RoleFormPermissionCreateSerializer
+from apps.security.entity.serializers.RolFormPermission.CreateRoleWithPermissionsSerializer import CreateRoleWithPermissionsSerializer
 
 
 class RolFormPermissionViewSet(BaseViewSet):
+
+    @swagger_auto_schema(
+        method='get',
+        operation_description="Obtiene un rol con sus formularios y permisos asignados por ID.",
+        tags=["RoleFormPermission"],
+        responses={200: CreateRoleWithPermissionsSerializer}
+    )
+    @action(detail=True, methods=['get'], url_path='get-role-with-permissions')
+    def get_role_with_permissions(self, request, pk=None):
+        from apps.security.entity.models import Role, RolFormPermission
+        from apps.security.entity.serializers.RolFormPermission.CreateRoleWithPermissionsSerializer import CreateRoleWithPermissionsSerializer
+        try:
+            role = Role.objects.get(pk=pk)
+        except Role.DoesNotExist:
+            return Response({'detail': 'Role not found.'}, status=status.HTTP_404_NOT_FOUND)
+        # Obtener todos los RolFormPermission de ese rol
+        rfp_qs = RolFormPermission.objects.filter(role=role)
+        # Agrupar por formulario
+        form_map = {}
+        for rfp in rfp_qs:
+            form_id = rfp.form.id
+            if form_id not in form_map:
+                form_map[form_id] = {'form_id': form_id, 'permission_ids': []}
+            form_map[form_id]['permission_ids'].append(rfp.permission.id)
+        data = {
+            'type_role': role.type_role,
+            'description': role.description,
+            'active': role.active,
+            'formularios': list(form_map.values())
+        }
+        serializer = CreateRoleWithPermissionsSerializer(data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        method='put',
+        request_body=CreateRoleWithPermissionsSerializer,
+        operation_description="Actualiza un rol y sus permisos por formulario.",
+        tags=["RoleFormPermission"],
+        responses={200: openapi.Response("Rol y permisos actualizados correctamente.")}
+    )
+    @action(detail=True, methods=['put'], url_path='update-role-with-permissions')
+    def update_role_with_permissions(self, request, pk=None):
+        serializer = CreateRoleWithPermissionsSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        result = self.service.update_role_with_permissions(pk, serializer.validated_data)
+        return Response(result, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        method='post',
+        request_body=CreateRoleWithPermissionsSerializer,
+        operation_description="Crea un nuevo rol y asigna uno o varios permisos a uno o varios formularios.",
+        tags=["RoleFormPermission"],
+        responses={201: openapi.Response("Rol y permisos creados correctamente.")}
+    )
+    @action(detail=False, methods=['post'], url_path='create-role-with-permissions')
+    def create_role_with_permissions(self, request):
+        serializer = CreateRoleWithPermissionsSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        result = self.service.create_role_with_permissions(serializer.validated_data)
+        return Response(result, status=status.HTTP_201_CREATED)
+    
     service_class = RolFormPermissionService
     serializer_class = RolFormPermissionSerializer
 
@@ -26,20 +87,12 @@ class RolFormPermissionViewSet(BaseViewSet):
 
     # ----------- CREATE -----------
     @swagger_auto_schema(
-        request_body=RoleFormPermissionCreateSerializer,
-        operation_description="Crea permisos por formulario para un rol (puede crear role).",
+        request_body=RolFormPermissionSerializer,
+        operation_description="Crea un nuevo permiso de formulario para un rol.",
         tags=["RoleFormPermission"]
     )
     def create(self, request, *args, **kwargs):
-        serializer = RoleFormPermissionCreateSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        try:
-            result = self.service_class().create_permissions_for_role(serializer.validated_data)
-            return Response(result, status=status.HTTP_201_CREATED)
-        except ValueError as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({"detail": "Internal error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return super().create(request, *args, **kwargs)
 
     # ----------- RETRIEVE -----------
     @swagger_auto_schema(
