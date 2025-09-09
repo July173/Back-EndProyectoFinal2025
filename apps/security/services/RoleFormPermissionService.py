@@ -2,5 +2,73 @@ from core.base.services.implements.baseService.BaseService import BaseService
 from apps.security.repositories.RoleFormPermissionRepository import RolFormPermissionRepository
 
 class RolFormPermissionService(BaseService):
+
+    def update_role_with_permissions(self, pk, data):
+        """
+        Actualiza un rol y sus permisos por formulario.
+        data = {
+            'type_role': str,
+            'description': str,
+            'active': bool,
+            'formularios': [
+                {'form_id': int, 'permission_ids': [int, ...]},
+                ...
+            ]
+        }
+        """
+        from apps.security.entity.models import Role, Form, Permission, RolFormPermission
+        role = Role.objects.get(pk=pk)
+        role.type_role = data['type_role']
+        role.description = data.get('description', '')
+        role.active = data.get('active', True)
+        role.save()
+        # Eliminar todos los permisos actuales de ese rol
+        RolFormPermission.objects.filter(role=role).delete()
+        total_created = 0
+        for form_perm in data.get('formularios', []):
+            form_id = form_perm.get('form_id')
+            permission_ids = form_perm.get('permission_ids', [])
+            form = Form.objects.get(pk=form_id)
+            for perm_id in permission_ids:
+                perm = Permission.objects.get(pk=perm_id)
+                RolFormPermission.objects.create(role=role, form=form, permission=perm)
+                total_created += 1
+        return {
+            'role_id': role.id,
+            'updated_permissions': total_created
+        }
+
+    def create_role_with_permissions(self, data):
+        """
+        Crea un nuevo rol y asigna permisos a uno o varios formularios.
+        data = {
+            'type_role': str,
+            'description': str,
+            'active': bool,
+            'formularios': [
+                {'form_id': int, 'permission_ids': [int, ...]},
+                ...
+            ]
+        }
+        """
+        from apps.security.entity.models import Role, Form, Permission, RolFormPermission
+        role = Role.objects.create(
+            type_role=data['type_role'],
+            description=data.get('description', ''),
+            active=data.get('active', True)
+        )
+        total_created = 0
+        for form_perm in data.get('formularios', []):
+            form_id = form_perm.get('form_id')
+            permission_ids = form_perm.get('permission_ids', [])
+            form = Form.objects.get(pk=form_id)
+            for perm_id in permission_ids:
+                perm = Permission.objects.get(pk=perm_id)
+                RolFormPermission.objects.create(role=role, form=form, permission=perm)
+                total_created += 1
+        return {
+            'role_id': role.id,
+            'created_permissions': total_created
+        }
     def __init__(self):
         self.repository = RolFormPermissionRepository()
