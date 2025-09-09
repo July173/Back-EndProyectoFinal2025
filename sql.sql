@@ -52,8 +52,8 @@ INSERT INTO general_ficha VALUES
 -- Insertar datos en security_role
 INSERT INTO security_role (id, type_role, description, active) VALUES 
 (1,'Administrador','Acceso completo al sistema',1),
-(2,'Instructor','Acceso a funciones de instructor',1),
-(3,'Aprendiz','Acceso básico como aprendiz',1),
+(2,'Aprendiz','Acceso básico como aprendiz',1),
+(3,'Instructor','Acceso a funciones de instructor',1),
 (4,'Coordinador','Coordinador académico',1);
 
 -- Insertar datos en security_permission
@@ -89,11 +89,11 @@ INSERT INTO security_formmodule VALUES
 INSERT INTO security_rolformpermission (role_id, form_id, permission_id) VALUES 
 -- Administrador (role_id=1) - Acceso completo a todos los formularios
 (1,1,5),(1,2,5),(1,3,5),(1,4,5),
--- Instructor (role_id=2) - Acceso de lectura y actualización
-(2,1,2),(2,2,2),(2,3,2),(2,4,2),
-(2,1,3),(2,2,3),(2,3,3),(2,4,3),
--- Aprendiz (role_id=3) - Solo lectura
-(3,3,2),(3,4,2),
+-- Aprendiz (role_id=2) - Solo lectura
+(2,3,2),(2,4,2),
+-- Instructor (role_id=3) - Acceso de lectura y actualización
+(3,1,2),(3,2,2),(3,3,2),(3,4,2),
+(3,1,3),(3,2,3),(3,3,3),(3,4,3),
 -- Coordinador (role_id=4) - Permisos específicos
 (4,1,2),(4,4,2);
 
