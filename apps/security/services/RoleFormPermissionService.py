@@ -4,6 +4,24 @@ from apps.security.repositories.RoleFormPermissionRepository import RolFormPermi
 from apps.security.entity.serializers.RolFormPermission.MenuSerializer import MenuSerializer
 class RolFormPermissionService(BaseService):
 
+    def get_permission_matrix(self):
+        from apps.security.entity.models import Role, Form, Permission, RolFormPermission
+        roles = Role.objects.all()
+        forms = Form.objects.all()
+        permissions = Permission.objects.all()
+        matrix = []
+        for role in roles:
+            for form in forms:
+                row = {
+                    'rol': role.type_role,
+                    'formulario': form.name,
+                }
+                for perm in permissions:
+                    exists = RolFormPermission.objects.filter(role=role, form=form, permission=perm).exists()
+                    row[perm.type_permission] = exists
+                matrix.append(row)
+        return matrix
+
     def get_menu(self, user_id: int):
         # Llama al repository para obtener la data cruda
         menu_data = self.repository.get_menu(user_id)

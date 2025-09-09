@@ -106,7 +106,7 @@ class RoleViewSet(BaseViewSet):
     )
     @action(detail=False, methods=['get'], url_path='roles-with-user-count')
     def roles_with_user_count(self, request):
-        roles = Role.objects.filter(active=True)
+        roles = Role.objects.all()
         data = []
         for role in roles:
             user_count = User.objects.filter(role=role, is_active=True).count()
