@@ -4,6 +4,11 @@ from apps.security.entity.serializers.person.PersonSerializer import PersonSeria
 
 
 class PersonRepository(BaseRepository):
+    def update_person(self, person, data):
+        for attr, value in data.items():
+            setattr(person, attr, value)
+        person.save()
+        return person
 # Métodos CRUD puros
     def __init__(self):
         super().__init__(Person)

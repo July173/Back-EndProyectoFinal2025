@@ -11,6 +11,22 @@ from apps.security.entity.models import Person
 from apps.security.entity.models import User
 
 class PersonService(BaseService):
+
+    def update(self, pk, data):
+        person = self.get(pk)
+        return self.update_person(person, data)
+
+    def partial_update(self, pk, data):
+        person = self.get(pk)
+        return self.update_person(person, data)
+
+    def update_person(self, person, data):
+        # Si se va a actualizar la imagen, eliminar la anterior
+        if 'image' in data and data['image'] and person.image:
+            import os
+            if hasattr(person.image, 'path') and os.path.isfile(person.image.path):
+                os.remove(person.image.path)
+        return self.repository.update_person(person, data)
     def __init__(self):
         super().__init__(PersonRepository())
 

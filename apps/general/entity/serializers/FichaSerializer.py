@@ -9,7 +9,8 @@ class FichaSerializer(serializers.ModelSerializer):
         model = Ficha
         fields = [
             'id',
-            'numeroFicha',
+            'file_number',
             'program',
-            'active'
+            'active',
+            'deleted_at'
         ]

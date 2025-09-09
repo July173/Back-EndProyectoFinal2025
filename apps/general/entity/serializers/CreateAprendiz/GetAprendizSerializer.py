@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from apps.general.entity.models import Aprendiz, Ficha, Program
-from apps.security.entity.models import User, Role
+from apps.general.entity.models import Aprendiz
+from apps.security.entity.models import User
 
 class GetAprendizSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
@@ -39,7 +39,7 @@ class GetAprendizSerializer(serializers.ModelSerializer):
         return user.role.type_role if user and user.role else "Aprendiz"
 
     def get_ficha(self, obj):
-        return obj.ficha.numeroFicha if obj.ficha else None
+        return obj.ficha.file_number if obj.ficha else None
 
     def get_estado(self, obj):
         user = User.objects.filter(person=obj.person).first()

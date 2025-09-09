@@ -14,6 +14,12 @@ from apps.security.emails.SendEmailsDesactivate import enviar_desactivacion_usua
 
 
 class UserService(BaseService):
+    def update(self, pk, data):
+        # Si se envía una nueva contraseña, hashearla antes de actualizar
+        pwd = data.get('password')
+        if pwd:
+            data['password'] = make_password(pwd)
+        return super().update(pk, data)
     def reset_password(self, email, new_password):
         # Validar correo y nueva contraseña
         if not email or not new_password:
@@ -146,7 +152,70 @@ class UserService(BaseService):
         except User.DoesNotExist:
             return False
 
-        user.soft_delete()
+        # Si el usuario está desactivado (deleted_at lleno o is_active False) -> restaurar
+        is_deactivated = False
+        if hasattr(user, 'is_active'):
+            is_deactivated = not user.is_active
+        elif hasattr(user, 'active'):
+            is_deactivated = not user.active
+        else:
+            is_deactivated = getattr(user, 'deleted_at', None) is not None
+
+        if is_deactivated:
+            # Restaurar
+            if hasattr(user, 'restore'):
+                user.restore()
+            else:
+                # Fallback manual
+                if hasattr(user, 'is_active'):
+                    user.is_active = True
+                if hasattr(user, 'active'):
+                    user.active = True
+                if hasattr(user, 'deleted_at'):
+                    user.deleted_at = None
+                if hasattr(user, 'delete_at'):
+                    user.delete_at = None
+                user.save()
+            # Marcar como activado
+            user.registered = False
+            user.save()
+            # Enviar correo de activación con el correo y contraseña actual
+            from apps.security.emails.SendEmailsActivate import enviar_activacion_usuario
+            nombre = f"{user.person.first_name} {user.person.first_last_name}" if user.person else user.email
+            email_usuario = user.email
+            # Restablecer la contraseña al número de identificación antes de enviar el correo
+            numero_identificacion = None
+            if user.person and hasattr(user.person, 'number_identification'):
+                numero_identificacion = str(user.person.number_identification)
+            if not numero_identificacion:
+                numero_identificacion = '(No disponible)'
+            else:
+                from django.contrib.auth.hashers import make_password
+                user.set_password(numero_identificacion)
+                user.save()
+            enviar_activacion_usuario(
+                email_usuario,
+                nombre,
+                email_usuario,
+                numero_identificacion
+            )
+            return True
+
+        # Si estaba activo -> desactivar y enviar correo
+        # Usar método del modelo si existe
+        if hasattr(user, 'soft_delete'):
+            user.soft_delete()
+        else:
+            if hasattr(user, 'is_active'):
+                user.is_active = False
+            if hasattr(user, 'active'):
+                user.active = False
+            if hasattr(user, 'deleted_at'):
+                user.deleted_at = timezone.now()
+            if hasattr(user, 'delete_at'):
+                user.delete_at = timezone.now()
+            user.save()
+
         nombre = f"{user.person.first_name} {user.person.first_last_name}" if user.person else user.email
         fecha_desactivacion = timezone.now().strftime('%d/%m/%Y')
         enviar_desactivacion_usuario(
