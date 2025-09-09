@@ -13,6 +13,16 @@ from apps.security.entity.serializers.RolFormPermission.CreateRoleWithPermission
 class RolFormPermissionViewSet(BaseViewSet):
 
     @swagger_auto_schema(
+        operation_description="Obtiene la matriz de permisos por rol, formulario y tipo de permiso.",
+        tags=["RoleFormPermission"],
+        responses={200: openapi.Response("Matriz de permisos por rol")}
+    )
+    @action(detail=False, methods=['get'], url_path='permission-matrix')
+    def permission_matrix(self, request):
+        matrix = self.service.get_permission_matrix()
+        return Response(matrix, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
         method='get',
         operation_description="Obtiene un rol con sus formularios y permisos asignados por ID.",
         tags=["RoleFormPermission"],

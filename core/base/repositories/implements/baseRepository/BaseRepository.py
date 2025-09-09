@@ -9,10 +9,8 @@ class BaseRepository(ABaseRepository[T]):
     """Implementación concreta del repositorio con funcionalidades extendidas."""
 
     def get_queryset(self):
-        qs = self.model.objects.all()
-        if hasattr(self.model, 'delete_at'):
-            qs = qs.filter(delete_at=None)
-        return qs
+        # Trae todos los registros, sin filtrar por delete_at ni active
+        return self.model.objects.all()
 
     def get_all(self) -> List[T]:
         return list(self.get_queryset())
