@@ -19,6 +19,12 @@ DELETE FROM general_regional;
 -- Reactivar verificación de claves foráneas
 SET FOREIGN_KEY_CHECKS = 1;
 
+-- Reiniciar AUTO_INCREMENT para las tablas principales
+ALTER TABLE security_role AUTO_INCREMENT = 1;
+ALTER TABLE security_permission AUTO_INCREMENT = 1;
+ALTER TABLE security_form AUTO_INCREMENT = 1;
+ALTER TABLE security_module AUTO_INCREMENT = 1;
+
 -- Insertar datos en general_regional
 INSERT INTO general_regional VALUES (1,'Huila','REG-HUI','Regional Huila',1,'Neiva',NULL);
 
@@ -44,14 +50,14 @@ INSERT INTO general_ficha VALUES
 (2,'2901885',1,NULL,2);
 
 -- Insertar datos en security_role
-INSERT INTO security_role VALUES 
+INSERT INTO security_role (id, type_role, description, active) VALUES 
 (1,'Administrador','Acceso completo al sistema',1),
 (2,'Instructor','Acceso a funciones de instructor',1),
 (3,'Aprendiz','Acceso básico como aprendiz',1),
 (4,'Coordinador','Coordinador académico',1);
 
 -- Insertar datos en security_permission
-INSERT INTO security_permission VALUES 
+INSERT INTO security_permission (id, type_permission, description) VALUES 
 (1,'Crear','Permiso para crear registros'),
 (2,'Leer','Permiso para leer/consultar registros'),
 (3,'Actualizar','Permiso para actualizar registros'),
@@ -90,3 +96,10 @@ INSERT INTO security_rolformpermission (role_id, form_id, permission_id) VALUES
 (3,3,2),(3,4,2),
 -- Coordinador (role_id=4) - Permisos específicos
 (4,1,2),(4,4,2);
+
+-- Verificar que los datos se insertaron correctamente
+SELECT 'Roles insertados:' as info;
+SELECT id, type_role, description FROM security_role ORDER BY id;
+
+SELECT 'Permisos insertados:' as info;
+SELECT id, type_permission, description FROM security_permission ORDER BY id;
