@@ -6,6 +6,7 @@ class RolFormPermissionRepository(BaseRepository):
         super().__init__(RolFormPermission)
 
     def get_menu(self, user_id: int):
+            
             """
             Retorna la estructura de menú para un usuario dado.
             Usamos directamente la relación User -> Role -> RolFormPermission.
