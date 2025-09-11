@@ -6,7 +6,7 @@ from drf_yasg import openapi
 
 from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.general.services.AprendizService import AprendizService
-from apps.general.entity.serializers.AprendizSerializer import AprendizSerializer
+from apps.general.entity.serializers.CreateAprendiz.AprendizSerializer import AprendizSerializer
 
 
 class AprendizViewset(BaseViewSet):

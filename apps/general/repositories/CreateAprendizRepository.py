@@ -3,83 +3,78 @@ from apps.general.entity.models import Aprendiz, Ficha, Program
 from django.utils import timezone
 
 class CreateAprendizRepository:
-    def create_person(self, data):
-        return Person.objects.create(**data)
+    """
+    Repositorio unificado para operaciones CRUD y de estado sobre Aprendiz, Persona y Usuario.
+    """
 
-    def create_user(self, data):
-        if User.objects.filter(email=data['email']).exists():
-            raise ValueError("El correo ya está registrado.")
-        email = data.pop('email')
-        password = data.pop('password')
-        return User.objects.create_user(email=email, password=password, **data)
+    def create_all_dates_aprendiz(self, person_data, user_data, ficha):
+        """
+        Crea persona, usuario y aprendiz en una sola transacción.
+        Retorna aprendiz, user y person.
+        """
+        from django.db import transaction
+        with transaction.atomic():
+            person = Person.objects.create(**person_data)
+            if User.objects.filter(email=user_data['email']).exists():
+                raise ValueError("El correo ya está registrado.")
+            email = user_data.pop('email')
+            password = user_data.pop('password')
+            # Eliminar person_id si existe en user_data para evitar sobrescribir el valor correcto
+            user_data.pop('person_id', None)
+            user = User.objects.create_user(email=email, password=password, person=person, **user_data)
+            aprendiz = Aprendiz.objects.create(person=person, ficha=ficha)
+            return aprendiz, user, person
 
-    def create_aprendiz(self, person, ficha):
-        return Aprendiz.objects.create(person=person, ficha=ficha)
+    def update_all_dates_aprendiz(self, aprendiz, person_data, user_data, ficha):
+        """
+        Actualiza persona, usuario y aprendiz en una sola transacción.
+        """
+        from django.db import transaction
+        with transaction.atomic():
+            # Persona
+            for attr, value in person_data.items():
+                setattr(aprendiz.person, attr, value)
+            aprendiz.person.save()
+            # Usuario
+            user = User.objects.filter(person=aprendiz.person).first()
+            if user:
+                for attr, value in user_data.items():
+                    setattr(user, attr, value)
+                user.save()
+            # Aprendiz
+            aprendiz.ficha = ficha
+            aprendiz.save()
+            return aprendiz
 
-    def update_person(self, person, data):
-        for attr, value in data.items():
-            setattr(person, attr, value)
-        person.save()
-        return person
+    def delete_all_dates_aprendiz(self, aprendiz):
+        """
+        Elimina aprendiz, usuario y persona en cascada.
+        """
+        from django.db import transaction
+        with transaction.atomic():
+            person = aprendiz.person
+            user = User.objects.filter(person=person).first()
+            aprendiz.delete()
+            if user:
+                user.delete()
+            person.delete()
 
-    def update_user(self, user, data):
-        for attr, value in data.items():
-            setattr(user, attr, value)
-        user.save()
-        return user
-
-    def update_aprendiz(self, aprendiz, ficha):
-        aprendiz.ficha = ficha
-        aprendiz.save()
-        return aprendiz
-
-    def delete_aprendiz(self, aprendiz):
-        aprendiz.delete()
-
-    def delete_user_by_person(self, person):
-        user = User.objects.filter(person=person).first()
-        if user:
-            user.delete()
-
-    def delete_person(self, person):
-        person.delete()
-
-    def deactivate_aprendiz(self, aprendiz):
-        aprendiz.active = False
-        aprendiz.delete_at = timezone.now()
-        aprendiz.save()
-        return aprendiz
-
-    def activate_aprendiz(self, aprendiz):
-        aprendiz.active = True
-        aprendiz.delete_at = None
-        aprendiz.save()
-        return aprendiz
-
-    def deactivate_user_by_person(self, person):
-        user = User.objects.filter(person=person).first()
-        if user:
-            user.is_active = False
-            user.deleted_at = timezone.now()
-            user.save()
-        return user
-
-    def activate_user_by_person(self, person):
-        user = User.objects.filter(person=person).first()
-        if user:
-            user.is_active = True
-            user.deleted_at = None
-            user.save()
-        return user
-
-    def deactivate_person(self, person):
-        person.active = False
-        person.delete_at = timezone.now()
-        person.save()
-        return person
-
-    def activate_person(self, person):
-        person.active = True
-        person.delete_at = None
-        person.save()
-        return person
+    def set_active_state_dates_aprendiz(self, aprendiz, active=True):
+        """
+        Activa o desactiva aprendiz, usuario y persona en cascada.
+        """
+        from django.db import transaction
+        with transaction.atomic():
+            aprendiz.active = active
+            aprendiz.delete_at = None if active else timezone.now()
+            aprendiz.save()
+            person = aprendiz.person
+            person.active = active
+            person.delete_at = None if active else timezone.now()
+            person.save()
+            user = User.objects.filter(person=person).first()
+            if user:
+                user.is_active = active
+                user.deleted_at = None if active else timezone.now()
+                user.save()
+            return aprendiz

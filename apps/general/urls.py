@@ -10,7 +10,7 @@ from apps.general.views.SedeViewset import SedeViewset
 from apps.general.views.PersonSedeViewset import PersonSedeViewset
 from apps.general.views.CreateInstructorViewset import CreateInstructorViewset
 from apps.general.views.KnowledgeAreaViewset import KnowledgeAreaViewset
-from apps.general.views.CreateAprendizViewset import CreateAprendizViewset
+
 
 
 router = DefaultRouter()
@@ -24,7 +24,7 @@ router.register(r'sedes', SedeViewset, basename='general_sedes')
 router.register(r'person-sedes', PersonSedeViewset, basename='general_person_sedes')
 router.register(r'create-instructors', CreateInstructorViewset, basename='general_create_instructors')
 router.register(r'knowledge-areas', KnowledgeAreaViewset, basename='general_knowledge_areas')
-router.register(r'create-aprendices', CreateAprendizViewset, basename='general_create_aprendices')
+
 
 urlpatterns = [
     path('', include(router.urls)),
