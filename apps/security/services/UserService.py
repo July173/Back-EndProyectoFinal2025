@@ -141,6 +141,7 @@ class UserService(BaseService):
                     'id': user.id,
                     'role': user.role.id if user.role else None,
                     'person': user.person.id if user.person else None,  # Solo el id
+                    'registered': user.registered if hasattr(user, 'registered') else None
                 }
             },
             'status': status.HTTP_200_OK
