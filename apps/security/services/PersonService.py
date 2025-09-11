@@ -67,7 +67,7 @@ class PersonService(BaseService):
                     'password': hashed_password,
                     'person': person.id,
                     'is_active': False,
-                    'role': 3,  # Rol de Aprendiz
+                    'role': 2,  # Rol de Aprendiz
                 }
                 user_serializer = UserSerializer(data=user_data)
                 if not user_serializer.is_valid():
