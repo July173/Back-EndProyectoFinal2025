@@ -42,12 +42,20 @@ class AprendizService(BaseService):
             temp_password = user_data.get('password')
             ficha = Ficha.objects.get(pk=ficha_id)
             aprendiz, user, person = self.repository.create_all_dates_aprendiz(person_data, user_data, ficha)
-            # send email with temporary password (non-blocking)
+            # Validar datos antes de enviar el correo
+            email_sent = False
+            email_error = None
             try:
-                full_name = f"{person_data.get('first_name', '')} {person_data.get('first_last_name', '')}"
-                send_account_created_email(email, full_name, temp_password)
-            except Exception:
-                pass
+                if user and email and temp_password:
+                    full_name = f"{person_data.get('first_name', '')} {person_data.get('first_last_name', '')}"
+                    send_account_created_email(email, full_name, temp_password)
+                    email_sent = True
+                else:
+                    email_error = f"Datos insuficientes para enviar correo: email={email}, password={temp_password}"
+            except Exception as e:
+                email_error = str(e)
+            if not email_sent:
+                print(f"[AprendizService] No se pudo enviar el correo de registro al aprendiz: {email_error}")
             return aprendiz, user, person
 
     def update_aprendiz(self, aprendiz_id, validated_data):
