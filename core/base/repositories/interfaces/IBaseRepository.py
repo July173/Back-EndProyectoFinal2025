@@ -24,6 +24,10 @@ class IBaseRepository(ABC, Generic[T]):
         pass
 
     @abstractmethod
+    def partial_update(self, entity: T, data: dict) -> T:
+        pass
+
+    @abstractmethod
     def delete(self, id: int) -> bool:
         """Elimina completamente el registro por id."""
         pass

@@ -1,5 +1,5 @@
 from apps.general.entity.models import Program
-from core.base.serializers.implements.baseSerializer.BaseSerializer import BaseSerializer
+from core.base.serializers.implements.BaseSerializer import BaseSerializer
 
 
 class ProgramSerializer(BaseSerializer):
