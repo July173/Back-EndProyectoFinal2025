@@ -7,8 +7,10 @@ from apps.security.emails.SendEmails import enviar_registro_pendiente
 from rest_framework import status
 from datetime import datetime
 from django.contrib.auth.hashers import make_password
+
 from apps.security.entity.models import Person
 from apps.security.entity.models import User
+from django.db import transaction
 
 class PersonService(BaseService):
 
@@ -31,7 +33,6 @@ class PersonService(BaseService):
         super().__init__(PersonRepository())
 
     def register_aprendiz(self, data):
-
         email = data.get('email')
         password = data.get('password')
         numero_identificacion = data.get('number_identification')
@@ -53,45 +54,47 @@ class PersonService(BaseService):
                 'data': {'error': 'El número de identificación ya está registrado.'},
                 'status': status.HTTP_400_BAD_REQUEST
             }
-        # Crear persona usando método base del repositorio
-        person, person_data, person_errors = self.repository.create_person(data)
-        if not person:
+        try:
+            with transaction.atomic():
+                # Crear persona usando método base del repositorio
+                person, person_data, person_errors = self.repository.create_person(data)
+                if not person:
+                    raise Exception({'error': 'Datos inválidos', 'detalle': person_errors})
+                # Encriptar la contraseña antes de crear el usuario
+                hashed_password = make_password(password)
+                user_data = {
+                    'email': email,
+                    'password': hashed_password,
+                    'person': person.id,
+                    'is_active': False,
+                    'role': 2,  # Rol de Aprendiz
+                }
+                user_serializer = UserSerializer(data=user_data)
+                if not user_serializer.is_valid():
+                    raise Exception({'error': 'No se pudo crear el usuario', 'detalle': user_serializer.errors})
+                user = user_serializer.save()
+                # Crear Aprendiz vinculado a la persona (ficha se asignará después por el administrador)
+                from apps.general.entity.models import Aprendiz
+                aprendiz = Aprendiz.objects.create(person=person, ficha=None)
+                # Si todo es exitoso, enviar correo
+                fecha_registro = datetime.now().strftime('%d/%m/%Y')
+                enviar_registro_pendiente(email, person.first_name + ' ' + person.first_last_name, fecha_registro)
+                return {
+                    'data': {
+                        'persona': person_data,
+                        'usuario': user_serializer.data,
+                        'aprendiz_id': aprendiz.id,
+                        'success': 'Usuario registrado correctamente. Tu cuenta está pendiente de activación.'
+                    },
+                    'status': status.HTTP_201_CREATED
+                }
+        except Exception as e:
+            # Si ocurre cualquier error, se hace rollback automáticamente
+            detalle = str(e)
+            # Si el error es un diccionario, extraer el mensaje
+            if hasattr(e, 'args') and len(e.args) > 0 and isinstance(e.args[0], dict):
+                detalle = e.args[0]
             return {
-                'data': {'error': 'Datos inválidos', 'detalle': person_errors},
+                'data': {'error': 'No se pudo completar el registro', 'detalle': detalle},
                 'status': status.HTTP_400_BAD_REQUEST
             }
-        # Encriptar la contraseña antes de crear el usuario
-        hashed_password = make_password(password)
-        user_data = {
-            'email': email,
-            'password': hashed_password,
-            'person': person.id,
-            'is_active': False,
-            'role': 2,  # Rol de Aprendiz
-        }
-        user_serializer = UserSerializer(data=user_data)
-        if not user_serializer.is_valid():
-            # Si falla, eliminar la persona para evitar datos basura
-            self.repository.delete_person(person)
-            return {
-                'data': {'error': 'No se pudo crear el usuario', 'detalle': user_serializer.errors},
-                'status': status.HTTP_400_BAD_REQUEST
-            }
-        user = user_serializer.save()
-        
-        # Crear Aprendiz vinculado a la persona (ficha se asignará después por el administrador)
-        from apps.general.entity.models import Aprendiz
-        aprendiz = Aprendiz.objects.create(person=person, ficha=None)
-        
-        # Si todo es exitoso, enviar correo
-        fecha_registro = datetime.now().strftime('%d/%m/%Y')
-        enviar_registro_pendiente(email, person.first_name + ' ' + person.first_last_name, fecha_registro)
-        return {
-            'data': {
-                'persona': person_data,
-                'usuario': user_serializer.data,
-                'aprendiz_id': aprendiz.id,
-                'success': 'Usuario registrado correctamente. Tu cuenta está pendiente de activación.'
-            },
-            'status': status.HTTP_201_CREATED
-        }

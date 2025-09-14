@@ -16,12 +16,11 @@ class CreateInstructorViewset(viewsets.ViewSet):
         tags=["Instructor"]
     )
     def retrieve(self, request, pk=None):
-        try:
-            instructor = Instructor.objects.get(pk=pk)
+        instructor = self.service.get_instructor(pk)
+        if instructor:
             serializer = GetInstructorSerializer(instructor)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        except Instructor.DoesNotExist:
-            return Response({"detail": "Instructor no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"detail": "Instructor no encontrado."}, status=status.HTTP_404_NOT_FOUND)
     service = CreateInstructorService()
 
     @swagger_auto_schema(
@@ -50,7 +49,7 @@ class CreateInstructorViewset(viewsets.ViewSet):
         tags=["Instructor"]
     )
     def list(self, request, *args, **kwargs):
-        instructors = Instructor.objects.all()
+        instructors = self.service.list_instructors()
         serializer = GetInstructorSerializer(instructors, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

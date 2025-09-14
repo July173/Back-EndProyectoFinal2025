@@ -9,20 +9,19 @@ from apps.general.entity.models import Aprendiz
 from apps.general.entity.serializers.CreateAprendiz.UpdateAprendizSerializer import UpdateAprendizSerializer
 
 class CreateAprendizViewset(viewsets.ViewSet):
-
+    
+    service = CreateAprendizService()
     @swagger_auto_schema(
         operation_description="Obtiene un aprendiz por su ID.",
         responses={200: GetAprendizSerializer},
         tags=["Aprendiz"]
     )
     def retrieve(self, request, pk=None):
-        try:
-            aprendiz = Aprendiz.objects.get(pk=pk)
+        aprendiz = self.service.get_aprendiz(pk)
+        if aprendiz:
             serializer = GetAprendizSerializer(aprendiz)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        except Aprendiz.DoesNotExist:
-            return Response({"detail": "Aprendiz no encontrado."}, status=status.HTTP_404_NOT_FOUND)
-    service = CreateAprendizService()
+        return Response({"detail": "Aprendiz no encontrado."}, status=status.HTTP_404_NOT_FOUND)
 
     @swagger_auto_schema(
         request_body=CreateAprendizSerializer,
@@ -32,25 +31,14 @@ class CreateAprendizViewset(viewsets.ViewSet):
     def create(self, request, *args, **kwargs):
         serializer = CreateAprendizSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        data = serializer.validated_data
-
-        person_data = {
-            'type_identification': data['type_identification'],
-            'number_identification': data['number_identification'],
-            'first_name': data['first_name'],
-            'second_name': data.get('second_name', ''),
-            'first_last_name': data['first_last_name'],
-            'second_last_name': data.get('second_last_name', ''),
-            'phone_number': data.get('phone_number', ''),
-        }
-        user_data = {
-            'email': data['email'],
-            'person_id': None  # Se asigna en el service
-        }
-        ficha_id = data['ficha_id']
-
-        aprendiz = self.service.create_aprendiz(person_data, user_data, ficha_id)
-        return Response({"detail": "Aprendiz creado correctamente.", "id": aprendiz.id}, status=status.HTTP_201_CREATED)
+        aprendiz, user, person = self.service.create_aprendiz(serializer.validated_data)
+        return Response({
+            "detail": "Aprendiz creado correctamente.",
+            "id": aprendiz.id,
+            "user_id": user.id,
+            "person_id": person.id,
+            "email": user.email
+        }, status=status.HTTP_201_CREATED)
 
     @swagger_auto_schema(
         operation_description="Lista todos los aprendices.",
@@ -58,7 +46,7 @@ class CreateAprendizViewset(viewsets.ViewSet):
         tags=["Aprendiz"]
     )
     def list(self, request, *args, **kwargs):
-        aprendices = Aprendiz.objects.all()
+        aprendices = self.service.list_aprendices()
         serializer = GetAprendizSerializer(aprendices, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -70,25 +58,8 @@ class CreateAprendizViewset(viewsets.ViewSet):
     def update(self, request, pk=None):
         serializer = UpdateAprendizSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        data = serializer.validated_data
-
-        person_data = {
-            'type_identification': data['type_identification'],
-            'number_identification': data['number_identification'],
-            'first_name': data['first_name'],
-            'second_name': data.get('second_name', ''),
-            'first_last_name': data['first_last_name'],
-            'second_last_name': data.get('second_last_name', ''),
-            'phone_number': data.get('phone_number', ''),
-        }
-        user_data = {
-            'email': data['email'],
-        }
-        ficha_id = data['ficha_id']
-        role_id = data['role_id']
-
         try:
-            aprendiz = self.service.update_aprendiz(pk, person_data, user_data, ficha_id, role_id)
+            aprendiz = self.service.update_aprendiz(pk, serializer.validated_data)
             return Response({"detail": "Aprendiz actualizado correctamente.", "id": aprendiz.id}, status=status.HTTP_200_OK)
         except Aprendiz.DoesNotExist:
             return Response({"detail": "Aprendiz no encontrado."}, status=status.HTTP_404_NOT_FOUND)
