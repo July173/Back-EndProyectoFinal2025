@@ -1,9 +1,10 @@
 from core.base.services.implements.baseService.BaseService import BaseService
 from apps.general.repositories.AprendizRepository import AprendizRepository
-from apps.security.entity.models import User, Role
+from apps.security.entity.models import User, Role, Person
 from apps.general.entity.models import Aprendiz, Ficha
 from apps.security.emails.CreacionCuentaUsers import send_account_created_email
 from django.db import transaction
+from core.utils.Validation import is_unique_email, is_unique_document_number, is_valid_phone_number
 
 class AprendizService(BaseService):
     def __init__(self):
@@ -28,6 +29,14 @@ class AprendizService(BaseService):
             'person_id': None  # Se asigna en el repo
         }
         ficha_id = validated_data['ficha_id']
+
+        # Validaciones reutilizables
+        if not is_unique_email(user_data['email'], User):
+            raise ValueError('El correo ya está registrado.')
+        if not is_unique_document_number(person_data['number_identification'], Person):
+            raise ValueError('El número de documento ya está registrado.')
+        if person_data['phone_number'] and not is_valid_phone_number(person_data['phone_number']):
+            raise ValueError('El número de teléfono debe tener exactamente 10 dígitos.')
         with transaction.atomic():
             user_data['password'] = person_data['number_identification']  # Asigna la contraseña automáticamente
             # Assign default role id=2 if not provided
@@ -76,6 +85,16 @@ class AprendizService(BaseService):
         }
         ficha_id = validated_data['ficha_id']
         role_id = validated_data['role_id']
+
+        aprendiz = Aprendiz.objects.get(pk=aprendiz_id)
+        # Validaciones reutilizables para update (excluyendo el aprendiz actual)
+        if not is_unique_email(user_data['email'], User, exclude_user_id=aprendiz.user.id):
+            raise ValueError('El correo ya está registrado.')
+        if not is_unique_document_number(person_data['number_identification'], Person, exclude_person_id=aprendiz.person.id):
+            raise ValueError('El número de documento ya está registrado.')
+        # Validación de número de documento numérico eliminada
+        if person_data['phone_number'] and not is_valid_phone_number(person_data['phone_number']):
+            raise ValueError('El número de teléfono debe tener exactamente 10 dígitos.')
         with transaction.atomic():
             aprendiz = Aprendiz.objects.get(pk=aprendiz_id)
             ficha = Ficha.objects.get(pk=ficha_id)

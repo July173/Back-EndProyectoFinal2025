@@ -1,3 +1,4 @@
+
 from core.base.services.implements.baseService.BaseService import BaseService
 from apps.security.repositories.UserRepository import UserRepository
 from django.contrib.auth.hashers import make_password
@@ -11,6 +12,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from apps.security.entity.models import User
 from apps.security.emails.SendEmailsDesactivate import enviar_desactivacion_usuario
+from core.utils.Validation import is_institutional_email
 
 
 class UserService(BaseService):
@@ -46,7 +48,7 @@ class UserService(BaseService):
 
     def send_password_reset_code(self, email):
         # Validar correo institucional
-        if not email or not (email.endswith('@soy.sena.edu.co') or email.endswith('@sena.edu.co')):
+        if not is_institutional_email(email):
             return {
                 'data': {'error': 'Solo se permiten correos institucionales (@soy.sena.edu.co o @sena.edu.co)'},
                 'status': status.HTTP_400_BAD_REQUEST
@@ -111,7 +113,7 @@ class UserService(BaseService):
 
     def validate_institutional_login(self, email, password):
         # Validar correo institucional
-        if not email or not (email.endswith('@soy.sena.edu.co') or email.endswith('@sena.edu.co')):
+        if not is_institutional_email(email):
             return {
                 'data': {'error': 'Solo se permiten correos institucionales (@soy.sena.edu.co o @sena.edu.co)'},
                 'status': status.HTTP_400_BAD_REQUEST
@@ -141,6 +143,7 @@ class UserService(BaseService):
                     'id': user.id,
                     'role': user.role.id if user.role else None,
                     'person': user.person.id if user.person else None,  # Solo el id
+                    'registered': user.registered if hasattr(user, 'registered') else None
                 }
             },
             'status': status.HTTP_200_OK
