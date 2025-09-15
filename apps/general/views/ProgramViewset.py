@@ -9,6 +9,8 @@ from apps.general.services.ProgramService import ProgramService
 from apps.general.entity.serializers.ProgramSerializer import ProgramSerializer
 
 
+from apps.general.entity.serializers.FichaSerializer import FichaSerializer
+
 class ProgramViewset(BaseViewSet):
     service_class = ProgramService
     serializer_class = ProgramSerializer
@@ -72,7 +74,7 @@ class ProgramViewset(BaseViewSet):
     )
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)
-
+    
     # ----------- SOFT DELETE (custom) -----------
     @swagger_auto_schema(
         method='delete',
@@ -97,3 +99,15 @@ class ProgramViewset(BaseViewSet):
             {"detail": "No encontrado."},
             status=status.HTTP_404_NOT_FOUND
         )
+
+    # ----------- GET FICHAS BY PROGRAM (custom) -----------
+    @swagger_auto_schema(
+        operation_description="Obtiene todas las fichas vinculadas a un programa específico.",
+        responses={200: FichaSerializer(many=True)},
+        tags=["Programas"]
+    )
+    @action(detail=True, methods=['get'], url_path='fichas')
+    def get_fichas_by_program(self, request, pk=None):
+        fichas = self.service_class().get_fichas_by_program(pk)
+        serializer = FichaSerializer(fichas, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
