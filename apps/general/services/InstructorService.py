@@ -2,9 +2,10 @@ from core.base.services.implements.baseService.BaseService import BaseService
 from apps.general.repositories.InstructorRepository import InstructorRepository
 from django.db import transaction
 from apps.general.entity.models import Sede, Center, Regional, PersonSede, KnowledgeArea
-from apps.security.entity.models import User
+from apps.security.entity.models import User, Person
 from apps.general.entity.models import Instructor
 from apps.security.emails.CreacionCuentaUsers import send_account_created_email
+from core.utils.Validation import is_unique_email, is_unique_document_number, is_valid_phone_number
 
 
 class InstructorService(BaseService):
@@ -40,6 +41,14 @@ class InstructorService(BaseService):
             user_data['password'] = person_data['number_identification']  # Asigna la contraseña automáticamente
             temp_email = user_data.get('email')
             temp_password = user_data.get('password')
+
+            # Validaciones reutilizables
+            if not is_unique_email(user_data['email'], User):
+                raise ValueError('El correo ya está registrado.')
+            if not is_unique_document_number(person_data['number_identification'], Person):
+                raise ValueError('El número de documento ya está registrado.')
+            if person_data.get('phone_number') and not is_valid_phone_number(person_data['phone_number']):
+                raise ValueError('El número de teléfono debe tener exactamente 10 dígitos.')
 
             # Crear todo en una sola transacción
             instructor, user, person, person_sede = self.repository.create_all_dates_instructor(
@@ -77,6 +86,15 @@ class InstructorService(BaseService):
             if 'knowledgeArea' in instructor_data:
                 knowledge_area_id = instructor_data.pop('knowledgeArea')
                 instructor_data['knowledgeArea'] = KnowledgeArea.objects.get(pk=knowledge_area_id)
+
+            # Validaciones reutilizables para update (excluyendo el instructor actual)
+            if not is_unique_email(user_data['email'], User, exclude_user_id=instructor.user.id):
+                raise ValueError('El correo ya está registrado.')
+            if not is_unique_document_number(person_data['number_identification'], Person, exclude_person_id=instructor.person.id):
+                raise ValueError('El número de documento ya está registrado.')
+            # Validación de número de documento numérico eliminada
+            if person_data.get('phone_number') and not is_valid_phone_number(person_data['phone_number']):
+                raise ValueError('El número de teléfono debe tener exactamente 10 dígitos.')
 
             self.repository.update_all_dates_instructor(
                 instructor,

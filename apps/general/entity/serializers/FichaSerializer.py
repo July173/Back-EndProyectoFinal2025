@@ -11,6 +11,5 @@ class FichaSerializer(serializers.ModelSerializer):
             'id',
             'file_number',
             'program',
-            'active',
-            'deleted_at'
+            'active'
         ]
