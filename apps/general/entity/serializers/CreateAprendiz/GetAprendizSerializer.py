@@ -3,6 +3,9 @@ from apps.general.entity.models import Aprendiz
 from apps.security.entity.models import User
 
 class GetAprendizSerializer(serializers.ModelSerializer):
+    type_identification = serializers.SerializerMethodField()
+    number_identification = serializers.SerializerMethodField()
+    phone_number = serializers.SerializerMethodField()
     full_name = serializers.SerializerMethodField()
     email = serializers.SerializerMethodField()
     program = serializers.SerializerMethodField()
@@ -19,8 +22,19 @@ class GetAprendizSerializer(serializers.ModelSerializer):
             'program',
             'role',
             'ficha',
-            'estado'
+            'estado',
+            'type_identification',
+            'number_identification',
+            'phone_number'
         ]
+    def get_type_identification(self, obj):
+        return obj.person.type_identification if obj.person else None
+
+    def get_number_identification(self, obj):
+        return obj.person.number_identification if obj.person else None
+
+    def get_phone_number(self, obj):
+        return obj.person.phone_number if obj.person else None
 
     def get_full_name(self, obj):
         person = obj.person
