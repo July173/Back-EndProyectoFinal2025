@@ -15,6 +15,7 @@ class AprendizService(BaseService):
         Recibe los datos validados del serializer y ejecuta la lógica de creación.
         Retorna aprendiz, user y person.
         """
+        from core.utils.Validation import is_soy_sena_email
         person_data = {
             'type_identification': validated_data['type_identification'],
             'number_identification': validated_data['number_identification'],
@@ -29,6 +30,10 @@ class AprendizService(BaseService):
             'person_id': None  # Se asigna en el repo
         }
         ficha_id = validated_data['ficha_id']
+
+        # Validación de correo institucional @soy.sena.edu.co
+        if not user_data['email'] or not is_soy_sena_email(user_data['email']):
+            raise ValueError('Solo se permiten correos institucionales (@soy.sena.edu.co) para aprendices.')
 
         # Validaciones reutilizables
         if not is_unique_email(user_data['email'], User):

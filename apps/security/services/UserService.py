@@ -12,7 +12,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from apps.security.entity.models import User
 from apps.security.emails.SendEmailsDesactivate import enviar_desactivacion_usuario
-from core.utils.Validation import is_institutional_email
+from core.utils.Validation import is_soy_sena_email, is_sena_email
 
 
 class UserService(BaseService):
@@ -48,7 +48,7 @@ class UserService(BaseService):
 
     def send_password_reset_code(self, email):
         # Validar correo institucional
-        if not is_institutional_email(email):
+        if not (is_soy_sena_email(email) or is_sena_email(email)):
             return {
                 'data': {'error': 'Solo se permiten correos institucionales (@soy.sena.edu.co o @sena.edu.co)'},
                 'status': status.HTTP_400_BAD_REQUEST
@@ -113,7 +113,7 @@ class UserService(BaseService):
 
     def validate_institutional_login(self, email, password):
         # Validar correo institucional
-        if not is_institutional_email(email):
+        if not (is_soy_sena_email(email) or is_sena_email(email)):
             return {
                 'data': {'error': 'Solo se permiten correos institucionales (@soy.sena.edu.co o @sena.edu.co)'},
                 'status': status.HTTP_400_BAD_REQUEST
