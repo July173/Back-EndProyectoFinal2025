@@ -23,5 +23,3 @@ COPY . .
 
 # Comando por defecto (se sobreescribe en docker-compose)
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
-
-

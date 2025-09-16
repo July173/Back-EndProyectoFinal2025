@@ -26,6 +26,7 @@ class InstructorService(BaseService):
         return Instructor.objects.filter(pk=instructor_id).first()
 
     def create_instructor(self, person_data, user_data, instructor_data, sede_id, center_id, regional_id):
+        from core.utils.Validation import is_sena_email
         with transaction.atomic():
             # Validar y obtener entidades relacionadas usando el ORM de Django
             regional = Regional.objects.get(id=regional_id)
@@ -41,6 +42,10 @@ class InstructorService(BaseService):
             user_data['password'] = person_data['number_identification']  # Asigna la contraseña automáticamente
             temp_email = user_data.get('email')
             temp_password = user_data.get('password')
+
+            # Validación de correo institucional @sena.edu.co
+            if not temp_email or not is_sena_email(temp_email):
+                raise ValueError('Solo se permiten correos institucionales (@sena.edu.co) para instructores.')
 
             # Validaciones reutilizables
             if not is_unique_email(user_data['email'], User):
