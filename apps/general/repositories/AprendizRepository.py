@@ -22,6 +22,8 @@ class AprendizRepository(BaseRepository):
             # Eliminar person_id si existe en user_data para evitar sobrescribir el valor correcto
             user_data.pop('person_id', None)
             user = User.objects.create_user(email=email, password=password, person=person, **user_data)
+            user.registered = False
+            user.save()
             aprendiz = Aprendiz.objects.create(person=person, ficha=ficha)
             return aprendiz, user, person
 
