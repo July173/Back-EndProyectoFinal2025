@@ -43,3 +43,6 @@ docker exec -it celery_worker python manage.py shell
 # 2 Ejecutar los dos siguientes comandos 
  1  from apps.general.tasks import deactivate_expired_instructors
  2  deactivate_expired_instructors.delay()
+
+# Revisar errores 
+docker compose logs
