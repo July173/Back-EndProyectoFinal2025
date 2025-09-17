@@ -1,4 +1,6 @@
+
 from rest_framework import serializers
+from apps.security.entity.enums.document_type_enum import DocumentType
 
 
 class CreateInstructorSerializer(serializers.Serializer):
@@ -8,7 +10,7 @@ class CreateInstructorSerializer(serializers.Serializer):
     first_last_name = serializers.CharField()
     second_last_name = serializers.CharField(required=False, allow_blank=True)
     phone_number = serializers.IntegerField(required=False)
-    type_identification = serializers.CharField()
+    type_identification = serializers.ChoiceField(choices=[dt.value for dt in DocumentType])
     number_identification = serializers.IntegerField()
     # Campos de User
     email = serializers.EmailField()
