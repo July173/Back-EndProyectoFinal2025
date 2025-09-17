@@ -101,17 +101,18 @@ DATABASES = {
         'HOST': 'localhost',
         'PORT': '5432',
     },
-    'sqlserver': {
-        'ENGINE': 'django_mssql_backend',
-        'NAME': 'bdautogestion',
-        'USER': 'sa',
-        'PASSWORD': 'SqlServer2025!',
-        'HOST': 'localhost',
-        'PORT': '1433',
-        'OPTIONS': {
-            'driver': 'ODBC Driver 17 for SQL Server',
-        },
-    }
+    # Comentado temporalmente hasta instalar django_mssql_backend
+    # 'sqlserver': {
+    #     'ENGINE': 'django_mssql_backend',
+    #     'NAME': 'bdautogestion',
+    #     'USER': 'sa',
+    #     'PASSWORD': 'SqlServer2025!',
+    #     'HOST': 'localhost',
+    #     'PORT': '1433',
+    #     'OPTIONS': {
+    #         'driver': 'ODBC Driver 17 for SQL Server',
+    #     },
+    # }
 }
 # ============================
 # MODELO DE USUARIO PERSONALIZADO
