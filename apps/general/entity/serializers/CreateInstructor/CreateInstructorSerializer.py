@@ -7,9 +7,9 @@ class CreateInstructorSerializer(serializers.Serializer):
     second_name = serializers.CharField(required=False, allow_blank=True)
     first_last_name = serializers.CharField()
     second_last_name = serializers.CharField(required=False, allow_blank=True)
-    phone_number = serializers.CharField(required=False, allow_blank=True)
+    phone_number = serializers.IntegerField(required=False)
     type_identification = serializers.CharField()
-    number_identification = serializers.CharField()
+    number_identification = serializers.IntegerField()
     # Campos de User
     email = serializers.EmailField()
     role_id = serializers.IntegerField()  # <-- Agrega este campo
@@ -19,9 +19,9 @@ class CreateInstructorSerializer(serializers.Serializer):
     contractEndDate = serializers.DateField()
     knowledgeArea = serializers.IntegerField()
     # IDs de relación
+    regional_id = serializers.IntegerField()
     center_id = serializers.IntegerField()
     sede_id = serializers.IntegerField()
-    regional_id = serializers.IntegerField()
 
     class Meta:
         ref_name = "CreateInstructorInputSerializer"

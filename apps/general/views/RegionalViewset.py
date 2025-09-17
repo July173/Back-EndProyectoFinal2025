@@ -7,9 +7,35 @@ from drf_yasg import openapi
 from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.general.services.RegionalService import RegionalService
 from apps.general.entity.serializers.RegionalSerializer import RegionalSerializer
+from apps.general.entity.serializers.RegionalNestedSerializer import RegionalNestedSerializer
 
 
 class RegionalViewset(BaseViewSet):
+    @swagger_auto_schema(
+        operation_description="Obtiene una regional por id con sus centros y sedes anidados.",
+        tags=["Regional"],
+        responses={200: RegionalNestedSerializer()}
+    )
+    @action(detail=True, methods=['get'], url_path='with-centers-sedes')
+    def with_centers_sedes_by_id(self, request, pk=None):
+        from apps.general.entity.models import Regional
+        try:
+            regional = Regional.objects.get(pk=pk)
+        except Regional.DoesNotExist:
+            return Response({"detail": "No encontrado."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = RegionalNestedSerializer(regional)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    @swagger_auto_schema(
+        operation_description="Obtiene todas las regionales con sus centros y sedes anidados.",
+        tags=["Regional"],
+        responses={200: RegionalNestedSerializer(many=True)}
+    )
+    @action(detail=False, methods=['get'], url_path='with-centers-sedes')
+    def with_centers_sedes(self, request):
+        from apps.general.entity.models import Regional
+        queryset = Regional.objects.all()
+        serializer = RegionalNestedSerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     service_class = RegionalService
     serializer_class = RegionalSerializer
 
