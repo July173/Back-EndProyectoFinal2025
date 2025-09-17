@@ -804,3 +804,170 @@ class ExcelTemplateService:
         except Exception as e:
             print(f"Error creando aprendiz: {e}")
             return False
+
+    def generate_instructor_error_report(self, error_records):
+        """
+        Genera un archivo Excel con los registros de instructores que fallaron,
+        incluyendo los datos originales y los errores específicos.
+        """
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Instructores con Errores"
+        
+        # Definir headers (datos originales + columna de errores)
+        headers = [
+            'Fila Original', 'Primer Nombre', 'Segundo Nombre', 'Primer Apellido', 
+            'Segundo Apellido', 'Tipo Identificación', 'Número Identificación',
+            'Teléfono', 'Email Institucional', 'Tipo de Contrato',
+            'Fecha Inicio Contrato', 'Fecha Fin Contrato', 'Área de Conocimiento',
+            'Contraseña Temporal', 'ERRORES ENCONTRADOS'
+        ]
+        
+        # Aplicar estilo a headers
+        for col_num, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col_num, value=header)
+            if header == 'ERRORES ENCONTRADOS':
+                cell.font = Font(bold=True, color='FFFFFF')
+                cell.fill = PatternFill(start_color='E74C3C', end_color='E74C3C', fill_type='solid')
+            else:
+                cell.font = Font(bold=True, color='FFFFFF')
+                cell.fill = PatternFill(start_color='4472C4', end_color='4472C4', fill_type='solid')
+            cell.alignment = Alignment(horizontal='center', vertical='center')
+        
+        # Agregar datos de error
+        for row_num, error_record in enumerate(error_records, 2):
+            data = error_record['data']
+            errors = ' | '.join(error_record['errors'])
+            
+            # Datos originales
+            row_data = [
+                error_record['row'],
+                data.get('primer_nombre', ''),
+                data.get('segundo_nombre', ''),
+                data.get('primer_apellido', ''),
+                data.get('segundo_apellido', ''),
+                data.get('tipo_identificacion', ''),
+                data.get('numero_identificacion', ''),
+                data.get('telefono', ''),
+                data.get('email', ''),
+                data.get('tipo_contrato', ''),
+                data.get('fecha_inicio_contrato', ''),
+                data.get('fecha_fin_contrato', ''),
+                data.get('area_conocimiento', ''),
+                data.get('password', ''),
+                errors
+            ]
+            
+            for col_num, value in enumerate(row_data, 1):
+                cell = ws.cell(row=row_num, column=col_num, value=value)
+                if col_num == len(row_data):  # Columna de errores
+                    cell.font = Font(color='E74C3C')
+                    cell.fill = PatternFill(start_color='FFEBEE', end_color='FFEBEE', fill_type='solid')
+        
+        # Autoajustar columnas
+        for column in ws.columns:
+            max_length = 0
+            column_letter = get_column_letter(column[0].column)
+            for cell in column:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(str(cell.value))
+                except:
+                    pass
+            adjusted_width = min(max_length + 2, 50)
+            ws.column_dimensions[column_letter].width = adjusted_width
+        
+        return wb
+
+    def generate_aprendiz_error_report(self, error_records):
+        """
+        Genera un archivo Excel con los registros de aprendices que fallaron,
+        incluyendo los datos originales y los errores específicos.
+        """
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Aprendices con Errores"
+        
+        # Definir headers (datos originales + columna de errores)
+        headers = [
+            'Fila Original', 'Primer Nombre', 'Segundo Nombre', 'Primer Apellido',
+            'Segundo Apellido', 'Tipo Identificación', 'Número Identificación',
+            'Teléfono', 'Email Institucional', 'Código Programa', 'Número Ficha',
+            'Contraseña Temporal', 'ERRORES ENCONTRADOS'
+        ]
+        
+        # Aplicar estilo a headers
+        for col_num, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col_num, value=header)
+            if header == 'ERRORES ENCONTRADOS':
+                cell.font = Font(bold=True, color='FFFFFF')
+                cell.fill = PatternFill(start_color='E74C3C', end_color='E74C3C', fill_type='solid')
+            else:
+                cell.font = Font(bold=True, color='FFFFFF')
+                cell.fill = PatternFill(start_color='4472C4', end_color='4472C4', fill_type='solid')
+            cell.alignment = Alignment(horizontal='center', vertical='center')
+        
+        # Agregar datos de error
+        for row_num, error_record in enumerate(error_records, 2):
+            data = error_record['data']
+            errors = ' | '.join(error_record['errors'])
+            
+            # Datos originales
+            row_data = [
+                error_record['row'],
+                data.get('primer_nombre', ''),
+                data.get('segundo_nombre', ''),
+                data.get('primer_apellido', ''),
+                data.get('segundo_apellido', ''),
+                data.get('tipo_identificacion', ''),
+                data.get('numero_identificacion', ''),
+                data.get('telefono', ''),
+                data.get('email', ''),
+                data.get('codigo_programa', ''),
+                data.get('numero_ficha', ''),
+                data.get('password', ''),
+                errors
+            ]
+            
+            for col_num, value in enumerate(row_data, 1):
+                cell = ws.cell(row=row_num, column=col_num, value=value)
+                if col_num == len(row_data):  # Columna de errores
+                    cell.font = Font(color='E74C3C')
+                    cell.fill = PatternFill(start_color='FFEBEE', end_color='FFEBEE', fill_type='solid')
+        
+        # Autoajustar columnas
+        for column in ws.columns:
+            max_length = 0
+            column_letter = get_column_letter(column[0].column)
+            for cell in column:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(str(cell.value))
+                except:
+                    pass
+            adjusted_width = min(max_length + 2, 50)
+            ws.column_dimensions[column_letter].width = adjusted_width
+        
+        return wb
+
+    def save_error_report_to_file(self, workbook, filename):
+        """
+        Guarda un reporte de errores en la carpeta media/error_reports/
+        """
+        import os
+        from django.conf import settings
+        
+        # Crear directorio si no existe
+        error_reports_dir = os.path.join(settings.MEDIA_ROOT, 'error_reports')
+        os.makedirs(error_reports_dir, exist_ok=True)
+        
+        # Generar nombre único con timestamp
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        unique_filename = f"{filename}_{timestamp}.xlsx"
+        file_path = os.path.join(error_reports_dir, unique_filename)
+        
+        # Guardar archivo
+        workbook.save(file_path)
+        
+        # Retornar la URL relativa para descarga
+        return f"/media/error_reports/{unique_filename}"

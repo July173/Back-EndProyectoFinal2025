@@ -199,7 +199,41 @@ class ExcelTemplateViewSet(ViewSet):
                             items=openapi.Schema(type=openapi.TYPE_OBJECT)
                         ),
                         'total_processed': openapi.Schema(type=openapi.TYPE_INTEGER),
-                        'successful_registrations': openapi.Schema(type=openapi.TYPE_INTEGER)
+                        'successful_registrations': openapi.Schema(type=openapi.TYPE_INTEGER),
+                        'error_report_url': openapi.Schema(
+                            type=openapi.TYPE_STRING, 
+                            description="URL para descargar reporte de errores (solo si hay errores)"
+                        ),
+                        'error_report_message': openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="Mensaje explicativo sobre el reporte de errores"
+                        )
+                    }
+                )
+            ),
+            207: openapi.Response(
+                "Procesado parcialmente - algunos registros fallaron",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'success': openapi.Schema(
+                            type=openapi.TYPE_ARRAY,
+                            items=openapi.Schema(type=openapi.TYPE_OBJECT)
+                        ),
+                        'errors': openapi.Schema(
+                            type=openapi.TYPE_ARRAY,
+                            items=openapi.Schema(type=openapi.TYPE_OBJECT)
+                        ),
+                        'total_processed': openapi.Schema(type=openapi.TYPE_INTEGER),
+                        'successful_registrations': openapi.Schema(type=openapi.TYPE_INTEGER),
+                        'error_report_url': openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="URL para descargar reporte de errores"
+                        ),
+                        'error_report_message': openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="Mensaje explicativo sobre el reporte de errores"
+                        )
                     }
                 )
             ),
@@ -232,6 +266,27 @@ class ExcelTemplateViewSet(ViewSet):
             
             # Procesar el archivo
             results = self.service.process_instructor_excel(excel_file)
+            
+            # Generar reporte de errores si hay errores
+            error_report_url = None
+            if results.get('errors') and len(results['errors']) > 0:
+                try:
+                    # Generar Excel con errores
+                    error_workbook = self.service.generate_instructor_error_report(results['errors'])
+                    
+                    # Guardar archivo en media/error_reports/
+                    error_report_url = self.service.save_error_report_to_file(
+                        error_workbook, 
+                        'instructor_errors'
+                    )
+                    
+                    # Agregar URL del reporte a la respuesta
+                    results['error_report_url'] = error_report_url
+                    results['error_report_message'] = 'Se ha generado un reporte con los registros que fallaron'
+                    
+                except Exception as e:
+                    print(f"Error generando reporte de errores: {e}")
+                    # No fallar la respuesta principal por errores en el reporte
             
             # Determinar el status code basado en los resultados
             if results['successful_registrations'] > 0:
@@ -280,7 +335,41 @@ class ExcelTemplateViewSet(ViewSet):
                             items=openapi.Schema(type=openapi.TYPE_OBJECT)
                         ),
                         'total_processed': openapi.Schema(type=openapi.TYPE_INTEGER),
-                        'successful_registrations': openapi.Schema(type=openapi.TYPE_INTEGER)
+                        'successful_registrations': openapi.Schema(type=openapi.TYPE_INTEGER),
+                        'error_report_url': openapi.Schema(
+                            type=openapi.TYPE_STRING, 
+                            description="URL para descargar reporte de errores (solo si hay errores)"
+                        ),
+                        'error_report_message': openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="Mensaje explicativo sobre el reporte de errores"
+                        )
+                    }
+                )
+            ),
+            207: openapi.Response(
+                "Procesado parcialmente - algunos registros fallaron",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'success': openapi.Schema(
+                            type=openapi.TYPE_ARRAY,
+                            items=openapi.Schema(type=openapi.TYPE_OBJECT)
+                        ),
+                        'errors': openapi.Schema(
+                            type=openapi.TYPE_ARRAY,
+                            items=openapi.Schema(type=openapi.TYPE_OBJECT)
+                        ),
+                        'total_processed': openapi.Schema(type=openapi.TYPE_INTEGER),
+                        'successful_registrations': openapi.Schema(type=openapi.TYPE_INTEGER),
+                        'error_report_url': openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="URL para descargar reporte de errores"
+                        ),
+                        'error_report_message': openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="Mensaje explicativo sobre el reporte de errores"
+                        )
                     }
                 )
             ),
@@ -313,6 +402,27 @@ class ExcelTemplateViewSet(ViewSet):
             
             # Procesar el archivo
             results = self.service.process_aprendiz_excel(excel_file)
+            
+            # Generar reporte de errores si hay errores
+            error_report_url = None
+            if results.get('errors') and len(results['errors']) > 0:
+                try:
+                    # Generar Excel con errores
+                    error_workbook = self.service.generate_aprendiz_error_report(results['errors'])
+                    
+                    # Guardar archivo en media/error_reports/
+                    error_report_url = self.service.save_error_report_to_file(
+                        error_workbook, 
+                        'aprendiz_errors'
+                    )
+                    
+                    # Agregar URL del reporte a la respuesta
+                    results['error_report_url'] = error_report_url
+                    results['error_report_message'] = 'Se ha generado un reporte con los registros que fallaron'
+                    
+                except Exception as e:
+                    print(f"Error generando reporte de errores: {e}")
+                    # No fallar la respuesta principal por errores en el reporte
             
             # Determinar el status code basado en los resultados
             if results['successful_registrations'] > 0:
