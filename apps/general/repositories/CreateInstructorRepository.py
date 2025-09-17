@@ -4,86 +4,100 @@ from django.utils import timezone
 
 
 class CreateInstructorRepository:
-    def create_person(self, data):
-        return Person.objects.create(**data)
+    """
+    Repositorio optimizado para operaciones CRUD y de estado sobre Instructor, Persona, Usuario y PersonSede.
+    """
 
-    def update_person(self, person, data):
-        for attr, value in data.items():
-            setattr(person, attr, value)
-        person.save()
-        return person
+    def create_all_dates_instructor(self, person_data, user_data, instructor_data, sede_id=None):
+        """
+        Crea persona, usuario, instructor y person_sede en una sola transacción.
+        Retorna instructor, user, person, person_sede.
+        """
+        from django.db import transaction
+        with transaction.atomic():
+            person = Person.objects.create(**person_data)
+            if User.objects.filter(email=user_data['email']).exists():
+                raise ValueError("El correo ya está registrado.")
+            email = user_data.pop('email')
+            password = user_data.pop('password')
+            user = User.objects.create_user(email=email, password=password, person=person, **user_data)
+            instructor = Instructor.objects.create(person=person, **instructor_data)
+            person_sede = None
+            if sede_id:
+                sede_instance = Sede.objects.get(pk=sede_id)
+                person_sede = PersonSede.objects.create(PersonId=person, SedeId=sede_instance)
+            return instructor, user, person, person_sede
 
-    def create_user(self, data):
-        if User.objects.filter(email=data['email']).exists():
-            raise ValueError("El correo ya está registrado.")
-        email = data.pop('email')
-        password = data.pop('password')
-        return User.objects.create_user(email=email, password=password, **data)
+    def update_all_dates_instructor(self, instructor, person_data, user_data, instructor_data, sede_id=None):
+        """
+        Actualiza persona, usuario, instructor y person_sede en una sola transacción.
+        """
+        from django.db import transaction
+        with transaction.atomic():
+            # Persona
+            for attr, value in person_data.items():
+                setattr(instructor.person, attr, value)
+            instructor.person.save()
+            # Usuario
+            user = User.objects.filter(person=instructor.person).first()
+            if user:
+                for attr, value in user_data.items():
+                    setattr(user, attr, value)
+                user.save()
+            # Instructor
+            for attr, value in instructor_data.items():
+                setattr(instructor, attr, value)
+            instructor.save()
+            # PersonSede
+            if sede_id:
+                sede_instance = Sede.objects.get(pk=sede_id)
+                person_sede = PersonSede.objects.filter(PersonId=instructor.person).first()
+                if person_sede:
+                    person_sede.SedeId = sede_instance
+                    person_sede.save()
+            return instructor
 
-    def update_user(self, user, data):
-        for attr, value in data.items():
-            setattr(user, attr, value)
-        user.save()
-        return user
+    def delete_all_dates_instructor(self, instructor):
+        """
+        Elimina instructor, usuario, person_sede y persona en cascada.
+        """
+        from django.db import transaction
+        with transaction.atomic():
+            person = instructor.person
+            user = User.objects.filter(person=person).first()
+            person_sede = PersonSede.objects.filter(PersonId=person)
+            instructor.delete()
+            if user:
+                user.delete()
+            person_sede.delete()
+            person.delete()
 
-    def create_instructor(self, data):
-        return Instructor.objects.create(**data)
-
-    def update_instructor(self, instructor, data):
-        for attr, value in data.items():
-            setattr(instructor, attr, value)
-        instructor.save()
-        return instructor
-
-    def update_person_sede(self, person, sede_id):
-        sede_instance = Sede.objects.get(pk=sede_id)
-        person_sede = PersonSede.objects.filter(PersonId=person).first()
-        if person_sede:
-            person_sede.SedeId = sede_instance
-            person_sede.save()
-        return person_sede
-
-    def delete_instructor(self, instructor):
-        instructor.delete()
-
-    def delete_user_by_person(self, person):
-        user = User.objects.filter(person=person).first()
-        if user:
-            user.delete()
-
-    def delete_person_sede_by_person(self, person):
-        person_sede = PersonSede.objects.filter(PersonId=person)
-        person_sede.delete()
-
-    def delete_person(self, person):
-        person.delete()
-
-    def deactivate_instructor(self, instructor):
-        instructor.active = False
-        instructor.delete_at = timezone.now()  # <-- minúscula, como en el modelo
-        instructor.save()
-        return instructor
-
-    def deactivate_user_by_person(self, person):
-        user = User.objects.filter(person=person).first()
-        if user:
-            user.is_active = False
-            user.deleted_at = timezone.now()  # <-- como en el modelo User
-            user.save()
-        return user
-
-    def deactivate_person(self, person):
-        person.active = False
-        person.delete_at = timezone.now()  # <-- minúscula, como en el modelo
-        person.save()
-        return person
-
-    def deactivate_person_sede_by_person(self, person):
-        person_sede = PersonSede.objects.filter(PersonId=person)
-        for ps in person_sede:
-            # Si tienes campo active en PersonSede, desactívalo también
-            if hasattr(ps, 'active'):
-                ps.active = False
-            ps.DeleteAt = timezone.now()  # <-- respeta la mayúscula
-            ps.save()
-        return person_sede
+    def set_active_state_dates_instructor(self, instructor, active=True):
+        """
+        Activa o desactiva instructor, usuario, persona y person_sede en cascada.
+        """
+        from django.db import transaction
+        with transaction.atomic():
+            instructor.active = active
+            instructor.delete_at = None if active else timezone.now()
+            instructor.save()
+            person = instructor.person
+            person.active = active
+            person.delete_at = None if active else timezone.now()
+            person.save()
+            user = User.objects.filter(person=person).first()
+            if user:
+                user.is_active = active
+                user.deleted_at = None if active else timezone.now()
+                user.save()
+            person_sede = PersonSede.objects.filter(PersonId=person)
+            for ps in person_sede:
+                if hasattr(ps, 'active'):
+                    ps.active = active
+                # Respeta la mayúscula/minúscula según el modelo
+                if hasattr(ps, 'DeleteAt'):
+                    ps.DeleteAt = None if active else timezone.now()
+                elif hasattr(ps, 'delete_at'):
+                    ps.delete_at = None if active else timezone.now()
+                ps.save()
+            return instructor

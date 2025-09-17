@@ -28,6 +28,11 @@ class IBaseService(ABC, Generic[T]):
         pass
 
     @abstractmethod
+    def delete(self, id: int) -> bool:
+        """Elimina físicamente el registro por id."""
+        pass
+
+    @abstractmethod
     def soft_delete(self, id: int) -> bool:
         """Elimina lógicamente el registro por id (cambia active y delete_at)."""
         pass

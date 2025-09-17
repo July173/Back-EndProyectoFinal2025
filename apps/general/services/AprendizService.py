@@ -1,7 +1,141 @@
 from core.base.services.implements.baseService.BaseService import BaseService
 from apps.general.repositories.AprendizRepository import AprendizRepository
-
+from apps.security.entity.models import User, Role, Person
+from apps.general.entity.models import Aprendiz, Ficha
+from apps.security.emails.CreacionCuentaUsers import send_account_created_email
+from django.db import transaction
+from core.utils.Validation import is_unique_email, is_unique_document_number, is_valid_phone_number
 
 class AprendizService(BaseService):
     def __init__(self):
         self.repository = AprendizRepository()
+
+    def create_aprendiz(self, validated_data):
+        """
+        Recibe los datos validados del serializer y ejecuta la lógica de creación.
+        Retorna aprendiz, user y person.
+        """
+        from core.utils.Validation import is_soy_sena_email
+        person_data = {
+            'type_identification': validated_data['type_identification'],
+            'number_identification': validated_data['number_identification'],
+            'first_name': validated_data['first_name'],
+            'second_name': validated_data.get('second_name', ''),
+            'first_last_name': validated_data['first_last_name'],
+            'second_last_name': validated_data.get('second_last_name', ''),
+            'phone_number': validated_data.get('phone_number', ''),
+        }
+        user_data = {
+            'email': validated_data['email'],
+            'person_id': None  # Se asigna en el repo
+        }
+        ficha_id = validated_data['ficha_id']
+
+        # Validación de correo institucional @soy.sena.edu.co
+        if not user_data['email'] or not is_soy_sena_email(user_data['email']):
+            raise ValueError('Solo se permiten correos institucionales (@soy.sena.edu.co) para aprendices.')
+
+        # Validaciones reutilizables
+        if not is_unique_email(user_data['email'], User):
+            raise ValueError('El correo ya está registrado.')
+        if not is_unique_document_number(person_data['number_identification'], Person):
+            raise ValueError('El número de documento ya está registrado.')
+        if person_data['phone_number'] and not is_valid_phone_number(person_data['phone_number']):
+            raise ValueError('El número de teléfono debe tener exactamente 10 dígitos.')
+        with transaction.atomic():
+            user_data['password'] = person_data['number_identification']  # Asigna la contraseña automáticamente
+            # Assign default role id=2 if not provided
+            if not user_data.get('role_id'):
+                try:
+                    default_role = Role.objects.get(pk=2)
+                    user_data['role_id'] = default_role.id
+                except Role.DoesNotExist:
+                    pass
+
+            email = user_data.get('email')
+            temp_password = user_data.get('password')
+            ficha = Ficha.objects.get(pk=ficha_id)
+            aprendiz, user, person = self.repository.create_all_dates_aprendiz(person_data, user_data, ficha)
+            # Validar datos antes de enviar el correo
+            email_sent = False
+            email_error = None
+            try:
+                if user and email and temp_password:
+                    full_name = f"{person_data.get('first_name', '')} {person_data.get('first_last_name', '')}"
+                    send_account_created_email(email, full_name, temp_password)
+                    email_sent = True
+                else:
+                    email_error = f"Datos insuficientes para enviar correo: email={email}, password={temp_password}"
+            except Exception as e:
+                email_error = str(e)
+            if not email_sent:
+                print(f"[AprendizService] No se pudo enviar el correo de registro al aprendiz: {email_error}")
+            return aprendiz, user, person
+
+    def update_aprendiz(self, aprendiz_id, validated_data):
+        """
+        Recibe los datos validados del serializer y ejecuta la lógica de actualización.
+        """
+        person_data = {
+            'type_identification': validated_data['type_identification'],
+            'number_identification': validated_data['number_identification'],
+            'first_name': validated_data['first_name'],
+            'second_name': validated_data.get('second_name', ''),
+            'first_last_name': validated_data['first_last_name'],
+            'second_last_name': validated_data.get('second_last_name', ''),
+            'phone_number': validated_data.get('phone_number', ''),
+        }
+        user_data = {
+            'email': validated_data['email'],
+        }
+        ficha_id = validated_data['ficha_id']
+        role_id = validated_data['role_id']
+
+        aprendiz = Aprendiz.objects.get(pk=aprendiz_id)
+        # Validaciones reutilizables para update (excluyendo el aprendiz actual)
+        if not is_unique_email(user_data['email'], User, exclude_user_id=aprendiz.user.id):
+            raise ValueError('El correo ya está registrado.')
+        if not is_unique_document_number(person_data['number_identification'], Person, exclude_person_id=aprendiz.person.id):
+            raise ValueError('El número de documento ya está registrado.')
+        # Validación de número de documento numérico eliminada
+        if person_data['phone_number'] and not is_valid_phone_number(person_data['phone_number']):
+            raise ValueError('El número de teléfono debe tener exactamente 10 dígitos.')
+        with transaction.atomic():
+            aprendiz = Aprendiz.objects.get(pk=aprendiz_id)
+            ficha = Ficha.objects.get(pk=ficha_id)
+            if not role_id:
+                role_id = 2
+            try:
+                role = Role.objects.get(pk=role_id)
+                user_data['role_id'] = role.id
+            except Role.DoesNotExist:
+                user_data['role_id'] = 2
+            self.repository.update_all_dates_aprendiz(aprendiz, person_data, user_data, ficha)
+            return aprendiz
+
+    def get_aprendiz(self, aprendiz_id):
+        """
+        Devuelve el aprendiz por id o None si no existe.
+        """
+        return Aprendiz.objects.filter(pk=aprendiz_id).first()
+
+    def list_aprendices(self):
+        """
+        Devuelve todos los aprendices.
+        """
+        return Aprendiz.objects.all()
+
+    def delete_aprendiz(self, aprendiz_id):
+        with transaction.atomic():
+            aprendiz = Aprendiz.objects.get(pk=aprendiz_id)
+            self.repository.delete_all_dates_aprendiz(aprendiz)
+
+    def logical_delete_aprendiz(self, aprendiz_id):
+        with transaction.atomic():
+            aprendiz = Aprendiz.objects.get(pk=aprendiz_id)
+            if not aprendiz.active:
+                self.repository.set_active_state_dates_aprendiz(aprendiz, active=True)
+                return "Aprendiz reactivado correctamente."
+            else:
+                self.repository.set_active_state_dates_aprendiz(aprendiz, active=False)
+                return "Eliminación lógica realizada correctamente."
