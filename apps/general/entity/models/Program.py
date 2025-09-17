@@ -2,7 +2,7 @@ from django.db import models
 
 
 class Program(models.Model):
-    codeProgram = models.CharField(max_length=50)
+    codeProgram = models.BigIntegerField()
     name = models.CharField(max_length=100)
     typeProgram = models.CharField(max_length=50)
     description = models.TextField(max_length=255)

@@ -76,33 +76,41 @@ WSGI_APPLICATION = 'core.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('DB_NAME', 'bdautogestion'),
-        'USER': os.environ.get('DB_USER', 'root'),
-        'PASSWORD': os.environ.get('DB_PASS', '123456'),
-        'HOST': os.environ.get('DB_HOST', 'localhost'),
-        'PORT': os.environ.get('DB_PORT', '3306'),
-        'OPTIONS': {'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"},
-    },
-    'postgresql': {
-        'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'bdautogestion',
-        'USER': 'postgres',
+        'USER': 'root',
         'PASSWORD': '123456',
         'HOST': 'localhost',
-        'PORT': '5432',
-    },
-    # Comentado temporalmente hasta instalar django_mssql_backend
-    # 'sqlserver': {
-    #     'ENGINE': 'django_mssql_backend',
-    #     'NAME': 'bdautogestion',
-    #     'USER': 'sa',
-    #     'PASSWORD': 'SqlServer2025!',
-    #     'HOST': 'localhost',
-    #     'PORT': '1433',
-    #     'OPTIONS': {
-    #         'driver': 'ODBC Driver 17 for SQL Server',
-    #     },
+        'PORT': '3306',
+        'OPTIONS': {'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"},
+    }
+    
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': os.environ.get('DB_NAME', 'bdautogestion'),
+    #     'USER': os.environ.get('DB_USER', 'root'),
+    #     'PASSWORD': os.environ.get('DB_PASS', '123456'),
+    #     'HOST': os.environ.get('DB_HOST', 'localhost'),
+    #     'PORT': os.environ.get('DB_PORT', '3306'),
+    #     'OPTIONS': {'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"},
     # }
+}
+# ============================
+# CELERY CONFIG (para Docker Compose)
+# ============================
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+TIME_ZONE = 'America/Bogota'
+CELERY_TIMEZONE = TIME_ZONE
+
+# Tarea periódica para desactivar instructores cuyo contrato terminó
+CELERY_BEAT_SCHEDULE = {
+    'deactivate-expired-instructors-daily': {
+        'task': 'apps.general.tasks.deactivate_expired_instructors',
+        'schedule': crontab(hour=0, minute=1),  # todos los días a las 00:01
+    },
 }
 # ============================
 # MODELO DE USUARIO PERSONALIZADO

@@ -6,7 +6,7 @@ class Person(models.Model):
     second_name = models.CharField(max_length=100, null=True, blank=True)
     first_last_name = models.CharField(max_length=100)
     second_last_name = models.CharField(max_length=100, null=True, blank=True)
-    phone_number = models.CharField(max_length=20)
+    phone_number = models.BigIntegerField()
     type_identification = models.CharField(max_length=20)
     number_identification = models.CharField(max_length=20)
     delete_at = models.DateTimeField(null=True, blank=True)

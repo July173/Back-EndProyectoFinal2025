@@ -6,7 +6,7 @@ class Boss(models.Model):
         'assign.Enterprise', on_delete=models.CASCADE, related_name='boss'
     )
     name_boss = models.CharField(max_length=100)
-    phone_number = models.CharField(max_length=20)
+    phone_number = models.BigIntegerField()
     email_boss = models.EmailField(max_length=100)
     position = models.CharField(max_length=100)
     active = models.BooleanField(default=True)

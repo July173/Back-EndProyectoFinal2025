@@ -3,7 +3,7 @@ from django.db import models
 
 class Sede(models.Model):
     name = models.CharField(max_length=100)
-    codeSede = models.CharField(max_length=50)
+    codeSede = models.BigIntegerField()
     address = models.CharField(max_length=255)
     phoneSede = models.CharField(max_length=20)
     emailContact = models.EmailField(max_length=100)
