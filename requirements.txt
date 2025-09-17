@@ -1,3 +1,6 @@
+celery
+redis
+django-celery-beat
 Django>=4.0
 mysqlclient>=2.0
 djangorestframework>=3.13
