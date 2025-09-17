@@ -167,3 +167,165 @@ class ExcelTemplateViewSet(ViewSet):
                 {"error": f"Error al obtener información de plantillas: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+    @swagger_auto_schema(
+        operation_description=(
+            "Procesa un archivo Excel con datos de instructores para registro masivo. "
+            "Los usuarios creados quedan activos automáticamente. "
+            "Retorna un resumen detallado de registros exitosos y errores."
+        ),
+        tags=["Registro Masivo"],
+        manual_parameters=[
+            openapi.Parameter(
+                'file',
+                openapi.IN_FORM,
+                description="Archivo Excel con datos de instructores (.xlsx o .xls)",
+                type=openapi.TYPE_FILE,
+                required=True
+            )
+        ],
+        responses={
+            201: openapi.Response(
+                "Archivo procesado exitosamente",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'success': openapi.Schema(
+                            type=openapi.TYPE_ARRAY,
+                            items=openapi.Schema(type=openapi.TYPE_OBJECT)
+                        ),
+                        'errors': openapi.Schema(
+                            type=openapi.TYPE_ARRAY,
+                            items=openapi.Schema(type=openapi.TYPE_OBJECT)
+                        ),
+                        'total_processed': openapi.Schema(type=openapi.TYPE_INTEGER),
+                        'successful_registrations': openapi.Schema(type=openapi.TYPE_INTEGER)
+                    }
+                )
+            ),
+            400: openapi.Response("Error en el archivo o datos"),
+            500: openapi.Response("Error interno del servidor")
+        }
+    )
+    @action(detail=False, methods=['post'], url_path='upload-instructor-excel')
+    def upload_instructor_excel(self, request):
+        """
+        Procesa archivo Excel con datos de instructores para registro masivo.
+        Los usuarios creados quedan activos automáticamente.
+        """
+        try:
+            # Verificar que se envió un archivo
+            if 'file' not in request.FILES:
+                return Response(
+                    {'error': 'No se encontró el archivo en la petición'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            excel_file = request.FILES['file']
+            
+            # Validar que es un archivo Excel
+            if not excel_file.name.endswith(('.xlsx', '.xls')):
+                return Response(
+                    {'error': 'El archivo debe ser de formato Excel (.xlsx o .xls)'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Procesar el archivo
+            results = self.service.process_instructor_excel(excel_file)
+            
+            # Determinar el status code basado en los resultados
+            if results['successful_registrations'] > 0:
+                response_status = status.HTTP_201_CREATED
+            elif results['total_processed'] == 0:
+                response_status = status.HTTP_400_BAD_REQUEST
+            else:
+                response_status = status.HTTP_207_MULTI_STATUS
+            
+            return Response(results, status=response_status)
+            
+        except Exception as e:
+            return Response(
+                {'error': f'Error procesando archivo: {str(e)}'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @swagger_auto_schema(
+        operation_description=(
+            "Procesa un archivo Excel con datos de aprendices para registro masivo. "
+            "Los usuarios creados quedan activos automáticamente. "
+            "Retorna un resumen detallado de registros exitosos y errores."
+        ),
+        tags=["Registro Masivo"],
+        manual_parameters=[
+            openapi.Parameter(
+                'file',
+                openapi.IN_FORM,
+                description="Archivo Excel con datos de aprendices (.xlsx o .xls)",
+                type=openapi.TYPE_FILE,
+                required=True
+            )
+        ],
+        responses={
+            201: openapi.Response(
+                "Archivo procesado exitosamente",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'success': openapi.Schema(
+                            type=openapi.TYPE_ARRAY,
+                            items=openapi.Schema(type=openapi.TYPE_OBJECT)
+                        ),
+                        'errors': openapi.Schema(
+                            type=openapi.TYPE_ARRAY,
+                            items=openapi.Schema(type=openapi.TYPE_OBJECT)
+                        ),
+                        'total_processed': openapi.Schema(type=openapi.TYPE_INTEGER),
+                        'successful_registrations': openapi.Schema(type=openapi.TYPE_INTEGER)
+                    }
+                )
+            ),
+            400: openapi.Response("Error en el archivo o datos"),
+            500: openapi.Response("Error interno del servidor")
+        }
+    )
+    @action(detail=False, methods=['post'], url_path='upload-aprendiz-excel')
+    def upload_aprendiz_excel(self, request):
+        """
+        Procesa archivo Excel con datos de aprendices para registro masivo.
+        Los usuarios creados quedan activos automáticamente.
+        """
+        try:
+            # Verificar que se envió un archivo
+            if 'file' not in request.FILES:
+                return Response(
+                    {'error': 'No se encontró el archivo en la petición'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            excel_file = request.FILES['file']
+            
+            # Validar que es un archivo Excel
+            if not excel_file.name.endswith(('.xlsx', '.xls')):
+                return Response(
+                    {'error': 'El archivo debe ser de formato Excel (.xlsx o .xls)'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Procesar el archivo
+            results = self.service.process_aprendiz_excel(excel_file)
+            
+            # Determinar el status code basado en los resultados
+            if results['successful_registrations'] > 0:
+                response_status = status.HTTP_201_CREATED
+            elif results['total_processed'] == 0:
+                response_status = status.HTTP_400_BAD_REQUEST
+            else:
+                response_status = status.HTTP_207_MULTI_STATUS
+            
+            return Response(results, status=response_status)
+            
+        except Exception as e:
+            return Response(
+                {'error': f'Error procesando archivo: {str(e)}'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

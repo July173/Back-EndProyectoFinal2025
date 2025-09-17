@@ -1,11 +1,13 @@
-from openpyxl import Workbook
+from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.datavalidation import DataValidation
 from django.http import HttpResponse
+from django.db import transaction
+from django.contrib.auth.hashers import make_password
 from io import BytesIO
-from apps.security.entity.models import Role
-from apps.general.entity.models import Program, Ficha, KnowledgeArea
+from apps.security.entity.models import Role, Person, User
+from apps.general.entity.models import Program, Ficha, KnowledgeArea, Instructor, Aprendiz
 from datetime import datetime
 
 
@@ -457,3 +459,348 @@ class ExcelTemplateService:
                 self._add_data_validation(worksheet, 'J', ficha_numbers)
         except Exception as e:
             print(f"Error obteniendo números de ficha: {e}")
+
+    def process_instructor_excel(self, excel_file):
+        """
+        Procesa un archivo Excel con datos de instructores para registro masivo.
+        Los usuarios creados quedan activos automáticamente.
+        """
+        try:
+            # Cargar el archivo Excel
+            workbook = load_workbook(excel_file)
+            worksheet = workbook.active
+            
+            results = {
+                'success': [],
+                'errors': [],
+                'total_processed': 0,
+                'successful_registrations': 0
+            }
+            
+            # Obtener los datos a partir de la fila 2 (la 1 son headers)
+            for row_num in range(2, worksheet.max_row + 1):
+                try:
+                    results['total_processed'] += 1
+                    
+                    # Leer datos de la fila (según la estructura de la plantilla)
+                    row_data = {
+                        'primer_nombre': self._get_cell_value(worksheet, row_num, 1),
+                        'segundo_nombre': self._get_cell_value(worksheet, row_num, 2),
+                        'primer_apellido': self._get_cell_value(worksheet, row_num, 3),
+                        'segundo_apellido': self._get_cell_value(worksheet, row_num, 4),
+                        'tipo_identificacion': self._get_cell_value(worksheet, row_num, 5),
+                        'numero_identificacion': self._get_cell_value(worksheet, row_num, 6),
+                        'telefono': self._get_cell_value(worksheet, row_num, 7),
+                        'email': self._get_cell_value(worksheet, row_num, 8),
+                        'tipo_contrato': self._get_cell_value(worksheet, row_num, 9),
+                        'fecha_inicio': self._get_cell_value(worksheet, row_num, 10),
+                        'fecha_fin': self._get_cell_value(worksheet, row_num, 11),
+                        'area_conocimiento': self._get_cell_value(worksheet, row_num, 12),
+                        'password': self._get_cell_value(worksheet, row_num, 13),
+                    }
+                    
+                    # Validar que los campos obligatorios estén presentes
+                    validation_errors = self._validate_instructor_data(row_data)
+                    if validation_errors:
+                        results['errors'].append({
+                            'row': row_num,
+                            'errors': validation_errors,
+                            'data': row_data
+                        })
+                        continue
+                    
+                    # Procesar el registro
+                    with transaction.atomic():
+                        success = self._create_instructor_record(row_data)
+                        if success:
+                            results['successful_registrations'] += 1
+                            results['success'].append({
+                                'row': row_num,
+                                'message': f"Instructor {row_data['primer_nombre']} {row_data['primer_apellido']} registrado exitosamente",
+                                'email': row_data['email']
+                            })
+                        else:
+                            results['errors'].append({
+                                'row': row_num,
+                                'errors': ['Error al crear el registro del instructor'],
+                                'data': row_data
+                            })
+                
+                except Exception as e:
+                    results['errors'].append({
+                        'row': row_num,
+                        'errors': [f"Error procesando fila: {str(e)}"],
+                        'data': row_data if 'row_data' in locals() else {}
+                    })
+            
+            return results
+            
+        except Exception as e:
+            return {
+                'success': [],
+                'errors': [{'general': f"Error procesando archivo: {str(e)}"}],
+                'total_processed': 0,
+                'successful_registrations': 0
+            }
+
+    def process_aprendiz_excel(self, excel_file):
+        """
+        Procesa un archivo Excel con datos de aprendices para registro masivo.
+        Los usuarios creados quedan activos automáticamente.
+        """
+        try:
+            # Cargar el archivo Excel
+            workbook = load_workbook(excel_file)
+            worksheet = workbook.active
+            
+            results = {
+                'success': [],
+                'errors': [],
+                'total_processed': 0,
+                'successful_registrations': 0
+            }
+            
+            # Obtener los datos a partir de la fila 2
+            for row_num in range(2, worksheet.max_row + 1):
+                try:
+                    results['total_processed'] += 1
+                    
+                    # Leer datos de la fila (según la estructura de la plantilla)
+                    row_data = {
+                        'primer_nombre': self._get_cell_value(worksheet, row_num, 1),
+                        'segundo_nombre': self._get_cell_value(worksheet, row_num, 2),
+                        'primer_apellido': self._get_cell_value(worksheet, row_num, 3),
+                        'segundo_apellido': self._get_cell_value(worksheet, row_num, 4),
+                        'tipo_identificacion': self._get_cell_value(worksheet, row_num, 5),
+                        'numero_identificacion': self._get_cell_value(worksheet, row_num, 6),
+                        'telefono': self._get_cell_value(worksheet, row_num, 7),
+                        'email': self._get_cell_value(worksheet, row_num, 8),
+                        'codigo_programa': self._get_cell_value(worksheet, row_num, 9),
+                        'numero_ficha': self._get_cell_value(worksheet, row_num, 10),
+                        'password': self._get_cell_value(worksheet, row_num, 11),
+                    }
+                    
+                    # Validar que los campos obligatorios estén presentes
+                    validation_errors = self._validate_aprendiz_data(row_data)
+                    if validation_errors:
+                        results['errors'].append({
+                            'row': row_num,
+                            'errors': validation_errors,
+                            'data': row_data
+                        })
+                        continue
+                    
+                    # Procesar el registro
+                    with transaction.atomic():
+                        success = self._create_aprendiz_record(row_data)
+                        if success:
+                            results['successful_registrations'] += 1
+                            results['success'].append({
+                                'row': row_num,
+                                'message': f"Aprendiz {row_data['primer_nombre']} {row_data['primer_apellido']} registrado exitosamente",
+                                'email': row_data['email']
+                            })
+                        else:
+                            results['errors'].append({
+                                'row': row_num,
+                                'errors': ['Error al crear el registro del aprendiz'],
+                                'data': row_data
+                            })
+                
+                except Exception as e:
+                    results['errors'].append({
+                        'row': row_num,
+                        'errors': [f"Error procesando fila: {str(e)}"],
+                        'data': row_data if 'row_data' in locals() else {}
+                    })
+            
+            return results
+            
+        except Exception as e:
+            return {
+                'success': [],
+                'errors': [{'general': f"Error procesando archivo: {str(e)}"}],
+                'total_processed': 0,
+                'successful_registrations': 0
+            }
+
+    def _get_cell_value(self, worksheet, row, column):
+        """Obtiene el valor de una celda, manejando valores None"""
+        cell = worksheet.cell(row=row, column=column)
+        return cell.value if cell.value is not None else ''
+
+    def _validate_instructor_data(self, data):
+        """Valida los datos de un instructor"""
+        errors = []
+        
+        # Validar campos obligatorios
+        required_fields = [
+            ('primer_nombre', 'Primer Nombre'),
+            ('primer_apellido', 'Primer Apellido'), 
+            ('tipo_identificacion', 'Tipo de Identificación'),
+            ('numero_identificacion', 'Número de Identificación'),
+            ('telefono', 'Teléfono'),
+            ('email', 'Email'),
+            ('tipo_contrato', 'Tipo de Contrato'),
+            ('fecha_inicio', 'Fecha Inicio Contrato'),
+            ('fecha_fin', 'Fecha Fin Contrato'),
+            ('area_conocimiento', 'Área de Conocimiento'),
+            ('password', 'Contraseña')
+        ]
+        
+        for field, name in required_fields:
+            if not data.get(field) or str(data.get(field)).strip() == '':
+                errors.append(f"{name} es obligatorio")
+        
+        # Validar email institucional
+        email = data.get('email', '')
+        if email and not email.endswith('@sena.edu.co'):
+            errors.append('El email debe ser institucional (@sena.edu.co)')
+        
+        # Validar que el email no esté repetido
+        if email and User.objects.filter(email=email).exists():
+            errors.append('El email ya está registrado')
+        
+        # Validar que el número de identificación no esté repetido
+        numero_id = data.get('numero_identificacion', '')
+        if numero_id and Person.objects.filter(number_identification=numero_id).exists():
+            errors.append('El número de identificación ya está registrado')
+        
+        # Validar que el área de conocimiento exista
+        area_nombre = data.get('area_conocimiento', '')
+        if area_nombre and not KnowledgeArea.objects.filter(name=area_nombre, active=True).exists():
+            errors.append('El área de conocimiento no existe o no está activa')
+        
+        return errors
+
+    def _validate_aprendiz_data(self, data):
+        """Valida los datos de un aprendiz"""
+        errors = []
+        
+        # Validar campos obligatorios
+        required_fields = [
+            ('primer_nombre', 'Primer Nombre'),
+            ('primer_apellido', 'Primer Apellido'),
+            ('tipo_identificacion', 'Tipo de Identificación'),
+            ('numero_identificacion', 'Número de Identificación'),
+            ('telefono', 'Teléfono'),
+            ('email', 'Email'),
+            ('codigo_programa', 'Código Programa'),
+            ('numero_ficha', 'Número Ficha'),
+            ('password', 'Contraseña')
+        ]
+        
+        for field, name in required_fields:
+            if not data.get(field) or str(data.get(field)).strip() == '':
+                errors.append(f"{name} es obligatorio")
+        
+        # Validar email institucional
+        email = data.get('email', '')
+        if email and not email.endswith('@soy.sena.edu.co'):
+            errors.append('El email debe ser institucional (@soy.sena.edu.co)')
+        
+        # Validar que el email no esté repetido
+        if email and User.objects.filter(email=email).exists():
+            errors.append('El email ya está registrado')
+        
+        # Validar que el número de identificación no esté repetido
+        numero_id = data.get('numero_identificacion', '')
+        if numero_id and Person.objects.filter(number_identification=numero_id).exists():
+            errors.append('El número de identificación ya está registrado')
+        
+        # Validar que el programa exista
+        codigo_programa = data.get('codigo_programa', '')
+        if codigo_programa and not Program.objects.filter(codeProgram=codigo_programa, active=True).exists():
+            errors.append('El código de programa no existe o no está activo')
+        
+        # Validar que la ficha exista
+        numero_ficha = data.get('numero_ficha', '')
+        if numero_ficha and not Ficha.objects.filter(file_number=numero_ficha, active=True).exists():
+            errors.append('El número de ficha no existe o no está activo')
+        
+        return errors
+
+    def _create_instructor_record(self, data):
+        """Crea un registro completo de instructor (Person + User + Instructor)"""
+        try:
+            # 1. Crear Person
+            person = Person.objects.create(
+                first_name=data['primer_nombre'],
+                second_name=data.get('segundo_nombre', ''),
+                first_last_name=data['primer_apellido'],
+                second_last_name=data.get('segundo_apellido', ''),
+                phone_number=data['telefono'],
+                type_identification=data['tipo_identificacion'],
+                number_identification=data['numero_identificacion'],
+                active=True
+            )
+            
+            # 2. Crear User (activo automáticamente)
+            hashed_password = make_password(data['password'])
+            user = User.objects.create(
+                email=data['email'],
+                password=hashed_password,
+                person=person,
+                is_active=True,  # Activo automáticamente
+                role_id=2  # Rol de Instructor (ajustar según tu BD)
+            )
+            
+            # 3. Obtener área de conocimiento
+            knowledge_area = KnowledgeArea.objects.get(name=data['area_conocimiento'], active=True)
+            
+            # 4. Crear Instructor
+            instructor = Instructor.objects.create(
+                person=person,
+                contractType=data['tipo_contrato'],
+                contractStartDate=data['fecha_inicio'],
+                contractEndDate=data['fecha_fin'],
+                knowledgeArea=knowledge_area,
+                active=True
+            )
+            
+            return True
+            
+        except Exception as e:
+            print(f"Error creando instructor: {e}")
+            return False
+
+    def _create_aprendiz_record(self, data):
+        """Crea un registro completo de aprendiz (Person + User + Aprendiz)"""
+        try:
+            # 1. Crear Person
+            person = Person.objects.create(
+                first_name=data['primer_nombre'],
+                second_name=data.get('segundo_nombre', ''),
+                first_last_name=data['primer_apellido'],
+                second_last_name=data.get('segundo_apellido', ''),
+                phone_number=data['telefono'],
+                type_identification=data['tipo_identificacion'],
+                number_identification=data['numero_identificacion'],
+                active=True
+            )
+            
+            # 2. Crear User (activo automáticamente)
+            hashed_password = make_password(data['password'])
+            user = User.objects.create(
+                email=data['email'],
+                password=hashed_password,
+                person=person,
+                is_active=True,  # Activo automáticamente
+                role_id=3  # Rol de Aprendiz (ajustar según tu BD)
+            )
+            
+            # 3. Obtener ficha
+            ficha = Ficha.objects.get(file_number=data['numero_ficha'], active=True)
+            
+            # 4. Crear Aprendiz
+            aprendiz = Aprendiz.objects.create(
+                person=person,
+                ficha=ficha,
+                active=True
+            )
+            
+            return True
+            
+        except Exception as e:
+            print(f"Error creando aprendiz: {e}")
+            return False
