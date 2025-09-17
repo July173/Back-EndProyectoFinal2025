@@ -1,9 +1,11 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework.parsers import MultiPartParser, FormParser
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.viewsets import ViewSet
+from rest_framework.renderers import JSONRenderer
 from django.http import HttpResponse
 from apps.security.services.ExcelTemplateService import ExcelTemplateService
 
@@ -46,7 +48,17 @@ class ExcelTemplateViewSet(ViewSet):
         """
         try:
             # El servicio ya retorna un HttpResponse, así que lo devolvemos directamente
-            return self.service.generate_instructor_template()
+            response = self.service.generate_instructor_template()
+            
+            # Para asegurar que no hay problemas de content negotiation
+            # cuando se descarga un archivo, establecemos el content type explícitamente
+            if isinstance(response, HttpResponse):
+                return response
+            else:
+                return Response(
+                    {"error": "Error generando la plantilla"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
         except Exception as e:
             return Response(
                 {"error": f"Error al generar la plantilla de instructores: {str(e)}"},
@@ -83,7 +95,16 @@ class ExcelTemplateViewSet(ViewSet):
         """
         try:
             # El servicio ya retorna un HttpResponse, así que lo devolvemos directamente
-            return self.service.generate_aprendiz_template()
+            response = self.service.generate_aprendiz_template()
+            
+            # Para asegurar que no hay problemas de content negotiation
+            if isinstance(response, HttpResponse):
+                return response
+            else:
+                return Response(
+                    {"error": "Error generando la plantilla"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
         except Exception as e:
             return Response(
                 {"error": f"Error al generar la plantilla de aprendices: {str(e)}"},
@@ -186,62 +207,16 @@ class ExcelTemplateViewSet(ViewSet):
         ],
         responses={
             201: openapi.Response(
-                "Archivo procesado exitosamente",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'success': openapi.Schema(
-                            type=openapi.TYPE_ARRAY,
-                            items=openapi.Schema(type=openapi.TYPE_OBJECT)
-                        ),
-                        'errors': openapi.Schema(
-                            type=openapi.TYPE_ARRAY,
-                            items=openapi.Schema(type=openapi.TYPE_OBJECT)
-                        ),
-                        'total_processed': openapi.Schema(type=openapi.TYPE_INTEGER),
-                        'successful_registrations': openapi.Schema(type=openapi.TYPE_INTEGER),
-                        'error_report_url': openapi.Schema(
-                            type=openapi.TYPE_STRING, 
-                            description="URL para descargar reporte de errores (solo si hay errores)"
-                        ),
-                        'error_report_message': openapi.Schema(
-                            type=openapi.TYPE_STRING,
-                            description="Mensaje explicativo sobre el reporte de errores"
-                        )
-                    }
-                )
+                "Archivo procesado exitosamente"
             ),
             207: openapi.Response(
-                "Procesado parcialmente - algunos registros fallaron",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'success': openapi.Schema(
-                            type=openapi.TYPE_ARRAY,
-                            items=openapi.Schema(type=openapi.TYPE_OBJECT)
-                        ),
-                        'errors': openapi.Schema(
-                            type=openapi.TYPE_ARRAY,
-                            items=openapi.Schema(type=openapi.TYPE_OBJECT)
-                        ),
-                        'total_processed': openapi.Schema(type=openapi.TYPE_INTEGER),
-                        'successful_registrations': openapi.Schema(type=openapi.TYPE_INTEGER),
-                        'error_report_url': openapi.Schema(
-                            type=openapi.TYPE_STRING,
-                            description="URL para descargar reporte de errores"
-                        ),
-                        'error_report_message': openapi.Schema(
-                            type=openapi.TYPE_STRING,
-                            description="Mensaje explicativo sobre el reporte de errores"
-                        )
-                    }
-                )
+                "Procesado parcialmente - algunos registros fallaron"
             ),
             400: openapi.Response("Error en el archivo o datos"),
             500: openapi.Response("Error interno del servidor")
         }
     )
-    @action(detail=False, methods=['post'], url_path='upload-instructor-excel')
+    @action(detail=False, methods=['post'], url_path='upload-instructor-excel', parser_classes=[MultiPartParser, FormParser])
     def upload_instructor_excel(self, request):
         """
         Procesa archivo Excel con datos de instructores para registro masivo.
@@ -322,62 +297,16 @@ class ExcelTemplateViewSet(ViewSet):
         ],
         responses={
             201: openapi.Response(
-                "Archivo procesado exitosamente",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'success': openapi.Schema(
-                            type=openapi.TYPE_ARRAY,
-                            items=openapi.Schema(type=openapi.TYPE_OBJECT)
-                        ),
-                        'errors': openapi.Schema(
-                            type=openapi.TYPE_ARRAY,
-                            items=openapi.Schema(type=openapi.TYPE_OBJECT)
-                        ),
-                        'total_processed': openapi.Schema(type=openapi.TYPE_INTEGER),
-                        'successful_registrations': openapi.Schema(type=openapi.TYPE_INTEGER),
-                        'error_report_url': openapi.Schema(
-                            type=openapi.TYPE_STRING, 
-                            description="URL para descargar reporte de errores (solo si hay errores)"
-                        ),
-                        'error_report_message': openapi.Schema(
-                            type=openapi.TYPE_STRING,
-                            description="Mensaje explicativo sobre el reporte de errores"
-                        )
-                    }
-                )
+                "Archivo procesado exitosamente"
             ),
             207: openapi.Response(
-                "Procesado parcialmente - algunos registros fallaron",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'success': openapi.Schema(
-                            type=openapi.TYPE_ARRAY,
-                            items=openapi.Schema(type=openapi.TYPE_OBJECT)
-                        ),
-                        'errors': openapi.Schema(
-                            type=openapi.TYPE_ARRAY,
-                            items=openapi.Schema(type=openapi.TYPE_OBJECT)
-                        ),
-                        'total_processed': openapi.Schema(type=openapi.TYPE_INTEGER),
-                        'successful_registrations': openapi.Schema(type=openapi.TYPE_INTEGER),
-                        'error_report_url': openapi.Schema(
-                            type=openapi.TYPE_STRING,
-                            description="URL para descargar reporte de errores"
-                        ),
-                        'error_report_message': openapi.Schema(
-                            type=openapi.TYPE_STRING,
-                            description="Mensaje explicativo sobre el reporte de errores"
-                        )
-                    }
-                )
+                "Procesado parcialmente - algunos registros fallaron"
             ),
             400: openapi.Response("Error en el archivo o datos"),
             500: openapi.Response("Error interno del servidor")
         }
     )
-    @action(detail=False, methods=['post'], url_path='upload-aprendiz-excel')
+    @action(detail=False, methods=['post'], url_path='upload-aprendiz-excel', parser_classes=[MultiPartParser, FormParser])
     def upload_aprendiz_excel(self, request):
         """
         Procesa archivo Excel con datos de aprendices para registro masivo.
