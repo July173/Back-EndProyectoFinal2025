@@ -8,6 +8,7 @@ from django.contrib.auth.hashers import make_password
 from io import BytesIO
 from apps.security.entity.models import Role, Person, User
 from apps.general.entity.models import Program, Ficha, KnowledgeArea, Instructor, Aprendiz
+from apps.security.entity.enums.document_type_enum import DocumentType
 from datetime import datetime
 
 
@@ -51,6 +52,14 @@ class ExcelTemplateService:
                 bottom=Side(style='thin')
             )
         }
+
+    def _get_document_types(self):
+        """Obtiene los tipos de documento desde el enum"""
+        return [doc_type.name for doc_type in DocumentType]
+
+    def _get_document_type_display_values(self):
+        """Obtiene los nombres completos de los tipos de documento"""
+        return [(doc_type.name, doc_type.value) for doc_type in DocumentType]
 
     def _apply_style(self, cell, style_dict):
         """Aplica un estilo específico a una celda"""
@@ -298,24 +307,20 @@ class ExcelTemplateService:
         self._auto_adjust_columns(ws)
 
     def _create_identification_types_sheet(self, workbook):
-        """Crea una hoja con los tipos de identificación"""
+        """Crea una hoja con los tipos de identificación desde el enum"""
         ws = workbook.create_sheet("Tipos de Identificación")
         
-        # Encabezado
-        cell = ws.cell(row=1, column=1, value='TIPOS DE IDENTIFICACIÓN')
-        self._apply_style(cell, self.header_style)
+        # Encabezados
+        headers = ['CÓDIGO', 'DESCRIPCIÓN']
+        for col_idx, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col_idx, value=header)
+            self._apply_style(cell, self.header_style)
         
-        # Tipos de identificación comunes
-        id_types = [
-            'CC',  # Cédula de Ciudadanía
-            'TI',  # Tarjeta de Identidad
-            'CE',  # Cédula de Extranjería
-            'PP',  # Pasaporte
-            'PEP'  # Permiso Especial de Permanencia
-        ]
-        
-        for row_idx, id_type in enumerate(id_types, 2):
-            ws.cell(row=row_idx, column=1, value=id_type)
+        # Datos desde el enum
+        document_types = self._get_document_type_display_values()
+        for row_idx, (code, description) in enumerate(document_types, 2):
+            ws.cell(row=row_idx, column=1, value=code)
+            ws.cell(row=row_idx, column=2, value=description)
         
         self._auto_adjust_columns(ws)
 
@@ -421,8 +426,8 @@ class ExcelTemplateService:
     def _add_instructor_data_validations(self, worksheet):
         """Agrega validaciones de datos (listas desplegables) para la plantilla de instructores"""
         
-        # Validación para Tipo de Identificación (columna E)
-        id_types = ['CC', 'TI', 'CE', 'PP', 'PEP']
+        # Validación para Tipo de Identificación (columna E) - desde enum
+        id_types = self._get_document_types()
         self._add_data_validation(worksheet, 'E', id_types)
         
         # Validación para Tipo de Contrato (columna I)
@@ -440,8 +445,8 @@ class ExcelTemplateService:
     def _add_aprendiz_data_validations(self, worksheet):
         """Agrega validaciones de datos (listas desplegables) para la plantilla de aprendices"""
         
-        # Validación para Tipo de Identificación (columna E)
-        id_types = ['CC', 'TI', 'CE', 'PP', 'PEP']
+        # Validación para Tipo de Identificación (columna E) - desde enum
+        id_types = self._get_document_types()
         self._add_data_validation(worksheet, 'E', id_types)
         
         # Validación para Código de Programa (columna I)
@@ -742,7 +747,7 @@ class ExcelTemplateService:
                 password=hashed_password,
                 person=person,
                 is_active=True,  # Activo automáticamente
-                role_id=2  # Rol de Instructor (ajustar según tu BD)
+                role_id=3  # Rol de Instructor (ajustar según tu BD)
             )
             
             # 3. Obtener área de conocimiento
@@ -786,7 +791,7 @@ class ExcelTemplateService:
                 password=hashed_password,
                 person=person,
                 is_active=True,  # Activo automáticamente
-                role_id=3  # Rol de Aprendiz (ajustar según tu BD)
+                role_id=2 # Rol de Aprendiz (ajustar según tu BD)
             )
             
             # 3. Obtener ficha
