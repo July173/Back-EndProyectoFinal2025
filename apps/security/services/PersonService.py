@@ -7,8 +7,6 @@ from apps.security.emails.SendEmails import enviar_registro_pendiente
 from rest_framework import status
 from datetime import datetime
 from django.contrib.auth.hashers import make_password
-import random
-import string
 
 from apps.security.entity.models import Person
 from apps.security.entity.models import User
@@ -33,26 +31,6 @@ class PersonService(BaseService):
         return self.repository.update_person(person, data)
     def __init__(self):
         super().__init__(PersonRepository())
-
-    def _generate_temporal_password(self, number_identification):
-        """
-        Genera una contraseña temporal basada en el número de identificación
-        más caracteres especiales aleatorios.
-        Formato: [numero_identificacion][2_especiales][2_numeros]
-        """
-        # Caracteres especiales permitidos
-        special_chars = ['!', '@', '#', '$', '%', '&', '*', '+', '=', '?']
-        
-        # Generar 2 caracteres especiales aleatorios
-        random_specials = ''.join(random.choices(special_chars, k=2))
-        
-        # Generar 2 números aleatorios
-        random_numbers = ''.join(random.choices(string.digits, k=2))
-        
-        # Combinar: número de identificación + especiales + números
-        temporal_password = f"{number_identification}{random_specials}{random_numbers}"
-        
-        return temporal_password
 
     def register_aprendiz(self, data):
         """
@@ -112,9 +90,6 @@ class PersonService(BaseService):
         
         # === LÓGICA DE NEGOCIO ===
         
-        # Generar contraseña temporal basada en el número de documento
-        temporal_password = self._generate_temporal_password(numero_identificacion)
-        
         try:
             with transaction.atomic():
                 # Crear persona usando método base del repositorio
@@ -122,11 +97,10 @@ class PersonService(BaseService):
                 if not person:
                     raise Exception({'error': 'Datos inválidos', 'detalle': person_errors})
                 
-                # Encriptar la contraseña antes de crear el usuario
-                hashed_password = make_password(temporal_password)
+                # Crear usuario inactivo sin contraseña (se establecerá cuando se active)
                 user_data = {
                     'email': email,
-                    'password': hashed_password,
+                    'password': make_password('temporal_placeholder'),  # Contraseña temporal que será reemplazada
                     'person': person.id,
                     'is_active': False,
                     'role': 2,  # Rol de Aprendiz
@@ -140,7 +114,7 @@ class PersonService(BaseService):
                 from apps.general.entity.models import Aprendiz
                 aprendiz = Aprendiz.objects.create(person=person, ficha=None)
                 
-                # Si todo es exitoso, enviar correo
+                # Si todo es exitoso, enviar correo de registro pendiente
                 fecha_registro = datetime.now().strftime('%d/%m/%Y')
                 enviar_registro_pendiente(email, person.first_name + ' ' + person.first_last_name, fecha_registro)
                 
@@ -149,8 +123,7 @@ class PersonService(BaseService):
                         'persona': person_data,
                         'usuario': user_serializer.data,
                         'aprendiz_id': aprendiz.id,
-                        'password_temporal': temporal_password,
-                        'success': 'Usuario registrado correctamente. Tu cuenta está pendiente de activación.'
+                        'success': 'Usuario registrado correctamente. Tu cuenta está pendiente de activación por un administrador.'
                     },
                     'status': status.HTTP_201_CREATED
                 }

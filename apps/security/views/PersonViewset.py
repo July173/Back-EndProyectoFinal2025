@@ -34,18 +34,17 @@ class PersonViewSet(BaseViewSet):
     #--- REGISTRO APRENDIZ ---
     @swagger_auto_schema(
         operation_description=(
-            "Registra un nuevo aprendiz en el sistema. "
-            "La contraseña temporal se genera automáticamente basada en el número de documento:\n\n"
+            "Registra un nuevo aprendiz en el sistema.\n\n"
             "• **Correo**: Debe ser proporcionado por el usuario (formato: usuario@soy.sena.edu.co)\n"
-            "• **Contraseña temporal**: Se genera usando el número de documento + caracteres especiales\n\n"
+            "• **Contraseña**: Se establecerá cuando un administrador active la cuenta\n\n"
             "El aprendiz queda registrado pero inactivo hasta que un administrador active su cuenta."
         ),
-        operation_summary="Registro de Aprendiz con contraseña temporal automática",
+        operation_summary="Registro de Aprendiz con activación pendiente",
         tags=["Person - Registro"],
         request_body=RegisterAprendizSerializer,
         responses={
             201: openapi.Response(
-                description="Registro exitoso con contraseña generada",
+                description="Registro exitoso, pendiente de activación",
                 schema=openapi.Schema(
                     type=openapi.TYPE_OBJECT,
                     properties={
@@ -77,10 +76,6 @@ class PersonViewSet(BaseViewSet):
                             }
                         ),
                         'aprendiz_id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                        'password_temporal': openapi.Schema(
-                            type=openapi.TYPE_STRING,
-                            description="Contraseña temporal generada: número_documento + caracteres especiales"
-                        ),
                         'success': openapi.Schema(type=openapi.TYPE_STRING)
                     }
                 ),
@@ -102,8 +97,7 @@ class PersonViewSet(BaseViewSet):
                             'role': 2
                         },
                         'aprendiz_id': 1,
-                        'password_temporal': '1234567890@#25',
-                        'success': 'Usuario registrado correctamente. Tu cuenta está pendiente de activación.'
+                        'success': 'Usuario registrado correctamente. Tu cuenta está pendiente de activación por un administrador.'
                     }
                 }
             ),
