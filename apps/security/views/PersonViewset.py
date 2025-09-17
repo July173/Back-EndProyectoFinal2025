@@ -8,6 +8,7 @@ from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.security.services.PersonService import PersonService
 from apps.security.entity.serializers.person.PatchPersonSerializer import PatchPersonSerializer
 from apps.security.entity.serializers.person.PersonSerializer import PersonSerializer
+from apps.security.entity.serializers.person.RegisterAprendizSerializer import RegisterAprendizSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
@@ -25,27 +26,123 @@ class PersonViewSet(BaseViewSet):
     def get_serializer_class(self):
         if self.action == 'partial_update':
             return PatchPersonSerializer
+        elif self.action == 'register_aprendiz':
+            print(f"DEBUG: Usando RegisterAprendizSerializer para action: {self.action}")
+            return RegisterAprendizSerializer
         return PersonSerializer
 
     #--- REGISTRO APRENDIZ ---
     @swagger_auto_schema(
         operation_description=(
-            "Orquesta el registro de aprendiz, delegando toda la lógica al servicio. Solo retorna la respuesta del servicio, sin lógica adicional."
+            "Registra un nuevo aprendiz en el sistema. "
+            "La contraseña temporal se genera automáticamente basada en el número de documento:\n\n"
+            "• **Correo**: Debe ser proporcionado por el usuario (formato: usuario@soy.sena.edu.co)\n"
+            "• **Contraseña temporal**: Se genera usando el número de documento + caracteres especiales\n\n"
+            "El aprendiz queda registrado pero inactivo hasta que un administrador active su cuenta."
         ),
-        tags=["Person"],
-        request_body=PersonSerializer,  # <-- Usa el serializer aquí
+        operation_summary="Registro de Aprendiz con contraseña temporal automática",
+        tags=["Person - Registro"],
+        request_body=RegisterAprendizSerializer,
         responses={
-            201: openapi.Response("Registro exitoso"),
-            400: openapi.Response("Datos inválidos")
+            201: openapi.Response(
+                description="Registro exitoso con contraseña generada",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'persona': openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            properties={
+                                'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                'first_name': openapi.Schema(type=openapi.TYPE_STRING),
+                                'first_last_name': openapi.Schema(type=openapi.TYPE_STRING),
+                                'number_identification': openapi.Schema(type=openapi.TYPE_STRING),
+                                'phone_number': openapi.Schema(type=openapi.TYPE_STRING),
+                                'type_identification': openapi.Schema(type=openapi.TYPE_STRING),
+                                'email': openapi.Schema(type=openapi.TYPE_STRING)
+                            }
+                        ),
+                        'usuario': openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            properties={
+                                'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                'email': openapi.Schema(
+                                    type=openapi.TYPE_STRING,
+                                    description="Correo proporcionado por el usuario"
+                                ),
+                                'is_active': openapi.Schema(
+                                    type=openapi.TYPE_BOOLEAN,
+                                    description="Siempre false inicialmente, requiere activación por administrador"
+                                ),
+                                'role': openapi.Schema(type=openapi.TYPE_INTEGER, description="Rol 2 = Aprendiz")
+                            }
+                        ),
+                        'aprendiz_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                        'password_temporal': openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="Contraseña temporal generada: número_documento + caracteres especiales"
+                        ),
+                        'success': openapi.Schema(type=openapi.TYPE_STRING)
+                    }
+                ),
+                examples={
+                    'application/json': {
+                        'persona': {
+                            'id': 1,
+                            'first_name': 'Juan',
+                            'first_last_name': 'Pérez',
+                            'number_identification': '1234567890',
+                            'phone_number': '3001234567',
+                            'type_identification': 'CC',
+                            'email': 'juan.perez@soy.sena.edu.co'
+                        },
+                        'usuario': {
+                            'id': 1,
+                            'email': 'juan.perez@soy.sena.edu.co',
+                            'is_active': False,
+                            'role': 2
+                        },
+                        'aprendiz_id': 1,
+                        'password_temporal': '1234567890@#25',
+                        'success': 'Usuario registrado correctamente. Tu cuenta está pendiente de activación.'
+                    }
+                }
+            ),
+            400: openapi.Response(
+                description="Error en el registro",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'error': openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="Descripción del error"
+                        ),
+                        'detalle': openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            description="Detalles específicos del error"
+                        )
+                    }
+                ),
+                examples={
+                    'application/json': {
+                        'error': 'El correo institucional ya está registrado.'
+                    }
+                }
+            )
         }
     )
     @action(detail=False, methods=['post'], url_path='register-aprendiz')
     def register_aprendiz(self, request):
         """
-        Orquesta el registro de aprendiz, delegando toda la lógica al servicio.
-        Solo retorna la respuesta del servicio, sin lógica adicional.
+        Controller: Solo orquesta la llamada al servicio.
+        No contiene validaciones ni lógica de negocio.
         """
-        result = self.service.register_aprendiz(request.data)
+        # Usar el serializer solo para transformar los datos de entrada
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Delegar toda la lógica al servicio
+        result = self.service.register_aprendiz(serializer.validated_data)
         return Response(result['data'], status=result['status'])
     # ----------- LIST -----------
     @swagger_auto_schema(
