@@ -11,6 +11,26 @@ from apps.security.entity.models import Role, User  # Asegúrate de importar Use
 
 
 class RoleViewSet(BaseViewSet):
+    @swagger_auto_schema(
+        method='delete',
+        operation_description="Activa si está desactivado y desactiva si está activo el rol y todos los usuarios vinculados. Solo se requiere el id en la URL.",
+        responses={200: openapi.Response('Resultado de la operación')},
+        tags=["Role"]
+    )
+    @action(detail=True, methods=['delete'], url_path='logical-delete-with-users')
+    def logical_delete_with_users(self, request, pk=None):
+        """
+        Activa si está desactivado y desactiva si está activo el rol y todos los usuarios vinculados. Solo se requiere el id en la URL.
+        """
+        # Obtener el estado actual del rol
+        from apps.security.entity.models import Role
+        try:
+            role = Role.objects.get(pk=pk)
+        except Role.DoesNotExist:
+            return Response({'detail': 'Rol no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+        nuevo_estado = not role.active
+        result = self.service_class().set_active_role_and_users(pk, nuevo_estado)
+        return Response(result)
     service_class = RoleService
     serializer_class = RoleSerializer
 
