@@ -19,7 +19,7 @@ class AsignationFormSerializer(serializers.Serializer):
     email = serializers.EmailField(max_length=100)  # Campo directo de Aprendiz
     confirm_email = serializers.EmailField(max_length=100)  # Campo directo de Aprendiz
     record_number = serializers.IntegerField()  # Campo directo de Aprendiz
-    mobile_phone_number = serializers.IntegerField(max_length=10)  # Campo directo de Aprendiz
+    mobile_phone_number = serializers.IntegerField()  # Campo directo de Aprendiz
     contract_start_date = serializers.DateField()  # Campo directo de RequestAsignation
     contract_end_date = serializers.DateField()  # Campo directo de RequestAsignation
 
