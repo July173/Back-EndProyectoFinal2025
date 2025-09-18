@@ -7,7 +7,8 @@ from drf_yasg import openapi
 from rest_framework.viewsets import ViewSet
 from rest_framework.renderers import JSONRenderer
 from django.http import HttpResponse
-from apps.security.services.ExcelTemplateService import ExcelTemplateService
+from apps.security.services.excel.ExcelInstructorTemplateService import ExcelInstructorTemplateService
+from apps.security.services.excel.ExcelAprendizTemplateService import ExcelAprendizTemplateService
 
 
 class ExcelTemplateViewSet(ViewSet):
@@ -16,7 +17,10 @@ class ExcelTemplateViewSet(ViewSet):
     de instructores y aprendices.
     """
     
-    service = ExcelTemplateService()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.instructor_service = ExcelInstructorTemplateService()
+        self.aprendiz_service = ExcelAprendizTemplateService()
 
     @swagger_auto_schema(
         operation_description=(
@@ -47,8 +51,8 @@ class ExcelTemplateViewSet(ViewSet):
         Incluye datos actualizados de áreas de conocimiento, tipos de contrato, etc.
         """
         try:
-            # El servicio ya retorna un HttpResponse, así que lo devolvemos directamente
-            response = self.service.generate_instructor_template()
+            # Usar el servicio específico de instructores
+            response = self.instructor_service.generate_instructor_template()
             
             # Para asegurar que no hay problemas de content negotiation
             # cuando se descarga un archivo, establecemos el content type explícitamente
@@ -94,8 +98,8 @@ class ExcelTemplateViewSet(ViewSet):
         Incluye datos actualizados de programas, fichas, etc.
         """
         try:
-            # El servicio ya retorna un HttpResponse, así que lo devolvemos directamente
-            response = self.service.generate_aprendiz_template()
+            # Usar el servicio específico de aprendices
+            response = self.aprendiz_service.generate_aprendiz_template()
             
             # Para asegurar que no hay problemas de content negotiation
             if isinstance(response, HttpResponse):
@@ -156,28 +160,27 @@ class ExcelTemplateViewSet(ViewSet):
                     "name": "Plantilla de Instructores",
                     "description": "Plantilla para registro masivo de instructores del SENA",
                     "fields": [
-                        "Primer Nombre*", "Segundo Nombre", "Primer Apellido*", "Segundo Apellido",
-                        "Tipo Identificación*", "Número Identificación*", "Teléfono*",
-                        "Email Institucional*", "Tipo de Contrato*", "Fecha Inicio Contrato*",
-                        "Fecha Fin Contrato*", "Área de Conocimiento*", "Contraseña Temporal*"
+                        "Tipo Identificación*", "Número Identificación*", "Primer Nombre*", "Segundo Nombre",
+                        "Primer Apellido*", "Segundo Apellido", "Correo Institucional*", "Número de Celular*",
+                        "Área de Conocimiento*", "Tipo de Contrato*", "Fecha Inicio Contrato*",
+                        "Fecha de Terminación de Contrato*", "Regional*", "Centro de Formación*", "Sede de Formación*"
                     ],
                     "download_url": "/api/excel-templates/instructor-template/",
                     "additional_sheets": [
-                        "Áreas de Conocimiento", "Tipos de Contrato", 
-                        "Tipos de Identificación", "Instrucciones"
+                        "Áreas de Conocimiento", "Tipos de Contrato", "Tipos de Identificación", 
+                        "Regionales", "Centros de Formación", "Sedes", "Instrucciones"
                     ]
                 },
                 "aprendiz_template": {
                     "name": "Plantilla de Aprendices",
                     "description": "Plantilla para registro masivo de aprendices del SENA",
                     "fields": [
-                        "Primer Nombre*", "Segundo Nombre", "Primer Apellido*", "Segundo Apellido",
-                        "Tipo Identificación*", "Número Identificación*", "Teléfono*",
-                        "Email Institucional*", "Código Programa*", "Número Ficha*", "Contraseña Temporal*"
+                        "Tipo Identificación*", "Número Identificación*", "Primer Nombre*", "Segundo Nombre",
+                        "Primer Apellido*", "Segundo Apellido", "Correo Institucional*", "Número de Celular*"
                     ],
                     "download_url": "/api/excel-templates/aprendiz-template/",
                     "additional_sheets": [
-                        "Programas", "Fichas", "Tipos de Identificación", "Instrucciones"
+                        "Tipos de Identificación", "Instrucciones"
                     ]
                 }
             }
@@ -239,29 +242,8 @@ class ExcelTemplateViewSet(ViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
-            # Procesar el archivo
-            results = self.service.process_instructor_excel(excel_file)
-            
-            # Generar reporte de errores si hay errores
-            error_report_url = None
-            if results.get('errors') and len(results['errors']) > 0:
-                try:
-                    # Generar Excel con errores
-                    error_workbook = self.service.generate_instructor_error_report(results['errors'])
-                    
-                    # Guardar archivo en media/error_reports/
-                    error_report_url = self.service.save_error_report_to_file(
-                        error_workbook, 
-                        'instructor_errors'
-                    )
-                    
-                    # Agregar URL del reporte a la respuesta
-                    results['error_report_url'] = error_report_url
-                    results['error_report_message'] = 'Se ha generado un reporte con los registros que fallaron'
-                    
-                except Exception as e:
-                    print(f"Error generando reporte de errores: {e}")
-                    # No fallar la respuesta principal por errores en el reporte
+            # Procesar el archivo usando el servicio específico de instructores
+            results = self.instructor_service.process_instructor_excel(excel_file)
             
             # Determinar el status code basado en los resultados
             if results['successful_registrations'] > 0:
@@ -329,29 +311,8 @@ class ExcelTemplateViewSet(ViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
-            # Procesar el archivo
-            results = self.service.process_aprendiz_excel(excel_file)
-            
-            # Generar reporte de errores si hay errores
-            error_report_url = None
-            if results.get('errors') and len(results['errors']) > 0:
-                try:
-                    # Generar Excel con errores
-                    error_workbook = self.service.generate_aprendiz_error_report(results['errors'])
-                    
-                    # Guardar archivo en media/error_reports/
-                    error_report_url = self.service.save_error_report_to_file(
-                        error_workbook, 
-                        'aprendiz_errors'
-                    )
-                    
-                    # Agregar URL del reporte a la respuesta
-                    results['error_report_url'] = error_report_url
-                    results['error_report_message'] = 'Se ha generado un reporte con los registros que fallaron'
-                    
-                except Exception as e:
-                    print(f"Error generando reporte de errores: {e}")
-                    # No fallar la respuesta principal por errores en el reporte
+            # Procesar el archivo usando el servicio específico de aprendices
+            results = self.aprendiz_service.process_aprendiz_excel(excel_file)
             
             # Determinar el status code basado en los resultados
             if results['successful_registrations'] > 0:
