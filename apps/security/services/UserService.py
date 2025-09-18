@@ -185,21 +185,23 @@ class UserService(BaseService):
             from apps.security.emails.SendEmailsActivate import enviar_activacion_usuario
             nombre = f"{user.person.first_name} {user.person.first_last_name}" if user.person else user.email
             email_usuario = user.email
-            # Restablecer la contraseña al número de identificación antes de enviar el correo
+            # Restablecer la contraseña al número de identificación + 2 caracteres aleatorios antes de enviar el correo
             numero_identificacion = None
             if user.person and hasattr(user.person, 'number_identification'):
                 numero_identificacion = str(user.person.number_identification)
             if not numero_identificacion:
-                numero_identificacion = '(No disponible)'
+                nueva_contrasena = '(No disponible)'
             else:
-                from django.contrib.auth.hashers import make_password
-                user.set_password(numero_identificacion)
+                from django.utils.crypto import get_random_string
+                caracteres_adicionales = get_random_string(length=2)
+                nueva_contrasena = numero_identificacion + caracteres_adicionales
+                user.set_password(nueva_contrasena)
                 user.save()
             enviar_activacion_usuario(
                 email_usuario,
                 nombre,
                 email_usuario,
-                numero_identificacion
+                nueva_contrasena
             )
             return True
 

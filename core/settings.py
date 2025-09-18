@@ -80,7 +80,7 @@ DATABASES = {
         'USER': 'root',
         'PASSWORD': '123456',
         'HOST': 'localhost',
-        'PORT': '3306',
+        'PORT': '3307',
         'OPTIONS': {'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"},
     }
     
@@ -221,9 +221,9 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'bscl20062007@gmail.com'  # Tu correo completo
-EMAIL_HOST_PASSWORD = 'giux eley mwzw zape'  # Tu contraseña de aplicación de Gmail
-DEFAULT_FROM_EMAIL = 'bscl20062007@gmail.com'
+EMAIL_HOST_USER = 'Serviciodecorreossena@gmail.com'  # Tu correo completo
+EMAIL_HOST_PASSWORD = 'oyfr yvax zjfj rwsw'  # Tu contraseña de aplicación de Gmail
+DEFAULT_FROM_EMAIL = 'Serviciodecorreossena@gmail.com'
 
 # ============================
 # ARCHIVOS MEDIA (IMÁGENES, ETC)

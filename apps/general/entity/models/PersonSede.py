@@ -7,6 +7,6 @@ class PersonSede(models.Model):
     DeleteAt = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        db_table = 'PersonSede'
+        db_table = 'general_personsede'
         verbose_name = 'Person Sede'
         verbose_name_plural = 'Person Sedes'
