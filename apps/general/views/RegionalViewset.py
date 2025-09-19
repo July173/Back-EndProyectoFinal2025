@@ -100,28 +100,26 @@ class RegionalViewset(BaseViewSet):
         
         
     @swagger_auto_schema(
-        operation_description="Obtiene una regional por id con sus centros y sedes anidados.",
+        operation_description="Obtiene una regional por id con sus centros anidados.",
         tags=["Regional"],
         responses={200: RegionalNestedSerializer()}
     )
-    @action(detail=True, methods=['get'], url_path='with-centers-sedes')
-    def with_centers_sedes_by_id(self, request, pk=None):
-        from apps.general.entity.models import Regional
-        try:
-            regional = Regional.objects.get(pk=pk)
-        except Regional.DoesNotExist:
+    @action(detail=True, methods=['get'], url_path='with-centers')
+    def with_centers_by_id(self, request, pk=None):
+        regional = self.service_class().get_regional_with_centers_by_id(pk)
+        if not regional:
             return Response({"detail": "No encontrado."}, status=status.HTTP_404_NOT_FOUND)
         serializer = RegionalNestedSerializer(regional)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
     @swagger_auto_schema(
-        operation_description="Obtiene todas las regionales con sus centros y sedes anidados.",
+        operation_description="Obtiene todas las regionales con sus centros anidados.",
         tags=["Regional"],
         responses={200: RegionalNestedSerializer(many=True)}
     )
-    @action(detail=False, methods=['get'], url_path='with-centers-sedes')
-    def with_centers_sedes(self, request):
-        from apps.general.entity.models import Regional
-        queryset = Regional.objects.all()
+    @action(detail=False, methods=['get'], url_path='with-centers')
+    def with_centers(self, request):
+        queryset = self.service_class().get_all_regionals_with_centers()
         serializer = RegionalNestedSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     service_class = RegionalService
