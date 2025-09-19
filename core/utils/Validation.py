@@ -1,8 +1,15 @@
-def is_institutional_email(email):
-	"""Valida si el correo es institucional SENA."""
+
+def is_soy_sena_email(email):
+	"""Valida si el correo termina en @soy.sena.edu.co."""
 	if not email:
 		return False
-	return email.endswith('@soy.sena.edu.co') or email.endswith('@sena.edu.co')
+	return email.endswith('@soy.sena.edu.co')
+
+def is_sena_email(email):
+	"""Valida si el correo termina en @sena.edu.co."""
+	if not email:
+		return False
+	return email.endswith('@sena.edu.co')
 
 def is_unique_email(email, user_model, exclude_user_id=None):
 	"""Valida que el correo sea único en el modelo dado. Puede excluir un usuario por id (para updates)."""
@@ -27,4 +34,3 @@ def is_valid_phone_number(phone):
 	if not phone:
 		return False
 	return str(phone).isdigit() and len(str(phone)) == 10
-

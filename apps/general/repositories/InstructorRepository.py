@@ -25,6 +25,8 @@ class InstructorRepository(BaseRepository):
             email = user_data.pop('email')
             password = user_data.pop('password')
             user = User.objects.create_user(email=email, password=password, person=person, **user_data)
+            user.registered = False
+            user.save()
             instructor = Instructor.objects.create(person=person, **instructor_data)
             person_sede = None
             if sede_id:

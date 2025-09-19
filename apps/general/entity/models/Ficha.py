@@ -2,7 +2,7 @@ from django.db import models
 
 
 class Ficha(models.Model):
-    file_number = models.CharField(max_length=50)
+    file_number = models.BigIntegerField()
     program = models.ForeignKey('Program', on_delete=models.CASCADE, related_name='fichas')
     active = models.BooleanField(default=True)
     deleted_at = models.DateTimeField(null=True, blank=True)

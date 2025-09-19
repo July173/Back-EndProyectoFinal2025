@@ -7,7 +7,7 @@ class HumanTalent(models.Model):
     )
     name = models.CharField(max_length=100)
     email = models.EmailField(max_length=100)
-    phone_number = models.CharField(max_length=20)
+    phone_number = models.BigIntegerField()
     active = models.BooleanField(default=True)
     delete_at = models.DateTimeField(null=True, blank=True)
 

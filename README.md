@@ -1,4 +1,5 @@
-# Back-end proyecto autogestion sena 
+# Back-end Proyecto Autogestión SENA
+
 Pasos:
   1) pip install -r requirements.txt
   2) Configura variables de entorno MySQL o edita core/settings.py
@@ -9,4 +10,48 @@ Pasos:
 
   7) url del navegador : http://127.0.0.1:8000/swagger/
 
-  
+# Comandos esenciales para levantar el contenedor y correr migraciones
+
+```bash
+# Levantar todos los servicios
+docker-compose up --build
+
+# Generar migraciones
+docker exec -it django_app python manage.py makemigrations
+
+# Aplicar migraciones
+docker exec -it django_app python manage.py migrate
+
+# Migrar una app específica (ejemplo: assign)
+docker exec -it django_app python manage.py makemigrations assign
+docker exec -it django_app python manage.py migrate assign
+
+# Crear superusuario (solo la primera vez)
+docker exec -it django_app python manage.py createsuperuser
+
+```
+
+# Si agregas dependencias en requirements.txt, ejecuta:
+docker-compose up --build
+para instalar los nuevos paquetes automáticamente en el contenedor.
+
+
+# Activar la tarea de manera manual 
+# 1 entrar a la terminal de Django 
+docker exec -it celery_worker python manage.py shell
+
+# 2 Ejecutar los dos siguientes comandos 
+ 1  from apps.general.tasks import deactivate_expired_instructors
+ 2  deactivate_expired_instructors.delay()
+
+# Revisar errores 
+docker compose logs
+
+
+
+correr celery
+
+1 terminal: celery -A core worker --loglevel=info
+2 python manage.py shell
+3 from apps.general.tasks import deactivate_expired_instructors
+4 deactivate_expired_instructors.delay()

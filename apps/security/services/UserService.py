@@ -1,4 +1,3 @@
-
 from core.base.services.implements.baseService.BaseService import BaseService
 from apps.security.repositories.UserRepository import UserRepository
 from django.contrib.auth.hashers import make_password
@@ -12,7 +11,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from apps.security.entity.models import User
 from apps.security.emails.SendEmailsDesactivate import enviar_desactivacion_usuario
-from core.utils.Validation import is_institutional_email
+from core.utils.Validation import is_soy_sena_email, is_sena_email
 
 
 class UserService(BaseService):
@@ -48,7 +47,7 @@ class UserService(BaseService):
 
     def send_password_reset_code(self, email):
         # Validar correo institucional
-        if not is_institutional_email(email):
+        if not (is_soy_sena_email(email) or is_sena_email(email)):
             return {
                 'data': {'error': 'Solo se permiten correos institucionales (@soy.sena.edu.co o @sena.edu.co)'},
                 'status': status.HTTP_400_BAD_REQUEST
@@ -113,7 +112,7 @@ class UserService(BaseService):
 
     def validate_institutional_login(self, email, password):
         # Validar correo institucional
-        if not is_institutional_email(email):
+        if not (is_soy_sena_email(email) or is_sena_email(email)):
             return {
                 'data': {'error': 'Solo se permiten correos institucionales (@soy.sena.edu.co o @sena.edu.co)'},
                 'status': status.HTTP_400_BAD_REQUEST
@@ -186,21 +185,23 @@ class UserService(BaseService):
             from apps.security.emails.SendEmailsActivate import enviar_activacion_usuario
             nombre = f"{user.person.first_name} {user.person.first_last_name}" if user.person else user.email
             email_usuario = user.email
-            # Restablecer la contraseña al número de identificación antes de enviar el correo
+            # Restablecer la contraseña al número de identificación + 2 caracteres aleatorios antes de enviar el correo
             numero_identificacion = None
             if user.person and hasattr(user.person, 'number_identification'):
                 numero_identificacion = str(user.person.number_identification)
             if not numero_identificacion:
-                numero_identificacion = '(No disponible)'
+                nueva_contrasena = '(No disponible)'
             else:
-                from django.contrib.auth.hashers import make_password
-                user.set_password(numero_identificacion)
+                from django.utils.crypto import get_random_string
+                caracteres_adicionales = get_random_string(length=2)
+                nueva_contrasena = numero_identificacion + caracteres_adicionales
+                user.set_password(nueva_contrasena)
                 user.save()
             enviar_activacion_usuario(
                 email_usuario,
                 nombre,
                 email_usuario,
-                numero_identificacion
+                nueva_contrasena
             )
             return True
 

@@ -7,6 +7,7 @@ from apps.assign.views.ModalityProductiveStageViewset import ModalityProductiveS
 from apps.assign.views.RequestAsignationViewset import RequestAsignationViewset
 from apps.assign.views.AsignationInstructorViewset import AsignationInstructorViewset
 from apps.assign.views.VisitFollowingViewset import VisitFollowingViewset
+from apps.assign.views.AsignationFormViewset import AsignationFormViewset
 
 router = DefaultRouter()
 router.register(r'empresas', EnterpriseViewset, basename='assign_empresas')
@@ -16,6 +17,7 @@ router.register(r'modalidades-etapa-productiva', ModalityProductiveStageViewset,
 router.register(r'solicitudes-asignacion', RequestAsignationViewset, basename='assign_solicitudes_asignacion')
 router.register(r'asignaciones-instructor', AsignationInstructorViewset, basename='assign_asignaciones_instructor')
 router.register(r'visitas-seguimiento', VisitFollowingViewset, basename='assign_visitas_seguimiento')
+router.register(r'formulario-asignacion', AsignationFormViewset, basename='assign_formulario_asignacion')
 
 urlpatterns = [
     path('', include(router.urls)),
