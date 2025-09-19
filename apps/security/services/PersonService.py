@@ -11,6 +11,7 @@ from django.contrib.auth.hashers import make_password
 from apps.security.entity.models import Person
 from apps.security.entity.models import User
 from django.db import transaction
+from apps.security.entity.enums.document_type_enum import DocumentType
 
 class PersonService(BaseService):
 
@@ -66,7 +67,7 @@ class PersonService(BaseService):
             }
         
         # Validar tipo de identificación según enum
-        from apps.security.entity.enums.document_type_enum import DocumentType
+        
         valid_types = [doc_type.name for doc_type in DocumentType]
         if type_identification not in valid_types:
             return {

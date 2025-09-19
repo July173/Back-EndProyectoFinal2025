@@ -2,7 +2,7 @@ from rest_framework import serializers
 from apps.security.entity.enums.document_type_enum import DocumentType
 
 class CreateAprendizSerializer(serializers.Serializer):
-    type_identification = serializers.ChoiceField(choices=[dt.value for dt in DocumentType])
+    type_identification = serializers.ChoiceField(choices=[dt.name for dt in DocumentType])
     number_identification = serializers.IntegerField(required=True)
     first_name = serializers.CharField()
     second_name = serializers.CharField(required=False, allow_blank=True)

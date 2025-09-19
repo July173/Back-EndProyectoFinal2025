@@ -5,6 +5,7 @@ from apps.general.entity.models import Aprendiz, Ficha
 from apps.security.emails.CreacionCuentaUsers import send_account_created_email
 from django.db import transaction
 from core.utils.Validation import is_unique_email, is_unique_document_number, is_valid_phone_number
+from apps.security.entity.enums.document_type_enum import DocumentType
 
 class AprendizService(BaseService):
     def __init__(self):
@@ -15,6 +16,12 @@ class AprendizService(BaseService):
         Crea un aprendiz, usuario y persona. Valida datos y envía correo de bienvenida.
         """
         from core.utils.Validation import is_soy_sena_email
+        # Validar tipo de documento usando enum
+        
+        type_identification = validated_data['type_identification']
+        valid_types = [doc_type.name for doc_type in DocumentType]
+        if type_identification not in valid_types:
+            raise ValueError(f'Tipo de identificación inválido. Opciones válidas: {", ".join(valid_types)}')
         # Construcción de datos de persona
         person_data = {
             'type_identification': validated_data['type_identification'],
