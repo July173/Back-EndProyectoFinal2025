@@ -195,6 +195,7 @@ class UserService(BaseService):
                 from django.utils.crypto import get_random_string
                 caracteres_adicionales = get_random_string(length=2)
                 nueva_contrasena = numero_identificacion + caracteres_adicionales
+                print(f"Contraseña generada: '{nueva_contrasena}' (longitud: {len(nueva_contrasena)})")
                 user.set_password(nueva_contrasena)
                 user.save()
             enviar_activacion_usuario(
