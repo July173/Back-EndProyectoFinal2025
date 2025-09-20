@@ -111,3 +111,28 @@ class ProgramViewset(BaseViewSet):
         fichas = self.service_class().get_fichas_by_program(pk)
         serializer = FichaSerializer(fichas, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    # ----------- DISABLE PROGRAM WITH FICHAS (custom) -----------
+    @swagger_auto_schema(
+        method='delete',
+        operation_description="Deshabilita o reactiva un programa y todas sus fichas vinculadas.",
+        tags=["Programas"],
+        responses={
+            200: "Acción realizada correctamente",
+            400: "Error de validación", 
+            404: "Programa no encontrado"
+        }
+    )
+    @action(detail=True, methods=['delete'], url_path='disable-with-fichas')
+    def disable_program_with_fichas(self, request, pk=None):
+        try:
+            mensaje = self.service_class().logical_delete_program(pk)
+            return Response(
+                {"detail": mensaje},
+                status=status.HTTP_200_OK
+            )
+        except ValueError as e:
+            return Response(
+                {"error": str(e)}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
