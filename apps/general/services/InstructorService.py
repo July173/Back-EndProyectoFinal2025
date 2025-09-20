@@ -6,8 +6,9 @@ from apps.security.entity.models import User, Person
 from apps.general.entity.models import Instructor
 from apps.security.emails.CreacionCuentaUsers import send_account_created_email
 from core.utils.Validation import is_unique_email, is_unique_document_number, is_valid_phone_number
-
-
+from django.utils.crypto import get_random_string
+from core.utils.Validation import is_sena_email
+from django.core.exceptions import ObjectDoesNotExist
 class InstructorService(BaseService):
     def __init__(self):
         self.repository = InstructorRepository()
@@ -26,8 +27,7 @@ class InstructorService(BaseService):
         return Instructor.objects.filter(pk=instructor_id).first()
 
     def create_instructor(self, person_data, user_data, instructor_data, sede_id, center_id, regional_id):
-        from core.utils.Validation import is_sena_email
-        from django.core.exceptions import ObjectDoesNotExist
+     
         with transaction.atomic():
             # Validar y obtener entidades relacionadas usando el ORM de Django
             try:
@@ -49,9 +49,13 @@ class InstructorService(BaseService):
             instructor_data['knowledgeArea'] = knowledge_area_instance
 
             # Preparar datos para user
-            user_data['password'] = str(person_data['number_identification'])  # Asigna la contraseña como string
+          
+            numero_identificacion = str(person_data['number_identification'])
+            caracteres_adicionales = get_random_string(length=2)
+            password_temporal = numero_identificacion + caracteres_adicionales
+            user_data['password'] = password_temporal
             temp_email = user_data.get('email')
-            temp_password = user_data.get('password')
+            temp_password = password_temporal
 
             # Validación de correo institucional @sena.edu.co
             if not temp_email or not is_sena_email(temp_email):

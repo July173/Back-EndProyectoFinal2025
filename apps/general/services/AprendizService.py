@@ -6,7 +6,8 @@ from apps.security.emails.CreacionCuentaUsers import send_account_created_email
 from django.db import transaction
 from core.utils.Validation import is_unique_email, is_unique_document_number, is_valid_phone_number
 from apps.security.entity.enums.document_type_enum import DocumentType
-
+from django.utils.crypto import get_random_string
+from core.utils.Validation import is_soy_sena_email
 class AprendizService(BaseService):
     def __init__(self):
         self.repository = AprendizRepository()
@@ -52,8 +53,11 @@ class AprendizService(BaseService):
             raise ValueError('El número de teléfono debe tener exactamente 10 dígitos.')
 
         with transaction.atomic():
-            # Asigna la contraseña y rol por defecto
-            user_data['password'] = str(person_data['number_identification'])
+            # Asigna la contraseña como número de documento + 2 caracteres aleatorios
+            numero_identificacion = str(person_data['number_identification'])
+            caracteres_adicionales = get_random_string(length=2)
+            password_temporal = numero_identificacion + caracteres_adicionales
+            user_data['password'] = password_temporal
             if not user_data.get('role_id'):
                 try:
                     default_role = Role.objects.get(pk=2)
@@ -63,7 +67,7 @@ class AprendizService(BaseService):
 
             # Obtiene ficha y crea registros
             email = user_data.get('email')
-            temp_password = user_data.get('password')
+            temp_password = password_temporal
             ficha = Ficha.objects.get(pk=ficha_id)
             aprendiz, user, person = self.repository.create_all_dates_aprendiz(person_data, user_data, ficha)
 
@@ -87,7 +91,7 @@ class AprendizService(BaseService):
         """
         Actualiza los datos de aprendiz, usuario y persona. Valida datos y roles.
         """
-        from core.utils.Validation import is_soy_sena_email
+        
         # Construcción de datos de persona
         person_data = {
             'type_identification': validated_data['type_identification'],
