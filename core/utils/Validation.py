@@ -34,3 +34,10 @@ def is_valid_phone_number(phone):
 	if not phone:
 		return False
 	return str(phone).isdigit() and len(str(phone)) == 10
+
+def validate_phone_number(value):
+	"""Validador para Django Rest Framework que valida números de teléfono."""
+	from rest_framework import serializers
+	if not is_valid_phone_number(value):
+		raise serializers.ValidationError("El número de teléfono debe tener exactamente 10 dígitos numéricos")
+	return value
