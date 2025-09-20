@@ -5,7 +5,7 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.general.services.InstructorService import InstructorService
-from apps.general.entity.serializers.InstructorSerializer import InstructorSerializer
+from apps.general.entity.serializers.CreateInstructor.InstructorSerializer import InstructorSerializer
 from apps.general.entity.models import Instructor
 from apps.general.entity.serializers.CreateInstructor.CreateInstructorSerializer import CreateInstructorSerializer
 from apps.general.entity.serializers.CreateInstructor.GetInstructorSerializer import GetInstructorSerializer

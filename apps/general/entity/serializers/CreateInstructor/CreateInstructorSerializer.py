@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from apps.security.entity.enums.document_type_enum import DocumentType
+from apps.general.entity.enums.contract_type_enum import ContractType
 
 
 class CreateInstructorSerializer(serializers.Serializer):
@@ -15,7 +16,7 @@ class CreateInstructorSerializer(serializers.Serializer):
     email = serializers.EmailField()
     role_id = serializers.IntegerField()  # <-- Agrega este campo
     # Campos de Instructor
-    contractType = serializers.CharField()
+    contractType = serializers.ChoiceField(choices=[ct.name for ct in ContractType])
     contractStartDate = serializers.DateField()
     contractEndDate = serializers.DateField()
     knowledgeArea = serializers.IntegerField()
