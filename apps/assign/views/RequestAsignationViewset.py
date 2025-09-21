@@ -6,7 +6,19 @@ from drf_yasg import openapi
 
 from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.assign.services.RequestAsignationService import RequestAsignationService
-from apps.assign.entity.serializers.RequestAsignationSerializer import RequestAsignationSerializer
+from apps.assign.entity.serializers.form.RequestAsignationSerializer import RequestAsignationSerializer
+
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+
+from apps.assign.services.FormRequestService import FormRequestService
+from apps.assign.entity.serializers.form.FormRequestSerializer import FormRequestSerializer
+from apps.assign.entity.serializers.form.FormPDFSerializer import FormPDFSerializer
+
+
 
 
 class RequestAsignationViewset(BaseViewSet):
@@ -76,3 +88,64 @@ class RequestAsignationViewset(BaseViewSet):
             {"detail": "No encontrado."},
             status=status.HTTP_404_NOT_FOUND
         )
+
+
+
+    service_class = RequestAsignationService
+    serializer_class = FormRequestSerializer
+    parser_classes = [JSONParser, MultiPartParser, FormParser]  # JSON y archivos
+    
+    def get_serializer(self, *args, **kwargs):
+        return self.serializer_class(*args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description="Crear una nueva solicitud de formulario (sin PDF)",
+        tags=["FormRequest"],
+        request_body=FormRequestSerializer,
+        responses={
+            201: "Solicitud creada exitosamente",
+            400: "Error en validación de datos"
+        }
+    )
+    @action(detail=False, methods=['post'], url_path='form-request')
+    def create_form_request(self, request):
+        """Crear nueva solicitud de formulario (sin PDF)"""
+        serializer = FormRequestSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response({
+                'success': False,
+                'message': 'Error en los datos de entrada',
+                'errors': serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+        result = self.service_class().create_form_request(serializer.validated_data)
+        if result['success']:
+            return Response(result, status=status.HTTP_201_CREATED)
+        else:
+            return Response(result, status=status.HTTP_400_BAD_REQUEST)
+
+    @swagger_auto_schema(
+        operation_description="Obtener lista de todas las solicitudes de formulario",
+        tags=["FormRequest"],
+        responses={
+            200: openapi.Response(
+                description="Lista obtenida exitosamente",
+                examples={
+                    "application/json": {
+                        "success": True,
+                        "message": "Se encontraron 5 solicitudes",
+                        "count": 5,
+                        "data": []
+                    }
+                }
+            ),
+            500: "Error interno del servidor"
+        }
+    )
+    @action(detail=False, methods=['get'], url_path='form-request-list')
+    def list_form_requests(self, request):
+        """Obtener lista de solicitudes de formulario"""
+        result = self.service_class().list_form_requests()
+        if result['success']:
+            return Response(result, status=status.HTTP_200_OK)
+        else:
+            return Response(result, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

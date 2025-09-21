@@ -14,6 +14,7 @@ class RequestAsignation(models.Model):
     )
     request_date = models.DateField()
     date_start_production_stage = models.DateField()
+    date_end_production_stage = models.DateField()
     pdf_request = models.FileField(upload_to='requests/', null=True, blank=True)
     request_state = models.CharField(max_length=50)
     delete_at = models.DateTimeField(null=True, blank=True)
