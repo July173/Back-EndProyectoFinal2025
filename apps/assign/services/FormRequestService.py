@@ -3,12 +3,6 @@ from apps.assign.repositories.FormRequestRepository import FormRequestRepository
 from django.db import transaction
 import logging
 
-# Importar modelos necesarios
-from apps.security.entity.models.Person import Person
-from apps.security.entity.models.User import User
-from apps.general.entity.models import Aprendiz, Regional, Center, Sede
-from apps.assign.entity.models import Enterprise, ModalityProductiveStage
-
 # Importar validaciones
 from core.utils.Validation import is_soy_sena_email
 
@@ -18,166 +12,80 @@ class FormRequestService(BaseService):
     def __init__(self):
         self.repository = FormRequestRepository()
     
-    def create_form_request(self, validated_data):
+    def upload_pdf_to_request(self, request_id, validated_data):
         """
-        Crear solicitud de formulario con validaciones integradas.
-        Sigue el patrón de AprendizService con validaciones dentro del método principal.
-        """
-        logger.info(f"Iniciando creación de solicitud para {validated_data.get('person_first_name')} {validated_data.get('person_first_last_name')} {validated_data.get('person_second_last_name', '')}")
+        Cargar archivo PDF a una solicitud existente.
+        Validaciones de negocio + delegación al repository.
         
-        # VALIDACIONES DE NEGOCIO (integradas en el método principal)
-        
-        # Validar confirmación de correo electrónico
-        if validated_data['person_email'] != validated_data['confirmar_correo']:
-            raise ValueError("Los correos electrónicos no coinciden. El correo y la confirmación de correo deben ser idénticos.")
-        
-        # Validar que el correo del aprendiz/persona sea de dominio SENA
-        if not is_soy_sena_email(validated_data['person_email']):
-            raise ValueError("El correo del aprendiz debe terminar en @soy.sena.edu.co")
-        
-        # Validar que el email no esté ya registrado en el sistema
-        if User.objects.filter(email=validated_data['person_email']).exists():
-            raise ValueError(f"El correo {validated_data['person_email']} ya está registrado en el sistema.")
-        
-        # Validar identificación única (Person usa 'number_identification', no 'identification')
-        if Person.objects.filter(number_identification=validated_data['person_document_number']).exists():
-            raise ValueError(f"La identificación {validated_data['person_document_number']} ya está registrada.")
-        
-        # Validar NIT único de empresa
-        if Enterprise.objects.filter(nit_enterprise=validated_data['enterprise_nit']).exists():
-            raise ValueError(f"El NIT {validated_data['enterprise_nit']} ya está registrado para una empresa.")
-        
-        # Validar email único de empresa
-        if Enterprise.objects.filter(email_enterprise=validated_data['enterprise_email']).exists():
-            raise ValueError(f"El correo {validated_data['enterprise_email']} ya está registrado para una empresa.")
-        
-        # Validar que las entidades de referencia existan
-        try:
-            Regional.objects.get(pk=validated_data['regional'])
-            Center.objects.get(pk=validated_data['center'])
-            Sede.objects.get(pk=validated_data['sede'])
-            ModalityProductiveStage.objects.get(pk=validated_data['modality_productive_stage'])
-        except (Regional.DoesNotExist, Center.DoesNotExist, Sede.DoesNotExist, ModalityProductiveStage.DoesNotExist) as e:
-            raise ValueError(f"Entidad de referencia no encontrada: {str(e)}")
-        
-        logger.info("Validaciones de negocio completadas exitosamente")
-        
-        # TRANSACCIÓN ATÓMICA (patrón AprendizService)
-        with transaction.atomic():
-            # Delegar creación al repository (solo BD)
-            person, aprendiz, enterprise, boss, human_talent, regional, center, sede, modality = self.repository.create_all_dates_form_request(validated_data)
+        Args:
+            request_id: ID de la solicitud a actualizar
+            validated_data: Datos validados del serializer con pdf_file
             
-            # Construir respuesta (lógica de presentación en service)
-            response = {
-                'success': True,
-                'message': 'Solicitud creada exitosamente',
-                'data': {
-                    'person': {
-                        'id': person.id,
-                        'full_name': f"{person.first_name} {person.second_name or ''} {person.first_last_name} {person.second_last_name or ''}".strip(),
-                        'phone': person.phone_number,
-                        'identification': person.number_identification
-                    },
-                    'aprendiz': {
-                        'id': aprendiz.id,
-                        'ficha_id': aprendiz.ficha_id if aprendiz.ficha else None,
-                        'active': aprendiz.active
-                    },
-                    'enterprise': {
-                        'id': enterprise.id,
-                        'name': enterprise.name_enterprise,
-                        'nit': enterprise.nit_enterprise,
-                        'location': enterprise.locate,
-                        'email': enterprise.email_enterprise
-                    },
-                    'boss': {
-                        'id': boss.id,
-                        'name': boss.name_boss,
-                        'phone': boss.phone_number,
-                        'email': boss.email_boss,
-                        'position': boss.position
-                    },
-                    'human_talent': {
-                        'id': human_talent.id,
-                        'name': human_talent.name,
-                        'email': human_talent.email,
-                        'phone': human_talent.phone_number
-                    },
-                    'references': {
-                        'regional': {'id': regional.id, 'name': regional.name},
-                        'center': {'id': center.id, 'name': center.name},
-                        'sede': {'id': sede.id, 'name': sede.name},
-                        'modality': {'id': modality.id, 'name': modality.name_modality}
-                    }
-                }
-            }
-            
-            logger.info("Solicitud creada exitosamente")
-            return response
-    
-    def list_form_requests(self):
-        """
-        Listar solicitudes - solo delega al repository sin validaciones.
-        El GET no necesita validaciones de negocio.
+        Returns:
+            dict: Resultado de la operación
         """
         try:
-            logger.info("Obteniendo lista de solicitudes")
+            logger.info(f"Iniciando carga de PDF para solicitud ID: {request_id}")
             
-            # Delegar directamente al repository (solo BD)
-            form_requests = self.repository.get_all_form_requests()
+            pdf_file = validated_data['pdf_file']
             
-            # Procesar datos para respuesta (lógica de presentación en service)
-            requests_data = []
-            for person, aprendiz, enterprise, boss, human_talent in form_requests:
-                request_item = {
-                    'person': {
-                        'id': person.id,
-                        'full_name': f"{person.first_name} {person.second_name or ''} {person.first_last_name} {person.second_last_name or ''}".strip(),
-                        'phone': person.phone_number,
-                        'identification': person.number_identification,
-                        'document_type': person.type_identification
-                    },
-                    'aprendiz': {
-                        'id': aprendiz.id,
-                        'ficha_id': aprendiz.ficha_id if aprendiz.ficha else None,
-                        'active': aprendiz.active
-                    },
-                    'enterprise': {
-                        'id': enterprise.id,
-                        'name': enterprise.name_enterprise,
-                        'nit': enterprise.nit_enterprise,
-                        'location': enterprise.locate,
-                        'email': enterprise.email_enterprise
-                    },
-                    'boss': {
-                        'id': boss.id,
-                        'name': boss.name_boss,
-                        'phone': boss.phone_number,
-                        'email': boss.email_boss,
-                        'position': boss.position
-                    },
-                    'human_talent': {
-                        'id': human_talent.id,
-                        'name': human_talent.name,
-                        'email': human_talent.email,
-                        'phone': human_talent.phone_number
+            # VALIDACIONES DE NEGOCIO
+            
+            # Validar que el archivo no esté vacío
+            if not pdf_file:
+                raise ValueError("No se proporcionó ningún archivo PDF")
+            
+            # Validar request_id
+            if not request_id or request_id <= 0:
+                raise ValueError("ID de solicitud inválido")
+            
+            # Validar tamaño del archivo (redundante pero por seguridad)
+            if pdf_file.size > 10 * 1024 * 1024:  # 10MB
+                raise ValueError("El archivo PDF no puede ser mayor a 10MB")
+            
+            # Validar extensión (redundante pero por seguridad)
+            if not pdf_file.name.lower().endswith('.pdf'):
+                raise ValueError("El archivo debe ser un PDF (.pdf)")
+            
+            logger.info("Validaciones de negocio completadas exitosamente")
+            
+            # TRANSACCIÓN ATÓMICA
+            with transaction.atomic():
+                # Delegar al repository (solo BD)
+                updated_request = self.repository.update_request_pdf(request_id, pdf_file)
+                
+                if not updated_request:
+                    raise ValueError(f"No se pudo actualizar la solicitud con ID {request_id}. Verifique que exista.")
+                
+                # Construir respuesta (lógica de presentación en service)
+                response = {
+                    'success': True,
+                    'message': 'Archivo PDF cargado exitosamente',
+                    'data': {
+                        'request_id': updated_request.id,
+                        'pdf_name': pdf_file.name,
+                        'pdf_size': pdf_file.size,
+                        'pdf_content_type': pdf_file.content_type,
+                        'pdf_url': updated_request.pdf_request.url if updated_request.pdf_request else None,
+                        'request_state': updated_request.request_state,
+                        'updated_at': updated_request.request_date
                     }
                 }
-                requests_data.append(request_item)
-            
-            logger.info(f"Se encontraron {len(requests_data)} solicitudes")
-            return {
-                'success': True,
-                'message': f'Se encontraron {len(requests_data)} solicitudes',
-                'count': len(requests_data),
-                'data': requests_data
-            }
-            
-        except Exception as e:
-            logger.error(f"Error al listar solicitudes: {str(e)}")
+                
+                logger.info(f"PDF cargado exitosamente para solicitud ID: {request_id}")
+                return response
+                
+        except ValueError as e:
+            logger.error(f"Error de validación en upload_pdf_to_request: {str(e)}")
             return {
                 'success': False,
-                'message': f'Error al obtener las solicitudes: {str(e)}',
-                'data': [],
-                'error_type': 'database_error'
+                'message': str(e),
+                'error_type': 'validation_error'
+            }
+        except Exception as e:
+            logger.error(f"Error interno en upload_pdf_to_request: {str(e)}")
+            return {
+                'success': False,
+                'message': f'Error interno al cargar PDF: {str(e)}',
+                'error_type': 'server_error'
             }

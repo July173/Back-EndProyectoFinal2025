@@ -7,7 +7,7 @@ from apps.assign.views.ModalityProductiveStageViewset import ModalityProductiveS
 from apps.assign.views.RequestAsignationViewset import RequestAsignationViewset
 from apps.assign.views.AsignationInstructorViewset import AsignationInstructorViewset
 from apps.assign.views.VisitFollowingViewset import VisitFollowingViewset
-from apps.assign.views.FormRequestViewset import FormRequestAPIView
+from apps.assign.views.FormRequestViewset import FormRequestPDFAPIView
 
 router = DefaultRouter()
 router.register(r'empresas', EnterpriseViewset, basename='assign_empresas')
@@ -21,5 +21,5 @@ router.register(r'visitas-seguimiento', VisitFollowingViewset, basename='assign_
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('form-requests/', FormRequestAPIView.as_view(), name='form_requests'),
+    path('form-requests/upload-pdf/', FormRequestPDFAPIView.as_view(), name='form_requests_upload_pdf'),
 ]
