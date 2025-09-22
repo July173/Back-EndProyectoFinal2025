@@ -14,15 +14,13 @@ class CreateInstructorSerializer(serializers.Serializer):
     number_identification = serializers.IntegerField(required=True)
     # Campos de User
     email = serializers.EmailField()
-    role_id = serializers.IntegerField()  # <-- Agrega este campo
+    role_id = serializers.IntegerField()
     # Campos de Instructor
     contractType = serializers.ChoiceField(choices=[ct.name for ct in ContractType])
     contractStartDate = serializers.DateField()
     contractEndDate = serializers.DateField()
     knowledgeArea = serializers.IntegerField()
-    # IDs de relación
-    regional_id = serializers.IntegerField()
-    center_id = serializers.IntegerField()
+    # ID de relación
     sede_id = serializers.IntegerField()
 
     class Meta:

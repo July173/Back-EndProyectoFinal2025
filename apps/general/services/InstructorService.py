@@ -25,23 +25,17 @@ class InstructorService(BaseService):
         """
         return Instructor.objects.filter(pk=instructor_id).first()
 
-    def create_instructor(self, person_data, user_data, instructor_data, sede_id, center_id, regional_id):
+    def create_instructor(self, person_data, user_data, instructor_data, sede_id):
         from core.utils.Validation import is_sena_email
         from django.core.exceptions import ObjectDoesNotExist
         with transaction.atomic():
-            # Validar y obtener entidades relacionadas usando el ORM de Django
+            # Obtener la sede y sus relaciones
             try:
-                regional = Regional.objects.get(id=regional_id)
+                sede = Sede.objects.get(id=sede_id)
             except ObjectDoesNotExist:
-                raise ValueError(f'Regional con id {regional_id} no existe.')
-            try:
-                center = Center.objects.get(id=center_id, regional=regional)
-            except ObjectDoesNotExist:
-                raise ValueError(f'El centro con id {center_id} no existe o no está vinculado al regional {regional_id}.')
-            try:
-                sede = Sede.objects.get(id=sede_id, center=center)
-            except ObjectDoesNotExist:
-                raise ValueError(f'La sede con id {sede_id} no existe o no está vinculada al centro {center_id}.')
+                raise ValueError(f'La sede con id {sede_id} no existe.')
+            center = sede.center if sede else None
+            regional = center.regional if center else None
 
             # Preparar datos para KnowledgeArea
             knowledge_area_id = instructor_data.pop('knowledgeArea')
@@ -89,9 +83,7 @@ class InstructorService(BaseService):
                 "person_id": person.id,
                 "user_id": user.id,
                 "instructor_id": instructor.id,
-                "sede_id": sede.id,
-                "center_id": center.id,
-                "regional_id": regional.id
+                "sede_id": sede.id
             }
 
     def update_instructor(self, instructor_id, person_data, user_data, instructor_data, sede_id):

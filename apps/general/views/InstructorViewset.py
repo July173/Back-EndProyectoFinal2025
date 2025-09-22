@@ -133,9 +133,7 @@ class InstructorViewset(BaseViewSet):
             {k: data[k] for k in ['first_name', 'second_name', 'first_last_name', 'second_last_name', 'phone_number', 'type_identification', 'number_identification']},
             {k: data[k] for k in ['email', 'role_id', 'password'] if k in data},
             {k: data[k] for k in ['contractType', 'contractStartDate', 'contractEndDate', 'knowledgeArea']},
-            data['sede_id'],
-            data['center_id'],
-            data['regional_id']
+            data['sede_id']
         )
         return Response({"detail": "Instructor creado correctamente.", "ids": result}, status=status.HTTP_201_CREATED)
 

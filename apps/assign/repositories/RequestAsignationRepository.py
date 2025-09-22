@@ -1,7 +1,8 @@
 from core.base.repositories.implements.baseRepository.BaseRepository import BaseRepository
 from apps.assign.entity.models import RequestAsignation
+from apps.assign.entity.enums.request_state_enum import RequestState
 
-from apps.security.entity.models.Person import Person
+from apps.general.entity.models import PersonSede
 from apps.general.entity.models import Aprendiz, Regional, Center, Sede
 from apps.assign.entity.models import Enterprise, Boss, HumanTalent, ModalityProductiveStage, RequestAsignation
 from django.db import transaction
@@ -12,6 +13,40 @@ logger = logging.getLogger(__name__)
 
 
 class RequestAsignationRepository(BaseRepository):
+    def get_form_request_by_id(self, request_id):
+        """
+        Obtener una solicitud de formulario por su ID con todas sus relaciones.
+        """
+        try:
+            request_asignation = RequestAsignation.objects.select_related(
+                'aprendiz__person',
+                'aprendiz__ficha',
+                'enterprise',
+                'enterprise__boss',
+                'enterprise__human_talent',
+                'modality_productive_stage'
+            ).get(pk=request_id)
+            if hasattr(request_asignation.enterprise, 'boss') and hasattr(request_asignation.enterprise, 'human_talent'):
+                modality = request_asignation.modality_productive_stage
+                regional = getattr(modality, 'regional', None)
+                center = getattr(modality, 'center', None)
+                sede = getattr(modality, 'sede', None)
+                return (
+                    request_asignation.aprendiz.person,
+                    request_asignation.aprendiz,
+                    request_asignation.enterprise,
+                    request_asignation.enterprise.boss,
+                    request_asignation.enterprise.human_talent,
+                    modality,
+                    request_asignation,
+                    regional,
+                    center,
+                    sede
+                )
+            else:
+                return None
+        except RequestAsignation.DoesNotExist:
+            return None
     def __init__(self):
         super().__init__(RequestAsignation)
 
@@ -25,8 +60,6 @@ class RequestAsignationRepository(BaseRepository):
             logger.info(f"Iniciando creación de solicitud para {data.get('person_first_name')} {data.get('person_first_last_name')} {data.get('person_second_last_name', '')}")
             
             # OBTENER ENTIDADES DE REFERENCIA (solo comunicación BD)
-            regional = Regional.objects.get(pk=data['regional'])
-            center = Center.objects.get(pk=data['center'])
             sede = Sede.objects.get(pk=data['sede'])
             modality = ModalityProductiveStage.objects.get(pk=data['modality_productive_stage'])
             
@@ -80,7 +113,7 @@ class RequestAsignationRepository(BaseRepository):
                 'date_start_production_stage': data['fecha_inicio_contrato'],
                 'date_end_production_stage': data['fecha_fin_contrato'],
                 'pdf_request': data.get('pdf_request'),  # El archivo PDF
-                'request_state': 'PENDIENTE',  # Estado inicial
+                 'request_state': RequestState.SIN_ASIGNAR,  # Estado inicial correcto del enum
             }
             request_asignation = RequestAsignation.objects.create(**request_asignation_data)
             logger.info(f"RequestAsignation creado con ID: {request_asignation.id}, PDF: {request_asignation.pdf_request}")
@@ -88,7 +121,7 @@ class RequestAsignationRepository(BaseRepository):
             logger.info("Solicitud de formulario creada exitosamente")
             
             # Retornar instancias directamente (incluyendo request_asignation)
-            return aprendiz, ficha, enterprise, boss, human_talent, regional, center, sede, modality, request_asignation
+            return aprendiz, ficha, enterprise, boss, human_talent, sede, modality, request_asignation
     
     def get_all_form_requests(self):
         """
@@ -113,17 +146,27 @@ class RequestAsignationRepository(BaseRepository):
         for request_asignation in request_asignations:
             # Verificar que tenga boss y human talent
             if hasattr(request_asignation.enterprise, 'boss') and hasattr(request_asignation.enterprise, 'human_talent'):
+                modality = request_asignation.modality_productive_stage
+                regional = getattr(modality, 'regional', None)
+                center = getattr(modality, 'center', None)
+                sede = getattr(modality, 'sede', None)
                 # Crear tupla con las entidades relacionadas
+                # Obtener la sede a través de PersonSede
+                person = request_asignation.aprendiz.person
+                person_sede = PersonSede.objects.filter(PersonId=person).first()
+                sede = person_sede.SedeId if person_sede and person_sede.SedeId else None
                 form_request = (
-                    request_asignation.aprendiz.person,         # Person
-                    request_asignation.aprendiz,                # Aprendiz  
-                    request_asignation.enterprise,              # Enterprise
-                    request_asignation.enterprise.boss,         # Boss (OneToOne)
-                    request_asignation.enterprise.human_talent, # HumanTalent (OneToOne)
-                    request_asignation.modality_productive_stage,  # ModalityProductiveStage
-                    request_asignation                          # RequestAsignation
+                    person,
+                    request_asignation.aprendiz,
+                    request_asignation.enterprise,
+                    request_asignation.enterprise.boss,
+                    request_asignation.enterprise.human_talent,
+                    sede,
+                    modality,
+                    request_asignation
                 )
                 form_requests.append(form_request)
-        
+
         logger.info(f"Se encontraron {len(form_requests)} solicitudes")
         return form_requests
+

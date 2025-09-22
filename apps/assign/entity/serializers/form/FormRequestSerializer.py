@@ -19,7 +19,5 @@ class FormRequestSerializer(serializers.Serializer):
     human_talent_name = serializers.CharField(max_length=100, help_text="Nombre del responsable de talento humano")
     human_talent_email = serializers.EmailField(help_text="Correo de talento humano")
     human_talent_phone = serializers.IntegerField(help_text="Teléfono de talento humano (solo números)")
-    regional = serializers.IntegerField(help_text="ID de la regional")
-    center = serializers.IntegerField(help_text="ID del centro")
     sede = serializers.IntegerField(help_text="ID de la sede")
     modality_productive_stage = serializers.IntegerField(help_text="ID de la modalidad de etapa productiva")
