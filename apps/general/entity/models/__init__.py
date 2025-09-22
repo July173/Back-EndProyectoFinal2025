@@ -1,5 +1,4 @@
 from .Aprendiz import Aprendiz
-from .AsignationInstructor import AsignationInstructor
 from .Center import Center
 from .Ficha import Ficha
 from .Instructor import Instructor
@@ -10,6 +9,6 @@ from .PersonSede import PersonSede
 from .KnowledgeArea import KnowledgeArea
 
 __all__ = [
-    'Aprendiz', 'AsignationInstructor', 'Center', 'Ficha',
+    'Aprendiz', 'Center', 'Ficha',
     'Instructor', 'Program', 'Regional', 'Sede', 'PersonSede', 'KnowledgeArea'
 ]
