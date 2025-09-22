@@ -22,6 +22,7 @@ class RequestAsignation(models.Model):
         choices=RequestState.choices,
         default=RequestState.SIN_ASIGNAR
     )
+    rejectionMessage= models.TextField(null=True, blank=True)
     delete_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):

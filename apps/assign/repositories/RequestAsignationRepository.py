@@ -3,7 +3,7 @@ from apps.assign.entity.models import RequestAsignation
 from apps.assign.entity.enums.request_state_enum import RequestState
 
 from apps.general.entity.models import PersonSede
-from apps.general.entity.models import Aprendiz, Regional, Center, Sede
+from apps.general.entity.models import Aprendiz, Sede
 from apps.assign.entity.models import Enterprise, Boss, HumanTalent, ModalityProductiveStage, RequestAsignation
 from django.db import transaction
 from apps.general.entity.models import Ficha

@@ -4,13 +4,49 @@ from django.db import transaction
 import logging
 
 # Importar modelos necesarios
-from apps.general.entity.models import Aprendiz, Ficha, Regional, Center, Sede
+from apps.general.entity.models import Aprendiz, Ficha, Sede
 from apps.assign.entity.models import ModalityProductiveStage
 
 logger = logging.getLogger(__name__)
 
 
 class RequestAsignationService(BaseService):
+    def reject_request(self, request_id, rejection_message):
+        """
+        Rechaza una solicitud cambiando el estado y guardando el mensaje de rechazo. Envía correo al aprendiz.
+        """
+        from apps.assign.entity.enums.request_state_enum import RequestState
+        from apps.assign.entity.models import RequestAsignation
+        from apps.security.emails.SolicitudRechazada import send_rejection_email
+        from apps.security.entity.models import User
+        try:
+            request = RequestAsignation.objects.get(pk=request_id)
+            request.request_state = RequestState.RECHAZADO
+            request.rejectionMessage = rejection_message
+            request.save()
+            # Obtener datos del aprendiz
+            aprendiz = request.aprendiz
+            person = aprendiz.person
+            nombre_aprendiz = f"{person.first_name} {person.first_last_name}"
+            user = User.objects.filter(person=person).first()
+            email = user.email if user else None
+            if email:
+                send_rejection_email(email, nombre_aprendiz, rejection_message)
+            return {
+                'success': True,
+                'message': 'Solicitud rechazada correctamente',
+                'data': {
+                    'id': request.id,
+                    'request_state': request.request_state,
+                    'rejectionMessage': request.rejectionMessage
+                }
+            }
+        except RequestAsignation.DoesNotExist:
+            return {
+                'success': False,
+                'message': 'Solicitud no encontrada',
+                'data': None
+            }
     def get_form_request_by_id(self, request_id):
         """
         Obtener una solicitud de formulario por su ID, retornando solo los campos del formulario y el request_state.
@@ -66,6 +102,12 @@ class RequestAsignationService(BaseService):
             ficha = Ficha.objects.get(pk=validated_data['ficha_id'])
         except (Aprendiz.DoesNotExist, Ficha.DoesNotExist) as e:
             raise ValueError(f"Entidad no encontrada: {str(e)}")
+        # Validar que el aprendiz solo pueda enviar el formulario si su último request_state fue RECHAZADO
+        from apps.assign.entity.enums.request_state_enum import RequestState
+        from apps.assign.entity.models import RequestAsignation
+        last_request = RequestAsignation.objects.filter(aprendiz=aprendiz).order_by('-id').first()
+        if last_request and last_request.request_state != RequestState.RECHAZADO:
+            raise ValueError("Solo puedes volver a enviar el formulario si tu última solicitud fue rechazada.")
         # Validar que las entidades de referencia existan
         try:
             sede = Sede.objects.get(pk=validated_data['sede'])
