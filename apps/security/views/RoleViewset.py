@@ -138,3 +138,21 @@ class RoleViewSet(BaseViewSet):
                 "cantidad_usuarios": user_count
             })
         return Response(data, status=status.HTTP_200_OK)
+
+
+    @swagger_auto_schema(
+        operation_description="Filtra roles por tipo (ej: Administrador, Aprendiz, Instructor)",
+        tags=["Role"],
+        manual_parameters=[
+            openapi.Parameter('type_role', openapi.IN_QUERY, description="Tipo de rol a filtrar", type=openapi.TYPE_STRING, required=True)
+        ],
+        responses={200: openapi.Response("Lista de roles filtrados")}
+    )
+    @action(detail=False, methods=['get'], url_path='filter-by-type')
+    def filter_by_type(self, request):
+        type_role = request.query_params.get('type_role')
+        if not type_role:
+            return Response({"detail": "Debe proporcionar el parámetro 'type_role'"}, status=status.HTTP_400_BAD_REQUEST)
+        roles = self.service_class().filter_roles_by_type(type_role)
+        serializer = self.serializer_class(roles, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

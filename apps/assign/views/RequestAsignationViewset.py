@@ -22,6 +22,36 @@ from apps.assign.entity.serializers.form.FormPDFSerializer import FormPDFSeriali
 
 
 class RequestAsignationViewset(BaseViewSet):
+    @swagger_auto_schema(
+        method='patch',
+        operation_description="Rechaza una solicitud de formulario, cambiando el estado y guardando el mensaje de rechazo.",
+        tags=["FormRequest"],
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=["rejectionMessage"],
+            properties={
+                "rejectionMessage": openapi.Schema(type=openapi.TYPE_STRING, description="Motivo del rechazo")
+            }
+        ),
+        responses={
+            200: openapi.Response("Solicitud rechazada correctamente."),
+            404: openapi.Response("Solicitud no encontrada."),
+        }
+    )
+    @action(detail=True, methods=['patch'], url_path='form-request-reject')
+    def reject_form_request(self, request, pk=None):
+        """Rechaza una solicitud de formulario"""
+        rejection_message = request.data.get('rejectionMessage')
+        if not rejection_message:
+            return Response({
+                'success': False,
+                'message': 'Debes proporcionar el motivo del rechazo.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        result = self.service_class().reject_request(pk, rejection_message)
+        if result['success']:
+            return Response(result, status=status.HTTP_200_OK)
+        else:
+            return Response(result, status=status.HTTP_404_NOT_FOUND)
     service_class = RequestAsignationService
     serializer_class = RequestAsignationSerializer
 

@@ -4,6 +4,9 @@ from apps.security.repositories.RoleRepository import RoleRepository
 
 
 class RoleService(BaseService):
+    def __init__(self):
+        self.repository = RoleRepository()
+
     def set_active_role_and_users(self, role_id, active):
         """
         Activa o desactiva el rol y todos los usuarios vinculados a ese rol.
@@ -18,6 +21,18 @@ class RoleService(BaseService):
             users.update(is_active=active)
         estado = "activados" if active else "desactivados"
         return {"detail": f"Rol y usuarios {estado} correctamente."}
-   
-    def __init__(self):
-        self.repository = RoleRepository()
+
+    def list_roles(self):
+        """
+        Devuelve todos los roles.
+        """
+        from apps.security.entity.models import Role
+        return Role.objects.all()
+
+    def filter_roles_by_type(self, type_role):
+        """
+        Devuelve roles filtrados por el campo type_role (ej: 'Administrador', 'Aprendiz', 'Instructor').
+        """
+        from apps.security.entity.models import Role
+        return Role.objects.filter(type_role__iexact=type_role)
+    
