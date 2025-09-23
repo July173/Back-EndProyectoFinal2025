@@ -15,6 +15,27 @@ from rest_framework import status
 class UserViewSet(BaseViewSet):
 
     @swagger_auto_schema(
+        operation_description="Filtra usuarios por estado usando un solo parámetro select: activo, inactivo o registrados.",
+        tags=["User"],
+        manual_parameters=[
+            openapi.Parameter('status', openapi.IN_QUERY, description="Filtrar por estado: activo, inactivo, registrados", type=openapi.TYPE_STRING, enum=['activo', 'inactivo', 'registrados'])
+        ],
+        responses={200: openapi.Response("Lista de usuarios filtrados")}
+    )
+    @action(detail=False, methods=['get'], url_path='filter-by-status')
+    def filter_by_status(self, request):
+        status_param = request.query_params.get('status')
+        users = self.service_class().repository.model.objects.all()
+        if status_param == 'activo':
+            users = users.filter(is_active=True)
+        elif status_param == 'inactivo':
+            users = users.filter(is_active=False)
+        elif status_param == 'registrados':
+            users = users.filter(registered=True)
+        serializer = self.serializer_class(users, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
         operation_description=(
             "Restablece la contraseña usando email y nueva contraseña."
         ),
