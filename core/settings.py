@@ -11,7 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ============================
 SECRET_KEY = 'django-insecure-igo_*_$d=s2s+x#u=!whln50*b2(+(9a=3z5rv)tr$v!1h%ty&'
 DEBUG = True
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '*']
 
 # ============================
 # APPS INSTALADAS
@@ -200,6 +200,10 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8085",
     "http://127.0.0.1:5173",
     "http://127.0.0.1:8080",
+    ## forntend movil
+    "http://198.168.1.21:8000",
+    "http://192.168.1.8:8000",
+    
 ]
 
 # Email settings
