@@ -12,6 +12,5 @@ class AsignationInstructorSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'instructor',
-            'request_asignation',
-            'date_asignation'
+            'request_asignation'
         ]
