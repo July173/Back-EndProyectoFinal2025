@@ -119,13 +119,13 @@ class ExcelInstructorTemplateService:
             ('SEGUNDO APELLIDO', False),
             ('CORREO INSTITUCIONAL*', True),
             ('NÚMERO DE CELULAR*', True),
+            ('REGIONAL*', True),
+            ('CENTRO DE FORMACIÓN*', True),
+            ('SEDE DE FORMACIÓN*', True),
             ('ÁREA DE CONOCIMIENTO*', True),
             ('TIPO DE CONTRATO*', True),
             ('FECHA INICIO CONTRATO*', True),
-            ('FECHA DE TERMINACIÓN DE CONTRATO*', True),
-            ('REGIONAL*', True),
-            ('CENTRO DE FORMACIÓN*', True),
-            ('SEDE DE FORMACIÓN*', True)
+            ('FECHA DE TERMINACIÓN DE CONTRATO*', True)
         ]
         for col_idx, (header, is_required) in enumerate(headers, 1):
             cell = ws_main.cell(row=1, column=col_idx, value=header)
@@ -133,8 +133,8 @@ class ExcelInstructorTemplateService:
             self._apply_style(cell, style)
         example_data = [
             ['CC', '1023456789', 'Juan', 'Carlos', 'Pérez', 'Gómez', 'juan.perez@sena.edu.co', '3004567890',
-             'Tecnologías de la Información', 'Planta', '2024-01-15', '2024-12-31', 'Huila',
-             'Centro de la industria, la empresa y los servicios', 'Industria - Neiva']
+             'Huila', 'Centro de la Biotecnología Agropecuaria', 'Sede Principal Biotecnología',
+             'Diseño', 'Planta', '2024-01-15', '2024-12-31']
         ]
         for row_idx, data_row in enumerate(example_data, 2):
             for col_idx, value in enumerate(data_row, 1):
@@ -292,32 +292,32 @@ class ExcelInstructorTemplateService:
         id_types = self._get_document_types()
         self._add_data_validation(worksheet, 'A', id_types, sheet_name="Tipos de Identificación", col_aux="A")
 
-        # Área de Conocimiento (columna I)
-        knowledge_areas = list(KnowledgeArea.objects.filter(active=True).values_list('name', flat=True))
-        self._add_data_validation(worksheet, 'I', knowledge_areas, sheet_name="Áreas de Conocimiento", col_aux="B")
+        # Regional (columna I)
+        from apps.general.entity.models import Regional
+        regionales = list(Regional.objects.filter(active=True).values_list('name', flat=True))
+        self._add_data_validation(worksheet, 'I', regionales, sheet_name="Regionales", col_aux="B")
 
-        # Tipo de Contrato (columna J)
+        # Centro de Formación (columna J)
+        from apps.general.entity.models import Center
+        centros = list(Center.objects.filter(active=True).values_list('name', flat=True))
+        self._add_data_validation(worksheet, 'J', centros, sheet_name="Centros de Formación", col_aux="B")
+
+        # Sede de Formación (columna K)
+        from apps.general.entity.models import Sede
+        sedes = list(Sede.objects.filter(active=True).values_list('name', flat=True))
+        self._add_data_validation(worksheet, 'K', sedes, sheet_name="Sedes", col_aux="B")
+
+        # Área de Conocimiento (columna L)
+        knowledge_areas = list(KnowledgeArea.objects.filter(active=True).values_list('name', flat=True))
+        self._add_data_validation(worksheet, 'L', knowledge_areas, sheet_name="Áreas de Conocimiento", col_aux="B")
+
+        # Tipo de Contrato (columna M)
         try:
             from apps.general.entity.enums.contract_type_enum import ContractType
             contract_types = [ct.name for ct in ContractType]
         except Exception:
             contract_types = ['Planta', 'Contratista', 'Temporal', 'Prestación de Servicios', 'Cátedra']
-        self._add_data_validation(worksheet, 'J', contract_types, sheet_name="Tipos de Contrato", col_aux="A")
-
-        # Regional (columna M)
-        from apps.general.entity.models import Regional
-        regionales = list(Regional.objects.filter(active=True).values_list('name', flat=True))
-        self._add_data_validation(worksheet, 'M', regionales, sheet_name="Regionales", col_aux="B")
-
-        # Centro de Formación (columna N)
-        from apps.general.entity.models import Center
-        centros = list(Center.objects.filter(active=True).values_list('name', flat=True))
-        self._add_data_validation(worksheet, 'N', centros, sheet_name="Centros de Formación", col_aux="B")
-
-        # Sede de Formación (columna O)
-        from apps.general.entity.models import Sede
-        sedes = list(Sede.objects.filter(active=True).values_list('name', flat=True))
-        self._add_data_validation(worksheet, 'O', sedes, sheet_name="Sedes", col_aux="B")
+        self._add_data_validation(worksheet, 'M', contract_types, sheet_name="Tipos de Contrato", col_aux="A")
 
     def _save_workbook_to_response(self, workbook, filename):
         """Guarda el workbook en un HttpResponse para descarga"""
@@ -405,13 +405,13 @@ class ExcelInstructorTemplateService:
                         'segundo_apellido': self._get_cell_value(worksheet, row_num, 6),
                         'email': self._get_cell_value(worksheet, row_num, 7),
                         'telefono': self._get_cell_value(worksheet, row_num, 8),
-                        'area_conocimiento': self._get_cell_value(worksheet, row_num, 9),
-                        'tipo_contrato': self._get_cell_value(worksheet, row_num, 10),
-                        'fecha_inicio': self._get_cell_value(worksheet, row_num, 11),
-                        'fecha_fin': self._get_cell_value(worksheet, row_num, 12),
-                        'regional': self._get_cell_value(worksheet, row_num, 13),
-                        'centro_formacion': self._get_cell_value(worksheet, row_num, 14),
-                        'sede': self._get_cell_value(worksheet, row_num, 15),
+                        'regional': self._get_cell_value(worksheet, row_num, 9),
+                        'centro_formacion': self._get_cell_value(worksheet, row_num, 10),
+                        'sede': self._get_cell_value(worksheet, row_num, 11),
+                        'area_conocimiento': self._get_cell_value(worksheet, row_num, 12),
+                        'tipo_contrato': self._get_cell_value(worksheet, row_num, 13),
+                        'fecha_inicio': self._get_cell_value(worksheet, row_num, 14),
+                        'fecha_fin': self._get_cell_value(worksheet, row_num, 15),
                     }
                     
                     # Validar que los campos obligatorios estén presentes
