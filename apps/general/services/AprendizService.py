@@ -8,6 +8,8 @@ from core.utils.Validation import is_unique_email, is_unique_document_number, is
 from apps.security.entity.enums.document_type_enum import DocumentType
 from django.utils.crypto import get_random_string
 from core.utils.Validation import is_soy_sena_email
+
+
 class AprendizService(BaseService):
 
     def __init__(self):
@@ -175,3 +177,9 @@ class AprendizService(BaseService):
         Delegar el filtro por nombre al repository.
         """
         return self.repository.filter_by_nombre(nombre)
+    
+    def filter_by_number_document(self, numero_documento):
+        """
+        Delegar el filtro por número de documento al repository.
+        """
+        return self.repository.filter_by_number_document(numero_documento)

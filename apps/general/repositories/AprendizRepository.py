@@ -4,7 +4,7 @@ from apps.security.entity.models import Person, User
 from django.utils import timezone
 
 class AprendizRepository(BaseRepository):
-
+    
     
     def __init__(self):
         super().__init__(Aprendiz)
@@ -97,3 +97,9 @@ class AprendizRepository(BaseRepository):
         ) | self.model.objects.filter(
             person__second_last_name__icontains=nombre
         )
+        
+    def filter_by_number_document(self, numero_documento):
+        """
+        Filtra aprendices por número de documento de la persona asociada.
+        """
+        return self.model.objects.filter(person__number_identification=numero_documento)

@@ -9,10 +9,11 @@ from core.utils.Validation import is_unique_email, is_unique_document_number, is
 from django.utils.crypto import get_random_string
 from core.utils.Validation import is_sena_email
 from django.core.exceptions import ObjectDoesNotExist
+
 class InstructorService(BaseService):
+
     def __init__(self):
         self.repository = InstructorRepository()
-
 
     def list_instructors(self):
         """
@@ -27,8 +28,6 @@ class InstructorService(BaseService):
         return Instructor.objects.filter(pk=instructor_id).first()
 
     def create_instructor(self, person_data, user_data, instructor_data, sede_id):
-        from core.utils.Validation import is_sena_email
-        from django.core.exceptions import ObjectDoesNotExist
         with transaction.atomic():
             # Obtener la sede y sus relaciones
             try:
@@ -156,3 +155,16 @@ class InstructorService(BaseService):
                 return "Instructor reactivado correctamente."
             self.repository.set_active_state_dates_instructor(instructor, active=False)
             return "Eliminación lógica realizada correctamente."
+
+
+    def filter_by_nombre(self, nombre):
+        """
+        Delegar el filtro por nombre al repository.
+        """
+        return self.repository.filter_by_name(nombre)
+
+    def filter_by_document_number(self, numero_documento):
+        """
+        Delegar el filtro por número de documento al repository.
+        """
+        return self.repository.filter_by_document_number(numero_documento)

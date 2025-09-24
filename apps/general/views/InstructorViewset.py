@@ -13,6 +13,7 @@ from apps.general.entity.serializers.CreateInstructor.GetInstructorSerializer im
 
 
 class InstructorViewset(BaseViewSet):
+
     service_class = InstructorService
     serializer_class = InstructorSerializer
 
@@ -201,3 +202,36 @@ class InstructorViewset(BaseViewSet):
             return Response({"detail": "Instructor no encontrado."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+    # ----------- FILTRAR POR NOMBRE -----------
+    @swagger_auto_schema(
+        operation_description="Filtra instructores por nombre (en cualquier campo de la persona asociada)",
+        tags=["Instructor"],
+        manual_parameters=[
+            openapi.Parameter('nombre', openapi.IN_QUERY, description="Texto de búsqueda de nombre", type=openapi.TYPE_STRING)
+        ],
+        responses={200: openapi.Response("Lista de instructores filtrados")}
+    )
+    @action(detail=False, methods=['get'], url_path='filter-by-name')
+    def filter_by_name(self, request):
+        nombre = request.query_params.get('nombre', '')
+        instructores = self.service.filter_by_name(nombre)
+        serializer = self.serializer_class(instructores, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    # ----------- FILTRAR POR NÚMERO DE DOCUMENTO -----------
+    @swagger_auto_schema(
+        operation_description="Filtra instructores por número de documento de la persona asociada",
+        tags=["Instructor"],
+        manual_parameters=[
+            openapi.Parameter('numero_documento', openapi.IN_QUERY, description="Número de documento", type=openapi.TYPE_STRING)
+        ],
+        responses={200: openapi.Response("Lista de instructores filtrados")}
+    )
+    @action(detail=False, methods=['get'], url_path='filter-by-document-number')
+    def filter_by_document_number(self, request):
+        numero_documento = request.query_params.get('numero_documento', '')
+        instructores = self.service.filter_by_document_number(numero_documento)
+        serializer = self.serializer_class(instructores, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

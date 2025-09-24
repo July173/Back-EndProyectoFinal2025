@@ -13,6 +13,7 @@ from apps.general.entity.serializers.CreateAprendiz.AprendizSerializer import Ap
 
 
 class AprendizViewset(BaseViewSet):
+
     service_class = AprendizService
     serializer_class = AprendizSerializer
 
@@ -194,5 +195,21 @@ class AprendizViewset(BaseViewSet):
     def filter_by_nombre(self, request):
         nombre = request.query_params.get('nombre', '')
         aprendices = self.service.filter_by_nombre(nombre)
+        serializer = self.serializer_class(aprendices, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    # ----------- FILTRAR POR NÚMERO DE DOCUMENTO -----------
+    @swagger_auto_schema(
+        operation_description="Filtra aprendices por número de documento de la persona asociada",
+        tags=["Aprendiz"],
+        manual_parameters=[
+            openapi.Parameter('numero_documento', openapi.IN_QUERY, description="Número de documento", type=openapi.TYPE_STRING)
+        ],
+        responses={200: openapi.Response("Lista de aprendices filtrados")}
+    )
+    @action(detail=False, methods=['get'], url_path='filter-by-numero-documento')
+    def filter_by_number_document(self, request):
+        numero_documento = request.query_params.get('numero_documento', '')
+        aprendices = self.service.filter_by_number_document(numero_documento)
         serializer = self.serializer_class(aprendices, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
