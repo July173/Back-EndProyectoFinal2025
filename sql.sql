@@ -108,11 +108,17 @@ INSERT INTO security_module VALUES
 (2,'Seguridad','Administra el sistema',1,NULL),
 (3,'Asignar seguimientos','Todo lo del proceso de asignar un instructor a un aprendiz para el seguimiento de su etapa practica',1,NULL);
 
-INSERT INTO security_form VALUES 
+
+INSERT INTO security_form VALUES
 (1,'Administración','Toda la seccion de control de administración del sistema, del modulo de seguridad','/admin',1,NULL),
 (2,'Registro Masivo','Toda la seccion de registro de usuarios masivamente mediante plantillas de excel','/mass-registration',1,NULL),
 (3,'Inicio','El inicio del sistema','/home',1,NULL),
-(4,'Solicitud','solicitud de aprendiz para asignacion de instructor','/request-registration',1,NULL);
+(4,'Solicitud','solicitud de aprendiz para asignacion de instructor','/request-registration',1,NULL),
+(5,'Reasignar','El coordinador reasigna instructor a algun aprendiz','/reassign',1,NULL),
+(6,'Seguimiento','El instructor hace seguimiento a los aprendices en su etapa practica','/following',1,NULL),
+(7,'Historial de seguimiento','Historial de todos los seguimientos de todos los aprendices','/following-history',1,NULL),
+(8,'Evaluar visita final','El coordinador evalua la visita final que suben los instructores','/evaluate-final-visit',1,NULL),
+(9,'Asignar','El coordinaro asigna instructor a aprendiz','/assign',1,NULL);
 
 INSERT INTO security_permission VALUES 
 (1,'Ver','Visualizar los datos'),
@@ -124,17 +130,20 @@ INSERT INTO security_permission VALUES
 INSERT INTO security_role VALUES 
 (1,'Administrador','Administra y tiene acceso absoluto al sistema',1,NULL),
 (2,'Aprendiz','Accede a sus secciones permitidas en el sistema',1,NULL),
-(3,'Instructor','Accede a sus secciones permitidas en el sistema',1,NULL);
+(3,'Instructor','Accede a sus secciones permitidas en el sistema',1,NULL),
+(4,'Coordinador','El coordinador evalua y sigue los procesos',1,NULL);
 
-INSERT INTO security_formmodule VALUES 
+INSERT INTO security_formmodule VALUES
 (1,1,2),
 (2,2,2),
 (3,3,1),
-(4,4,3);
+(10,4,3),
+(11,6,3),
+(12,5,3),
+(13,7,3),
+(14,8,3),
+(15,9,3);
 
 INSERT INTO security_rolformpermission VALUES 
-(1,3,1,1),(2,2,1,1),(3,1,1,1),(4,3,2,1),(5,2,2,1),(6,1,2,1),
-(7,3,3,1),(8,2,3,1),(9,1,3,1),(10,3,4,1),(11,2,4,1),(12,1,4,1),
-(13,3,5,1),(14,2,5,1),(15,1,5,1),(16,3,1,2),(17,3,1,3),(18,4,1,2),(19,4,4,2);
-
+(1,3,1,1),(2,2,1,1),(3,1,1,1),(4,3,2,1),(5,2,2,1),(6,1,2,1),(7,3,3,1),(8,2,3,1),(9,1,3,1),(10,3,4,1),(11,2,4,1),(12,1,4,1),(13,3,5,1),(14,2,5,1),(15,1,5,1),(16,3,1,2),(17,3,1,3),(18,4,1,2),(19,4,4,2),(20,2,1,4),(21,2,2,4),(22,2,3,4),(23,2,4,4),(24,2,5,4),(25,3,1,4),(26,3,2,4),(27,3,3,4),(28,3,4,4),(29,3,5,4),(30,5,1,4),(31,5,2,4),(32,5,3,4),(33,5,4,4),(34,5,5,4),(35,7,1,4),(36,7,2,4),(37,7,3,4),(38,7,4,4),(39,7,5,4),(40,8,1,4),(41,8,2,4),(42,8,3,4),(43,8,4,4),(44,8,5,4),(45,9,1,4),(46,9,2,4),(47,9,3,4),(48,9,4,4),(49,9,5,4),(50,3,1,3),(51,6,1,3),(52,6,2,3),(53,6,3,3),(54,6,4,3),(55,6,5,3),(56,7,1,3),(57,7,2,3),(58,7,3,3),(59,7,4,3),(60,7,5,3),(61,1,1,1),(62,1,2,1),(63,1,3,1),(64,1,4,1),(65,1,5,1),(66,2,1,1),(67,2,2,1),(68,2,3,1),(69,2,4,1),(70,2,5,1),(71,3,1,1),(72,3,2,1),(73,3,3,1),(74,3,4,1),(75,3,5,1),(76,4,1,1),(77,4,2,1),(78,4,3,1),(79,4,4,1),(80,4,5,1),(81,5,1,1),(82,5,2,1),(83,5,3,1),(84,5,4,1),(85,5,5,1),(86,6,1,1),(87,6,2,1),(88,6,3,1),(89,6,4,1),(90,6,5,1),(91,7,1,1),(92,7,2,1),(93,7,3,1),(94,7,4,1),(95,7,5,1),(96,8,1,1),(97,8,2,1),(98,8,3,1),(99,8,4,1),(100,8,5,1),(101,9,1,1),(102,9,2,1),(103,9,3,1),(104,9,4,1),(105,9,5,1);
 SELECT 'Datos insertados correctamente en bdautogestion' as mensaje;

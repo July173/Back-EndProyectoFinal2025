@@ -4,17 +4,14 @@ from django.conf import settings
 
 
 def enviar_activacion_usuario(email_destino, nombre, email_usuario, password_temporal):
-    import random, string
-    # Agregar un carácter aleatorio al final de la contraseña temporal
-    random_char = random.choice(string.ascii_letters + string.digits)
-    password_temporal_mod = str(password_temporal) + random_char
     asunto = "Cuenta Activada - Credenciales de Acceso"
+    password_temporal
     html_content = render_to_string(
         'ActivacionUsuario.html',
         {
             'nombre': nombre,
             'email_usuario': email_usuario,
-            'password_temporal': password_temporal_mod,
+            'password_temporal': password_temporal,
         }
     )
     msg = EmailMultiAlternatives(

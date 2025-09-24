@@ -7,8 +7,10 @@ Pasos:
   4) python manage.py migrate
   5) python manage.py createsuperuser
   6) python manage.py runserver
+  7) celery -A core worker --loglevel=info
+  8) celery -A core beat --loglevel=info  
 
-  7) url del navegador : http://127.0.0.1:8000/swagger/
+  9) url del navegador : http://127.0.0.1:8000/swagger/
 
 # Comandos esenciales para levantar el contenedor y correr migraciones
 
@@ -49,9 +51,9 @@ docker compose logs
 
 
 
-correr celery
+redis-cli ping
+respuesta correcta PONG
 
-1 terminal: celery -A core worker --loglevel=info
-2 python manage.py shell
-3 from apps.general.tasks import deactivate_expired_instructors
-4 deactivate_expired_instructors.delay()
+correr celerey
+celery -A core worker --loglevel=info
+celery -A core beat --loglevel=info  

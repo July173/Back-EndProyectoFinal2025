@@ -12,7 +12,7 @@ from apps.security.views.ModuleViewset import ModuleViewSet
 from apps.security.views.FormModuleViewset import FormModuleViewSet
 from apps.security.views.RoleFormPermissionViewset import RolFormPermissionViewSet
 from apps.security.views.ExcelTemplateViewSet import ExcelTemplateViewSet
-from apps.security.views.EnumViewset import get_document_types
+from apps.security.views.EnumViewset import get_document_types, get_contract_types
 
 # Importa login y refresh
 from apps.security.views.auth_viewset import LoginView, RefreshView
@@ -33,5 +33,6 @@ urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
     path('refresh/', RefreshView.as_view(), name='token_refresh'),
     path('enums/document-types/', get_document_types, name='document-types'),
+    path('enums/contract-types/', get_contract_types, name='contract-types'),
     path('', include(router.urls)),  # Incluir las rutas del router
 ]

@@ -17,9 +17,7 @@ class GetInstructorSerializer(serializers.ModelSerializer):
     contractStartDate = serializers.DateField()
     contractEndDate = serializers.DateField()
     knowledgeArea = serializers.SerializerMethodField()
-    center_id = serializers.SerializerMethodField()
     sede_id = serializers.SerializerMethodField()
-    regional_id = serializers.SerializerMethodField()
     active = serializers.SerializerMethodField()
 
     class Meta:
@@ -39,9 +37,7 @@ class GetInstructorSerializer(serializers.ModelSerializer):
             'contractStartDate',
             'contractEndDate',
             'knowledgeArea',
-            'center_id',
             'sede_id',
-            'regional_id',
             'active'
         ]
     def get_first_name(self, obj):
@@ -76,22 +72,10 @@ class GetInstructorSerializer(serializers.ModelSerializer):
     def get_knowledgeArea(self, obj):
         return obj.knowledgeArea.id if obj.knowledgeArea else None
 
-    def get_center_id(self, obj):
-        person_sede = PersonSede.objects.filter(PersonId=obj.person).first()
-        if person_sede and person_sede.SedeId and person_sede.SedeId.center:
-            return person_sede.SedeId.center.id
-        return None
-
     def get_sede_id(self, obj):
         person_sede = PersonSede.objects.filter(PersonId=obj.person).first()
         if person_sede and person_sede.SedeId:
             return person_sede.SedeId.id
-        return None
-
-    def get_regional_id(self, obj):
-        person_sede = PersonSede.objects.filter(PersonId=obj.person).first()
-        if person_sede and person_sede.SedeId and person_sede.SedeId.center and person_sede.SedeId.center.regional:
-            return person_sede.SedeId.center.regional.id
         return None
 
     def get_active(self, obj):

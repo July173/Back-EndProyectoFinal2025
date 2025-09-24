@@ -9,7 +9,7 @@ class AsignationInstructor(models.Model):
     request_asignation = models.OneToOneField(
         'assign.RequestAsignation', on_delete=models.CASCADE, related_name="asignation_instructor"
     )
-    date_asignation = models.DateField()
+    date_asignation = models.DateField(auto_now_add=True)
     delete_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):

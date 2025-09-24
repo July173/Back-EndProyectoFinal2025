@@ -6,8 +6,9 @@ from apps.security.entity.models import User, Person
 from apps.general.entity.models import Instructor
 from apps.security.emails.CreacionCuentaUsers import send_account_created_email
 from core.utils.Validation import is_unique_email, is_unique_document_number, is_valid_phone_number
-
-
+from django.utils.crypto import get_random_string
+from core.utils.Validation import is_sena_email
+from django.core.exceptions import ObjectDoesNotExist
 class InstructorService(BaseService):
     def __init__(self):
         self.repository = InstructorRepository()
@@ -25,23 +26,17 @@ class InstructorService(BaseService):
         """
         return Instructor.objects.filter(pk=instructor_id).first()
 
-    def create_instructor(self, person_data, user_data, instructor_data, sede_id, center_id, regional_id):
+    def create_instructor(self, person_data, user_data, instructor_data, sede_id):
         from core.utils.Validation import is_sena_email
         from django.core.exceptions import ObjectDoesNotExist
         with transaction.atomic():
-            # Validar y obtener entidades relacionadas usando el ORM de Django
+            # Obtener la sede y sus relaciones
             try:
-                regional = Regional.objects.get(id=regional_id)
+                sede = Sede.objects.get(id=sede_id)
             except ObjectDoesNotExist:
-                raise ValueError(f'Regional con id {regional_id} no existe.')
-            try:
-                center = Center.objects.get(id=center_id, regional=regional)
-            except ObjectDoesNotExist:
-                raise ValueError(f'El centro con id {center_id} no existe o no está vinculado al regional {regional_id}.')
-            try:
-                sede = Sede.objects.get(id=sede_id, center=center)
-            except ObjectDoesNotExist:
-                raise ValueError(f'La sede con id {sede_id} no existe o no está vinculada al centro {center_id}.')
+                raise ValueError(f'La sede con id {sede_id} no existe.')
+            center = sede.center if sede else None
+            regional = center.regional if center else None
 
             # Preparar datos para KnowledgeArea
             knowledge_area_id = instructor_data.pop('knowledgeArea')
@@ -49,9 +44,13 @@ class InstructorService(BaseService):
             instructor_data['knowledgeArea'] = knowledge_area_instance
 
             # Preparar datos para user
-            user_data['password'] = str(person_data['number_identification'])  # Asigna la contraseña como string
+          
+            numero_identificacion = str(person_data['number_identification'])
+            caracteres_adicionales = get_random_string(length=2)
+            password_temporal = numero_identificacion + caracteres_adicionales
+            user_data['password'] = password_temporal
             temp_email = user_data.get('email')
-            temp_password = user_data.get('password')
+            temp_password = password_temporal
 
             # Validación de correo institucional @sena.edu.co
             if not temp_email or not is_sena_email(temp_email):
@@ -89,9 +88,7 @@ class InstructorService(BaseService):
                 "person_id": person.id,
                 "user_id": user.id,
                 "instructor_id": instructor.id,
-                "sede_id": sede.id,
-                "center_id": center.id,
-                "regional_id": regional.id
+                "sede_id": sede.id
             }
 
     def update_instructor(self, instructor_id, person_data, user_data, instructor_data, sede_id):

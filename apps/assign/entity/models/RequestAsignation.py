@@ -1,5 +1,6 @@
 from django.db import models
 from apps.general.entity.models import Aprendiz
+from apps.assign.entity.enums.request_state_enum import RequestState
 
 
 class RequestAsignation(models.Model):
@@ -14,8 +15,14 @@ class RequestAsignation(models.Model):
     )
     request_date = models.DateField()
     date_start_production_stage = models.DateField()
+    date_end_production_stage = models.DateField()
     pdf_request = models.FileField(upload_to='requests/', null=True, blank=True)
-    request_state = models.CharField(max_length=50)
+    request_state = models.CharField(
+        max_length=50,
+        choices=RequestState.choices,
+        default=RequestState.SIN_ASIGNAR
+    )
+    rejectionMessage= models.TextField(null=True, blank=True)
     delete_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):

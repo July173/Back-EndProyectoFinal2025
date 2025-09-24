@@ -10,9 +10,7 @@ from apps.assign.entity.serializers.AsignationInstructorSerializer import Asigna
 
 
 class AsignationInstructorViewset(BaseViewSet):
-    service_class = AsignationInstructorService
-    serializer_class = AsignationInstructorSerializer
-
+    
     @swagger_auto_schema(
         operation_description="Obtiene una lista de todas las asignaciones de instructor.",
         tags=["AsignationInstructor"]
@@ -76,3 +74,30 @@ class AsignationInstructorViewset(BaseViewSet):
             {"detail": "No encontrado."},
             status=status.HTTP_404_NOT_FOUND
         )
+
+
+
+
+
+    @swagger_auto_schema(
+        method='post',
+        operation_description="Crea una asignación de instructor personalizada (fecha automática)",
+        request_body=AsignationInstructorSerializer,
+        responses={
+            201: openapi.Response("Asignación creada correctamente", AsignationInstructorSerializer),
+            400: "Datos inválidos"
+        },
+        tags=["AsignationInstructor"]
+    )
+    @action(detail=False, methods=['post'], url_path='custom-create')
+    def custom_create(self, request):
+        instructor_id = request.data.get('instructor')
+        request_asignation_id = request.data.get('request_asignation')
+        if not instructor_id or not request_asignation_id:
+            return Response({"detail": "Faltan datos obligatorios."}, status=status.HTTP_400_BAD_REQUEST)
+        service = self.service_class()
+        asignation = service.create_custom(instructor_id, request_asignation_id)
+        serializer = self.serializer_class(asignation)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    service_class = AsignationInstructorService
+    serializer_class = AsignationInstructorSerializer

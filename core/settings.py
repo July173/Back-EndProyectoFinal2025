@@ -55,7 +55,10 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [
+            BASE_DIR / 'templates',
+            BASE_DIR / 'apps/security/templates',
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -164,6 +167,16 @@ SWAGGER_SETTINGS = {
     'USE_SESSION_AUTH': False,
     'JSON_EDITOR': True,
     'SUPPORTED_SUBMIT_METHODS': ['get', 'post', 'put', 'delete', 'patch'],
+    'DEFAULT_FIELD_INSPECTORS': [
+        'drf_yasg.inspectors.CamelCaseJSONFilter',
+        'drf_yasg.inspectors.ReferencingSerializerInspector',
+        'drf_yasg.inspectors.RelatedFieldInspector',
+        'drf_yasg.inspectors.ChoiceFieldInspector',
+        'drf_yasg.inspectors.FileFieldInspector',  # PARA ARCHIVOS
+        'drf_yasg.inspectors.DictFieldInspector',
+        'drf_yasg.inspectors.SimpleFieldInspector',
+        'drf_yasg.inspectors.StringDefaultFieldInspector',
+    ],
 }
 REDOC_SETTINGS = {'LAZY_RENDERING': False}
 
@@ -222,12 +235,12 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = 'Serviciodecorreossena@gmail.com'  # Tu correo completo
-# EMAIL_HOST_PASSWORD = 'oyfr yvax zjfj rwsw'  # Tu contraseña de aplicación de Gmail
-# DEFAULT_FROM_EMAIL = 'Serviciodecorreossena@gmail.com'
-EMAIL_HOST_USER = 'bscl20062007@gmail.com'
-EMAIL_HOST_PASSWORD = 'giux eley mwzw zape'
-DEFAULT_FROM_EMAIL = 'bscl20062007@gmail.com'
+EMAIL_HOST_USER = 'Serviciodecorreossena@gmail.com'  # Tu correo completo
+EMAIL_HOST_PASSWORD = 'oyfr yvax zjfj rwsw'  # Tu contraseña de aplicación de Gmail
+DEFAULT_FROM_EMAIL = 'Serviciodecorreossena@gmail.com'
+# EMAIL_HOST_USER = 'bscl20062007@gmail.com'
+# EMAIL_HOST_PASSWORD = 'giux eley mwzw zape'
+# DEFAULT_FROM_EMAIL = 'bscl20062007@gmail.com'
 # ============================
 # ARCHIVOS MEDIA (IMÁGENES, ETC)
 # ============================
