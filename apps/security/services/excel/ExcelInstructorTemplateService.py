@@ -543,7 +543,8 @@ class ExcelInstructorTemplateService:
                 password=hashed_password,
                 person=person,
                 is_active=True,  # Activo automáticamente
-                role_id=3  # Rol de Instructor (ajustar según tu BD)
+                role_id=3,  # Rol de Instructor (ajustar según tu BD)
+                registered=False  # No registrado
             )
             
             # 3. Obtener área de conocimiento
