@@ -11,6 +11,26 @@ logger = logging.getLogger(__name__)
 
 
 class RequestAsignationService(BaseService):
+
+    def get_pdf_url(self, request_id):
+        from apps.assign.entity.models import RequestAsignation
+        try:
+            solicitud = RequestAsignation.objects.get(pk=request_id)
+            if solicitud.pdf_request:
+                return {
+                    'success': True,
+                    'pdf_url': solicitud.pdf_request.url
+                }
+            else:
+                return {
+                    'success': False,
+                    'message': 'La solicitud no tiene PDF adjunto.'
+                }
+        except RequestAsignation.DoesNotExist:
+            return {
+                'success': False,
+                'message': 'Solicitud no encontrada.'
+            }
     def reject_request(self, request_id, rejection_message):
         """
         Rechaza una solicitud cambiando el estado y guardando el mensaje de rechazo. Envía correo al aprendiz.

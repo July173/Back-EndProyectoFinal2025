@@ -22,6 +22,22 @@ from apps.assign.entity.serializers.form.FormPDFSerializer import FormPDFSeriali
 
 
 class RequestAsignationViewset(BaseViewSet):
+
+    @swagger_auto_schema(
+        operation_description="Obtiene la URL del PDF de la solicitud.",
+        tags=["FormRequest PDF"],
+        responses={
+            200: openapi.Response("URL del PDF obtenida correctamente."),
+            404: openapi.Response("Solicitud no encontrada."),
+        }
+    )
+    @action(detail=True, methods=['get'], url_path='form-request-pdf-url')
+    def get_pdf_url(self, request, pk=None):
+        result = self.service_class().get_pdf_url(pk)
+        if result['success']:
+            return Response(result, status=status.HTTP_200_OK)
+        else:
+            return Response(result, status=status.HTTP_404_NOT_FOUND)
     @swagger_auto_schema(
         method='patch',
         operation_description="Rechaza una solicitud de formulario, cambiando el estado y guardando el mensaje de rechazo.",
