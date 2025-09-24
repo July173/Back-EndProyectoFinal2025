@@ -9,7 +9,7 @@ class FormRequestSerializer(serializers.Serializer):
     fecha_inicio_contrato = serializers.DateField(help_text="Fecha de inicio de contrato de aprendizaje")
     fecha_fin_contrato = serializers.DateField(help_text="Fecha de fin de contrato de aprendizaje")
     enterprise_name = serializers.CharField(max_length=100, help_text="Nombre de la empresa")
-    enterprise_nit = serializers.IntegerField(help_text="NIT de la empresa (solo números)")
+    enterprise_nit = serializers.CharField(max_length=100, help_text="NIT de la empresa (solo números)")
     enterprise_location = serializers.CharField(max_length=255, help_text="Ubicación de la empresa")
     enterprise_email = serializers.EmailField(help_text="Correo electrónico de la empresa")
     boss_name = serializers.CharField(max_length=100, help_text="Nombre del jefe inmediato")
