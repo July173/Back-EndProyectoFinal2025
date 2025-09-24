@@ -134,6 +134,15 @@ class RequestAsignationService(BaseService):
             ModalityProductiveStage.objects.get(pk=validated_data['modality_productive_stage'])
         except (Sede.DoesNotExist, ModalityProductiveStage.DoesNotExist) as e:
             raise ValueError(f"Entidad de referencia no encontrada: {str(e)}")
+        # Validar que haya al menos 6 meses entre fecha de inicio y fin de contrato
+        fecha_inicio = validated_data.get('fecha_inicio_contrato')
+        fecha_fin = validated_data.get('fecha_fin_contrato')
+        if fecha_inicio and fecha_fin:
+            from dateutil.relativedelta import relativedelta
+            diferencia = relativedelta(fecha_fin, fecha_inicio)
+            meses = diferencia.years * 12 + diferencia.months
+            if meses < 6:
+                raise ValueError("La diferencia entre la fecha de inicio y fin de contrato debe ser de al menos 6 meses.")
         logger.info("Validaciones completadas exitosamente")
         with transaction.atomic():
             aprendiz, ficha, enterprise, boss, human_talent, sede, modality, request_asignation = self.repository.create_all_dates_form_request(validated_data)
