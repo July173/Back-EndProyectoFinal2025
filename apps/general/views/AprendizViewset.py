@@ -179,3 +179,20 @@ class AprendizViewset(BaseViewSet):
             return Response({"detail": "Aprendiz no encontrado."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+        
+    # ----------- FILTRAR POR NOMBRE -----------
+    @swagger_auto_schema(
+        operation_description="Filtra aprendices por nombre (en cualquier campo de la persona asociada)",
+        tags=["Aprendiz"],
+        manual_parameters=[
+            openapi.Parameter('nombre', openapi.IN_QUERY, description="Texto de búsqueda de nombre", type=openapi.TYPE_STRING)
+        ],
+        responses={200: openapi.Response("Lista de aprendices filtrados")}
+    )
+    @action(detail=False, methods=['get'], url_path='filter-by-nombre')
+    def filter_by_nombre(self, request):
+        nombre = request.query_params.get('nombre', '')
+        aprendices = self.service.filter_by_nombre(nombre)
+        serializer = self.serializer_class(aprendices, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

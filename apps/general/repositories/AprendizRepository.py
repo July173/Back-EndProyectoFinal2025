@@ -4,6 +4,8 @@ from apps.security.entity.models import Person, User
 from django.utils import timezone
 
 class AprendizRepository(BaseRepository):
+
+    
     def __init__(self):
         super().__init__(Aprendiz)
 
@@ -80,3 +82,18 @@ class AprendizRepository(BaseRepository):
                 user.deleted_at = None if active else timezone.now()
                 user.save()
             return aprendiz
+
+
+    def filter_by_nombre(self, nombre):
+        """
+        Filtra aprendices por nombre (en cualquier campo de la persona asociada).
+        """
+        return self.model.objects.filter(
+            person__first_name__icontains=nombre
+        ) | self.model.objects.filter(
+            person__second_name__icontains=nombre
+        ) | self.model.objects.filter(
+            person__first_last_name__icontains=nombre
+        ) | self.model.objects.filter(
+            person__second_last_name__icontains=nombre
+        )

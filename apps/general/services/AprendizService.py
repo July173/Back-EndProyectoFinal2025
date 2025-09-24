@@ -9,6 +9,7 @@ from apps.security.entity.enums.document_type_enum import DocumentType
 from django.utils.crypto import get_random_string
 from core.utils.Validation import is_soy_sena_email
 class AprendizService(BaseService):
+
     def __init__(self):
         self.repository = AprendizRepository()
 
@@ -16,9 +17,7 @@ class AprendizService(BaseService):
         """
         Crea un aprendiz, usuario y persona. Valida datos y envía correo de bienvenida.
         """
-        from core.utils.Validation import is_soy_sena_email
         # Validar tipo de documento usando enum
-        
         type_identification = validated_data['type_identification']
         valid_types = [doc_type.name for doc_type in DocumentType]
         if type_identification not in valid_types:
@@ -169,3 +168,10 @@ class AprendizService(BaseService):
             else:
                 self.repository.set_active_state_dates_aprendiz(aprendiz, active=False)
                 return "Eliminación lógica realizada correctamente."
+
+
+    def filter_by_nombre(self, nombre):
+        """
+        Delegar el filtro por nombre al repository.
+        """
+        return self.repository.filter_by_nombre(nombre)
