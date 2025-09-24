@@ -13,6 +13,20 @@ logger = logging.getLogger(__name__)
 
 
 class RequestAsignationRepository(BaseRepository):
+
+    def __init__(self):
+        super().__init__(RequestAsignation)
+
+
+    def filter_by_state(self, request_state):
+        """
+        Filtra las solicitudes por el campo request_state.
+        """
+        if request_state in ['ASIGNADO', 'SIN_ASIGNAR', 'RECHAZADO']:
+            return RequestAsignation.objects.filter(request_state=request_state)
+        return RequestAsignation.objects.all()
+    
+    
     def get_form_request_by_id(self, request_id):
         """
         Obtener una solicitud de formulario por su ID con todas sus relaciones.
@@ -47,8 +61,7 @@ class RequestAsignationRepository(BaseRepository):
                 return None
         except RequestAsignation.DoesNotExist:
             return None
-    def __init__(self):
-        super().__init__(RequestAsignation)
+
 
     def create_all_dates_form_request(self, data):
         """
@@ -122,7 +135,8 @@ class RequestAsignationRepository(BaseRepository):
             
             # Retornar instancias directamente (incluyendo request_asignation)
             return aprendiz, ficha, enterprise, boss, human_talent, sede, modality, request_asignation
-    
+
+
     def get_all_form_requests(self):
         """
         Obtener todas las solicitudes de formulario con sus relaciones.

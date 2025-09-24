@@ -83,8 +83,10 @@ class CenterViewset(BaseViewSet):
             {"detail": "No encontrado."},
             status=status.HTTP_404_NOT_FOUND
         )
+        
+        
 
-    # ----------- GET CENTER WITH SEDES -----------
+    # ----------- GET CENTER WITH SEDES BY ID-----------
     @swagger_auto_schema(
         operation_description="Obtiene un centro por id con sus sedes anidadas.",
         tags=["Center"],
@@ -98,6 +100,8 @@ class CenterViewset(BaseViewSet):
         serializer = CenterNestedSerializer(center)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
+    
+    # ----------- GET CENTER WITH SEDES -----------
     @swagger_auto_schema(
         operation_description="Obtiene todos los centros con sus sedes anidadas.",
         tags=["Center"],

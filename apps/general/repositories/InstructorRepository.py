@@ -5,6 +5,7 @@ from apps.general.entity.models import Instructor, PersonSede, Sede
 
 
 class InstructorRepository(BaseRepository):
+
     def __init__(self):
         super().__init__(Instructor)
 
@@ -107,3 +108,24 @@ class InstructorRepository(BaseRepository):
                     ps.delete_at = None if active else timezone.now()
                 ps.save()
             return instructor
+
+    
+    def filter_by_name(self, nombre):
+        """
+        Filtra instructores por nombre (en cualquier campo de la persona asociada).
+        """
+        return self.model.objects.filter(
+            person__first_name__icontains=nombre
+        ) | self.model.objects.filter(
+            person__second_name__icontains=nombre
+        ) | self.model.objects.filter(
+            person__first_last_name__icontains=nombre
+        ) | self.model.objects.filter(
+            person__second_last_name__icontains=nombre
+        )
+
+    def filter_by_document_number(self, numero_documento):
+        """
+        Filtra instructores por número de documento de la persona asociada.
+        """
+        return self.model.objects.filter(person__number_identification=numero_documento)
