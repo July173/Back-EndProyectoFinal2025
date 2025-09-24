@@ -9,30 +9,25 @@ class RoleService(BaseService):
 
     def set_active_role_and_users(self, role_id, active):
         """
-        Activa o desactiva el rol y todos los usuarios vinculados a ese rol.
+        Delegar activación/desactivación al repository.
         """
-        from apps.security.entity.models import User, Role
-        from django.db import transaction
-        with transaction.atomic():
-            role = Role.objects.get(pk=role_id)
-            role.active = active
-            role.save()
-            users = User.objects.filter(role_id=role_id)
-            users.update(is_active=active)
-        estado = "activados" if active else "desactivados"
-        return {"detail": f"Rol y usuarios {estado} correctamente."}
+        return self.repository.set_active_role_and_users(role_id, active)
 
     def list_roles(self):
         """
-        Devuelve todos los roles.
+        Delegar listado al repository.
         """
-        from apps.security.entity.models import Role
-        return Role.objects.all()
+        return self.repository.list_roles()
 
     def filter_roles_by_type(self, type_role):
         """
-        Devuelve roles filtrados por el campo type_role (ej: 'Administrador', 'Aprendiz', 'Instructor').
+        Delegar filtrado al repository.
         """
-        from apps.security.entity.models import Role
-        return Role.objects.filter(type_role__iexact=type_role)
+        return self.repository.filter_roles_by_type(type_role)
+
+    def roles_with_user_count(self):
+        """
+        Delegar conteo al repository.
+        """
+        return self.repository.roles_with_user_count()
     

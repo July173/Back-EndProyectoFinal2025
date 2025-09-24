@@ -77,8 +77,6 @@ class AsignationInstructorViewset(BaseViewSet):
 
 
 
-
-
     @swagger_auto_schema(
         method='post',
         operation_description="Crea una asignación de instructor personalizada (fecha automática)",

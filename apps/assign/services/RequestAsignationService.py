@@ -6,14 +6,36 @@ import logging
 # Importar modelos necesarios
 from apps.general.entity.models import Aprendiz, Ficha, Sede
 from apps.assign.entity.models import ModalityProductiveStage
+from apps.assign.entity.enums.request_state_enum import RequestState
+from apps.assign.entity.models import RequestAsignation
+from apps.security.emails.SolicitudRechazada import send_rejection_email
+from apps.security.entity.models import User
+from apps.assign.entity.models import RequestAsignation
+from apps.general.entity.models import PersonSede
+from dateutil.relativedelta import relativedelta
 
 logger = logging.getLogger(__name__)
 
 
 class RequestAsignationService(BaseService):
+    
+    def __init__(self):
+        self.repository = RequestAsignationRepository()
+
+
+    def filter_by_state(self, request_state):
+        """
+        Filtra las solicitudes por el campo request_state.
+        """
+        
+        if request_state in ['ASIGNADO', 'SIN_ASIGNAR', 'RECHAZADO']:
+            solicitudes = RequestAsignation.objects.filter(request_state=request_state)
+        else:
+            solicitudes = RequestAsignation.objects.all()
+        return solicitudes
+
 
     def get_pdf_url(self, request_id):
-        from apps.assign.entity.models import RequestAsignation
         try:
             solicitud = RequestAsignation.objects.get(pk=request_id)
             if solicitud.pdf_request:
@@ -31,14 +53,13 @@ class RequestAsignationService(BaseService):
                 'success': False,
                 'message': 'Solicitud no encontrada.'
             }
+
+
     def reject_request(self, request_id, rejection_message):
         """
         Rechaza una solicitud cambiando el estado y guardando el mensaje de rechazo. Envía correo al aprendiz.
         """
-        from apps.assign.entity.enums.request_state_enum import RequestState
-        from apps.assign.entity.models import RequestAsignation
-        from apps.security.emails.SolicitudRechazada import send_rejection_email
-        from apps.security.entity.models import User
+
         try:
             request = RequestAsignation.objects.get(pk=request_id)
             request.request_state = RequestState.RECHAZADO
@@ -67,6 +88,8 @@ class RequestAsignationService(BaseService):
                 'message': 'Solicitud no encontrada',
                 'data': None
             }
+
+
     def get_form_request_by_id(self, request_id):
         """
         Obtener una solicitud de formulario por su ID, retornando solo los campos del formulario y el request_state.
@@ -107,8 +130,6 @@ class RequestAsignationService(BaseService):
             'message': 'Solicitud encontrada',
             'data': request_item
         }
-    def __init__(self):
-        self.repository = RequestAsignationRepository()
 
     def create_form_request(self, validated_data):
         """
@@ -123,8 +144,6 @@ class RequestAsignationService(BaseService):
         except (Aprendiz.DoesNotExist, Ficha.DoesNotExist) as e:
             raise ValueError(f"Entidad no encontrada: {str(e)}")
         # Validar que el aprendiz solo pueda enviar el formulario si su último request_state fue RECHAZADO
-        from apps.assign.entity.enums.request_state_enum import RequestState
-        from apps.assign.entity.models import RequestAsignation
         last_request = RequestAsignation.objects.filter(aprendiz=aprendiz).order_by('-id').first()
         if last_request and last_request.request_state != RequestState.RECHAZADO:
             raise ValueError("Solo puedes volver a enviar el formulario si tu última solicitud fue rechazada.")
@@ -138,7 +157,6 @@ class RequestAsignationService(BaseService):
         fecha_inicio = validated_data.get('fecha_inicio_contrato')
         fecha_fin = validated_data.get('fecha_fin_contrato')
         if fecha_inicio and fecha_fin:
-            from dateutil.relativedelta import relativedelta
             diferencia = relativedelta(fecha_fin, fecha_inicio)
             meses = diferencia.years * 12 + diferencia.months
             if meses < 6:
@@ -147,7 +165,6 @@ class RequestAsignationService(BaseService):
         with transaction.atomic():
             aprendiz, ficha, enterprise, boss, human_talent, sede, modality, request_asignation = self.repository.create_all_dates_form_request(validated_data)
             # Guardar la relación en PersonSede
-            from apps.general.entity.models import PersonSede
             person = aprendiz.person
             PersonSede.objects.update_or_create(
                 PersonId=person,
@@ -197,7 +214,8 @@ class RequestAsignationService(BaseService):
             }
             logger.info("Solicitud creada exitosamente")
             return response
-    
+
+
     def list_form_requests(self):
         """
         Listar solicitudes - solo delega al repository sin validaciones.

@@ -3,13 +3,17 @@ from core.base.services.implements.baseService.BaseService import BaseService
 from apps.assign.repositories.AsignationInstructorRepository import AsignationInstructorRepository
 from apps.general.entity.models import Instructor
 from apps.assign.entity.models import RequestAsignation
+from apps.assign.entity.enums.request_state_enum import RequestState
+from apps.security.entity.models import User
+from apps.security.emails.AsignacionInstructor import send_instructor_assignment_email
 
 
 class AsignationInstructorService(BaseService):
+    def __init__(self):
+        self.repository = AsignationInstructorRepository()
+
+
     def create_custom(self, instructor_id, request_asignation_id):
-        from apps.assign.entity.enums.request_state_enum import RequestState
-        from apps.security.entity.models import User
-        from apps.security.emails.AsignacionInstructor import send_instructor_assignment_email
         instructor = Instructor.objects.get(id=instructor_id)
         request_asignation = RequestAsignation.objects.get(id=request_asignation_id)
         # Validar que el estado no sea RECHAZADO
@@ -24,7 +28,7 @@ class AsignationInstructorService(BaseService):
         user = User.objects.filter(person=person).first()
         email = user.email if user else None
         if email:
-            send_instructor_assignment_email(
+            send_instructor_assignment_email(   
                 email,
                 f"{person.first_name} {person.first_last_name}",
                 f"{instructor.person.first_name} {instructor.person.first_last_name}",
@@ -42,5 +46,4 @@ class AsignationInstructorService(BaseService):
                 f"{instructor.person.first_name} {instructor.person.first_last_name}"
             )
         return asignation
-    def __init__(self):
-        self.repository = AsignationInstructorRepository()
+

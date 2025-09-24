@@ -12,26 +12,30 @@ from django.template.loader import render_to_string
 from apps.security.entity.models import User
 from apps.security.emails.SendEmailsDesactivate import enviar_desactivacion_usuario
 from core.utils.Validation import is_soy_sena_email, is_sena_email
+from django.utils.crypto import get_random_string
+from apps.security.emails.SendEmailsActivate import enviar_activacion_usuario
 
 
 class UserService(BaseService):
+    
+    def __init__(self):
+        self.repository = UserRepository()
 
-    def filter_by_status(self, is_active=None, registered=None):
-        users = self.repository.model.objects.all()
-        if is_active is not None:
-            if str(is_active).lower() == 'true':
-                users = users.filter(is_active=True)
-            elif str(is_active).lower() == 'false':
-                users = users.filter(is_active=False)
-        if registered is not None and str(registered).lower() == 'true':
-            users = users.filter(registered=True)
-        return users
+    def filter_by_status(self, status_param):
+        """
+        Delegar filtrado al repository.
+        """
+        return self.repository.filter_by_status(status_param)
+
+
     def update(self, pk, data):
         # Si se envía una nueva contraseña, hashearla antes de actualizar
         pwd = data.get('password')
         if pwd:
             data['password'] = make_password(pwd)
         return super().update(pk, data)
+
+
     def reset_password(self, email, new_password):
         # Validar correo y nueva contraseña
         if not email or not new_password:
@@ -55,6 +59,7 @@ class UserService(BaseService):
             'data': {'success': 'Contraseña actualizada correctamente.'},
             'status': status.HTTP_200_OK
         }
+
 
     def send_password_reset_code(self, email):
         # Validar correo institucional
@@ -106,8 +111,6 @@ class UserService(BaseService):
                 'status': status.HTTP_500_INTERNAL_SERVER_ERROR
             }
 
-    def __init__(self):
-        self.repository = UserRepository()
 
     def create(self, data):
         pwd = data.get('password')
@@ -115,11 +118,13 @@ class UserService(BaseService):
             data['password'] = make_password(pwd)
         return super().create(data)
 
+
     def change_password(self, pk, new_password):
         inst = self.get(pk)
         inst.set_password(new_password)
         inst.save()
         return inst
+
 
     def validate_institutional_login(self, email, password):
         # Validar correo institucional
@@ -159,6 +164,7 @@ class UserService(BaseService):
             'status': status.HTTP_200_OK
         }
 
+
     def soft_delete(self, pk, motivo="Desactivación de cuenta"):
         try:
             user = User.objects.get(pk=pk)
@@ -193,7 +199,6 @@ class UserService(BaseService):
             user.registered = False
             user.save()
             # Enviar correo de activación con el correo y contraseña actual
-            from apps.security.emails.SendEmailsActivate import enviar_activacion_usuario
             nombre = f"{user.person.first_name} {user.person.first_last_name}" if user.person else user.email
             email_usuario = user.email
             # Restablecer la contraseña al número de identificación + 2 caracteres aleatorios antes de enviar el correo
@@ -203,7 +208,6 @@ class UserService(BaseService):
             if not numero_identificacion:
                 nueva_contrasena = '(No disponible)'
             else:
-                from django.utils.crypto import get_random_string
                 caracteres_adicionales = get_random_string(length=2)
                 nueva_contrasena = numero_identificacion + caracteres_adicionales
                 print(f"Contraseña generada: '{nueva_contrasena}' (longitud: {len(nueva_contrasena)})")
