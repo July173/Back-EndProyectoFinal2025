@@ -6,7 +6,7 @@ from drf_yasg import openapi
 
 from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.assign.services.AsignationInstructorService import AsignationInstructorService
-from apps.assign.entity.serializers.AsignationInstructorSerializer import AsignationInstructorSerializer
+from apps.assign.entity.serializers.AsignationInstructor.AsignationInstructorSerializer import AsignationInstructorSerializer
 
 
 class AsignationInstructorViewset(BaseViewSet):

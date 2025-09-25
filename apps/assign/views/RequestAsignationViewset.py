@@ -116,7 +116,8 @@ class RequestAsignationViewset(BaseViewSet):
             }, status=status.HTTP_400_BAD_REQUEST)
         result = self.service_class().create_form_request(serializer.validated_data)
         if result['success']:
-            return Response(result, status=status.HTTP_201_CREATED)
+            request_id = result['data']['request_asignation']['id'] if result['data'] and 'request_asignation' in result['data'] else None
+            return Response({"id": request_id}, status=status.HTTP_201_CREATED)
         else:
             return Response(result, status=status.HTTP_400_BAD_REQUEST)
 

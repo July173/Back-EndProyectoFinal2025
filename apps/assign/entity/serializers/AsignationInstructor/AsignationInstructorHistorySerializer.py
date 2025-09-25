@@ -9,7 +9,6 @@ class AsignationInstructorHistorySerializer(serializers.ModelSerializer):
             'asignation_instructor',
             'old_instructor_id',
             'message',
-            'date',
-            'changed_by'
+            'date'
         ]
         read_only_fields = ['id', 'date', 'changed_by']
