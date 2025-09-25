@@ -35,6 +35,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('file_number', models.BigIntegerField(unique=True)),
+                ('file_number', models.BigIntegerField(unique=True)),
                 ('active', models.BooleanField(default=True)),
                 ('delete_at', models.DateTimeField(blank=True, null=True)),
             ],

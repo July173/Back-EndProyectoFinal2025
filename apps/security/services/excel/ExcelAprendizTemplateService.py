@@ -472,7 +472,8 @@ class ExcelAprendizTemplateService:
                 password=hashed_password,
                 person=person,
                 is_active=True,  # Activo automáticamente
-                role_id=2  # Rol de Aprendiz (ajustar según tu BD)
+                role_id=2,  # Rol de Aprendiz (ajustar según tu BD)
+                registered=False  # No registrado, ya que se activa automáticamente
             )
             
             # 3. Crear Aprendiz (sin ficha específica por ahora)
