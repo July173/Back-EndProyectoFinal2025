@@ -6,6 +6,7 @@ from apps.assign.views.HumanTalentViewset import HumanTalentViewset
 from apps.assign.views.ModalityProductiveStageViewset import ModalityProductiveStageViewset
 from apps.assign.views.RequestAsignationViewset import RequestAsignationViewset
 from apps.assign.views.AsignationInstructorViewset import AsignationInstructorViewset
+from apps.assign.views.AsignationInstructorHistoryViewset import AsignationInstructorHistoryViewset
 from apps.assign.views.VisitFollowingViewset import VisitFollowingViewset
 from apps.assign.views.FormRequestViewset import FormRequestPDFAPIView
 
@@ -16,6 +17,7 @@ router.register(r'human_talent', HumanTalentViewset, basename='assign_human_tale
 router.register(r'modality_productive_stage', ModalityProductiveStageViewset, basename='assign_modality_productive_stage')
 router.register(r'request_asignation', RequestAsignationViewset, basename='assign_request_asignation')
 router.register(r'asignation_instructor', AsignationInstructorViewset, basename='assign_asignation_instructor')
+router.register(r'asignation_instructor_history', AsignationInstructorHistoryViewset, basename='assign_asignation_instructor_history')
 router.register(r'visit_following', VisitFollowingViewset, basename='assign_visit_following')
 # FormRequestViewset ya no se registra en el router porque es APIView
 
