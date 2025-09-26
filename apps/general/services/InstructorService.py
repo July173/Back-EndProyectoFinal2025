@@ -11,6 +11,11 @@ from core.utils.Validation import is_sena_email
 from django.core.exceptions import ObjectDoesNotExist
 
 class InstructorService(BaseService):
+    def filter_by_knowledge_area(self, area_name):
+        """
+        Delegar el filtro por nombre de área de conocimiento al repository.
+        """
+        return self.repository.filter_by_knowledge_area(area_name)
 
     def __init__(self):
         self.repository = InstructorRepository()
