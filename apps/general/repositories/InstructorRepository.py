@@ -5,6 +5,11 @@ from apps.general.entity.models import Instructor, PersonSede, Sede
 
 
 class InstructorRepository(BaseRepository):
+    def filter_by_knowledge_area(self, area_name):
+        """
+        Filtra instructores por nombre de área de conocimiento (case-insensitive, partial match).
+        """
+        return self.model.objects.filter(knowledgeArea__name__icontains=area_name)
 
     def __init__(self):
         super().__init__(Instructor)

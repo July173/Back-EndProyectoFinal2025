@@ -11,6 +11,16 @@ from core.utils.Validation import is_soy_sena_email
 
 
 class AprendizService(BaseService):
+    def filter_by_ficha_number(self, ficha_number):
+        """
+        Delegar el filtro por número de ficha al repository.
+        """
+        return self.repository.filter_by_ficha_number(ficha_number)
+    def filter_by_program(self, program_name):
+        """
+        Delegar el filtro por nombre de programa de formación al repository.
+        """
+        return self.repository.filter_by_program(program_name)
 
     def __init__(self):
         self.repository = AprendizRepository()

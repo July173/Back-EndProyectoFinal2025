@@ -11,8 +11,7 @@ from apps.security.entity.models import Role, User  # Asegúrate de importar Use
 
 
 class RoleViewSet(BaseViewSet):
-    
-
+   
     # ----------- LIST -----------
     @swagger_auto_schema(
         operation_description=(
@@ -158,3 +157,23 @@ class RoleViewSet(BaseViewSet):
         return Response(result)
     service_class = RoleService
     serializer_class = RoleSerializer
+    
+    
+    @swagger_auto_schema(
+        operation_description="Filtra roles por estado activo/inactivo.",
+        tags=["Role"],
+        manual_parameters=[
+            openapi.Parameter('active', openapi.IN_QUERY, description="Filtrar por estado activo (true) o inactivo (false)", type=openapi.TYPE_BOOLEAN)
+        ],
+        responses={200: openapi.Response("Lista de roles filtrados")}
+    )
+    @action(detail=False, methods=['get'], url_path='filter-by-active')
+    def filter_by_active(self, request):
+        active_param = request.query_params.get('active', None)
+        if active_param is None:
+            return Response({"detail": "Debe proporcionar el parámetro 'active' (true/false)."}, status=status.HTTP_400_BAD_REQUEST)
+        active = str(active_param).lower() == 'true'
+        roles = self.service_class().filter_rols_by_active(active)
+        serializer = self.serializer_class(roles, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    

@@ -3,20 +3,15 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-
 from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.assign.services.RequestAsignationService import RequestAsignationService
 from apps.assign.entity.serializers.form.RequestAsignationSerializer import RequestAsignationSerializer
-
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-
-from apps.assign.services.FormRequestService import FormRequestService
 from apps.assign.entity.serializers.form.FormRequestSerializer import FormRequestSerializer
-from apps.assign.entity.serializers.form.FormPDFSerializer import FormPDFSerializer
 
 class RequestAsignationViewset(BaseViewSet):
 
@@ -114,11 +109,18 @@ class RequestAsignationViewset(BaseViewSet):
                 'message': 'Error en los datos de entrada',
                 'errors': serializer.errors
             }, status=status.HTTP_400_BAD_REQUEST)
-        result = self.service_class().create_form_request(serializer.validated_data)
-        if result['success']:
-            return Response(result, status=status.HTTP_201_CREATED)
-        else:
-            return Response(result, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            result = self.service_class().create_form_request(serializer.validated_data)
+            if result['success']:
+                request_id = result['data']['request_asignation']['id'] if result['data'] and 'request_asignation' in result['data'] else None
+                return Response({"id": request_id}, status=status.HTTP_201_CREATED)
+            else:
+                return Response(result, status=status.HTTP_400_BAD_REQUEST)
+        except ValueError as e:
+            return Response({
+                "success": False,
+                "message": str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
         operation_description="Obtener lista de todas las solicitudes de formulario",

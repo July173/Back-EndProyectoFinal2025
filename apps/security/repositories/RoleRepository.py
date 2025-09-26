@@ -3,6 +3,7 @@ from apps.security.entity.models import Role
 
 
 class RoleRepository(BaseRepository):    
+    
     def __init__(self):
         super().__init__(Role)
         
@@ -50,3 +51,9 @@ class RoleRepository(BaseRepository):
                 "cantidad_usuarios": user_count
             })
         return data
+    
+    def filter_rols_by_active(self, active=True):
+        """
+        Filtra roles por estado activo/inactivo.
+        """
+        return self.model.objects.filter(active=active)

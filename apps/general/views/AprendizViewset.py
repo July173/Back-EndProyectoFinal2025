@@ -89,6 +89,7 @@ class AprendizViewset(BaseViewSet):
         )
 #--------------------------------------------------------------------------------------------
 
+    # ----------- RETRIEVE (custom) -----------
     @swagger_auto_schema(
         operation_description="Obtiene un aprendiz por su ID (nuevo endpoint avanzado).",
         responses={200: GetAprendizSerializer},
@@ -102,7 +103,7 @@ class AprendizViewset(BaseViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response({"detail": "Aprendiz no encontrado."}, status=status.HTTP_404_NOT_FOUND)
 
-
+    # ----------- CREATE (custom) -----------
     @swagger_auto_schema(
         request_body=CreateAprendizSerializer,
         operation_description="Crea un nuevo aprendiz (nuevo endpoint avanzado).",
@@ -121,7 +122,7 @@ class AprendizViewset(BaseViewSet):
             "email": user.email
         }, status=status.HTTP_201_CREATED)
 
-
+    # ----------- LIST (custom) -----------
     @swagger_auto_schema(
         operation_description="Lista todos los aprendices (nuevo endpoint avanzado).",
         responses={200: GetAprendizSerializer(many=True)},
@@ -133,7 +134,7 @@ class AprendizViewset(BaseViewSet):
         serializer = GetAprendizSerializer(aprendices, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
+    # ----------- UPDATE (custom) -----------
     @swagger_auto_schema(
         request_body=UpdateAprendizSerializer,
         operation_description="Actualiza los datos de un aprendiz (nuevo endpoint avanzado).",
@@ -151,7 +152,7 @@ class AprendizViewset(BaseViewSet):
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-
+    # ----------- DELETE (custom) -----------
     @swagger_auto_schema(
         operation_description="Elimina un aprendiz (delete persistencial, nuevo endpoint avanzado).",
         tags=["Aprendiz"]
@@ -166,7 +167,8 @@ class AprendizViewset(BaseViewSet):
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-
+    
+    # ----------- LOGICAL DELETE OR REACTIVATE -----------
     @swagger_auto_schema(
         operation_description="Elimina lógicamente o reactiva un aprendiz (nuevo endpoint avanzado).",
         tags=["Aprendiz"]
@@ -191,10 +193,10 @@ class AprendizViewset(BaseViewSet):
         ],
         responses={200: openapi.Response("Lista de aprendices filtrados")}
     )
-    @action(detail=False, methods=['get'], url_path='filter-by-nombre')
-    def filter_by_nombre(self, request):
-        nombre = request.query_params.get('nombre', '')
-        aprendices = self.service.filter_by_nombre(nombre)
+    @action(detail=False, methods=['get'], url_path='filter-by-name')
+    def filter_by_name(self, request):
+        name = request.query_params.get('name', '')
+        aprendices = self.service.filter_by_name(name)
         serializer = self.serializer_class(aprendices, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
@@ -207,9 +209,45 @@ class AprendizViewset(BaseViewSet):
         ],
         responses={200: openapi.Response("Lista de aprendices filtrados")}
     )
-    @action(detail=False, methods=['get'], url_path='filter-by-numero-documento')
-    def filter_by_number_document(self, request):
-        numero_documento = request.query_params.get('numero_documento', '')
-        aprendices = self.service.filter_by_number_document(numero_documento)
+    @action(detail=False, methods=['get'], url_path='filter-by-document-number')
+    def filter_by_document_number(self, request):
+        document_number = request.query_params.get('document_number', '')
+        aprendices = self.service.filter_by_document_number(document_number)
+        serializer = self.serializer_class(aprendices, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    # ----------- FILTRAR POR NÚMERO DE FICHA -----------
+    @swagger_auto_schema(
+        operation_description="Filtra aprendices por número de ficha",
+        tags=["Aprendiz"],
+        manual_parameters=[
+            openapi.Parameter('number_ficha', openapi.IN_QUERY, description="Número de ficha", type=openapi.TYPE_INTEGER)
+        ],
+        responses={200: openapi.Response("Lista de aprendices filtrados")}
+    )
+    @action(detail=False, methods=['get'], url_path='filter-by-number-ficha')
+    def filter_by_number_ficha(self, request):
+        ficha_number = request.query_params.get('number_ficha', None)
+        if not ficha_number:
+            return Response({"detail": "Debe proporcionar el parámetro number_ficha."}, status=status.HTTP_400_BAD_REQUEST)
+        aprendices = self.service.filter_by_number_ficha(ficha_number)
+        serializer = self.serializer_class(aprendices, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    # ----------- FILTRAR POR PROGRAMA DE FORMACIÓN -----------
+    @swagger_auto_schema(
+        operation_description="Filtra aprendices por nombre de programa de formación (case-insensitive, partial match)",
+        tags=["Aprendiz"],
+        manual_parameters=[
+            openapi.Parameter('program_name', openapi.IN_QUERY, description="Nombre del programa de formación", type=openapi.TYPE_STRING)
+        ],
+        responses={200: openapi.Response("Lista de aprendices filtrados")}
+    )
+    @action(detail=False, methods=['get'], url_path='filter-by-program')
+    def filter_by_program(self, request):
+        program_name = request.query_params.get('program_name', None)
+        if not program_name:
+            return Response({"detail": "Debe proporcionar el parámetro program_name."}, status=status.HTTP_400_BAD_REQUEST)
+        aprendices = self.service.filter_by_program(program_name)
         serializer = self.serializer_class(aprendices, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
