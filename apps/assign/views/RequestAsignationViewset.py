@@ -14,6 +14,22 @@ from drf_yasg import openapi
 from apps.assign.entity.serializers.form.FormRequestSerializer import FormRequestSerializer
 
 class RequestAsignationViewset(BaseViewSet):
+    @swagger_auto_schema(
+        operation_description="Obtiene la información detallada de una solicitud de formulario por su ID.",
+        tags=["FormRequest"],
+        responses={
+            200: openapi.Response("Solicitud encontrada con todos los datos detallados."),
+            404: openapi.Response("Solicitud no encontrada."),
+        }
+    )
+    @action(detail=True, methods=['get'], url_path='form-request-detail')
+    def form_request_detail(self, request, pk=None):
+        """Obtener la solicitud de formulario con todos los datos detallados"""
+        result = self.service_class().get_form_request_by_id(pk)
+        if result['success']:
+            return Response(result, status=status.HTTP_200_OK)
+        else:
+            return Response(result, status=status.HTTP_404_NOT_FOUND)
 
     
     @swagger_auto_schema(
