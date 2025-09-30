@@ -1,5 +1,6 @@
 from core.base.services.implements.baseService.BaseService import BaseService
 from apps.general.repositories.RegionalRepository import RegionalRepository
+from apps.general.entity.models import Regional
 
 
 class RegionalService(BaseService):
@@ -8,7 +9,6 @@ class RegionalService(BaseService):
     
     def get_regional_with_centers_by_id(self, pk):
         """Obtiene una regional por ID con sus centros anidados"""
-        from apps.general.entity.models import Regional
         try:
             return Regional.objects.prefetch_related('centers').get(pk=pk)
         except Regional.DoesNotExist:
@@ -16,5 +16,4 @@ class RegionalService(BaseService):
     
     def get_all_regionals_with_centers(self):
         """Obtiene todas las regionales con sus centros anidados"""
-        from apps.general.entity.models import Regional
         return Regional.objects.prefetch_related('centers').all()

@@ -3,7 +3,6 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-
 from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.general.services.RegionalService import RegionalService
 from apps.general.entity.serializers.Regional.RegionalSerializer import RegionalSerializer
@@ -11,6 +10,8 @@ from apps.general.entity.serializers.Regional.RegionalNestedSerializer import Re
 
 
 class RegionalViewset(BaseViewSet):
+    service_class = RegionalService
+    serializer_class = RegionalSerializer
 
     # ----------- LIST -----------
     @swagger_auto_schema(
@@ -122,5 +123,4 @@ class RegionalViewset(BaseViewSet):
         queryset = self.service_class().get_all_regionals_with_centers()
         serializer = RegionalNestedSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    service_class = RegionalService
-    serializer_class = RegionalSerializer
+    

@@ -9,9 +9,6 @@ from apps.general.entity.serializers.SupportScheduleSerializer import SupportSch
 from apps.general.entity.models.SupportSchedule import SupportSchedule
 
 class SupportScheduleViewset(BaseViewSet):
-    """
-    Viewset para operaciones CRUD sobre SupportSchedule.
-    """
     service_class = SupportScheduleService
     serializer_class = SupportScheduleSerializer
 

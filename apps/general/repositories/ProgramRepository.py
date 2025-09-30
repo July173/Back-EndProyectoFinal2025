@@ -1,5 +1,7 @@
 from core.base.repositories.implements.baseRepository.BaseRepository import BaseRepository
-from apps.general.entity.models import Program
+from apps.general.entity.models import Program, Ficha
+from django.utils import timezone
+from django.db import transaction
 
 
 class ProgramRepository(BaseRepository):
@@ -10,7 +12,6 @@ class ProgramRepository(BaseRepository):
         """
         Retorna todas las fichas vinculadas a un programa específico, sin filtrar por estado.
         """
-        from apps.general.entity.models import Ficha
         return Ficha.objects.filter(program_id=program_id)
     
     def set_active_state_program_with_fichas(self, program_id, active=True):
@@ -18,10 +19,6 @@ class ProgramRepository(BaseRepository):
         Activa o desactiva un programa y todas sus fichas vinculadas.
         Si active=True, activa; si active=False, desactiva.
         """
-        from apps.general.entity.models import Ficha
-        from django.utils import timezone
-        from django.db import transaction
-
         try:
             with transaction.atomic():
                 program = self.model.objects.filter(pk=program_id).first()

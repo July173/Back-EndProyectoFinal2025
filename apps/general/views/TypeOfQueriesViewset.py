@@ -9,9 +9,6 @@ from apps.general.entity.serializers.TypeOfQueriesSerializer import TypeOfQuerie
 from apps.general.entity.models.TypeOfQueries import TypeOfQueries
 
 class TypeOfQueriesViewset(BaseViewSet):
-    """
-    Viewset para operaciones CRUD sobre TypeOfQueries.
-    """
     service_class = TypeOfQueriesService
     serializer_class = TypeOfQueriesSerializer
 
