@@ -2,8 +2,6 @@ from core.base.services.implements.baseService.BaseService import BaseService
 from apps.assign.repositories.RequestAsignationRepository import RequestAsignationRepository
 from django.db import transaction
 import logging
-
-# Importar modelos necesarios
 from apps.general.entity.models import Aprendiz, Ficha, Sede
 from apps.assign.entity.models import ModalityProductiveStage
 from apps.assign.entity.enums.request_state_enum import RequestState
@@ -102,7 +100,7 @@ class RequestAsignationService(BaseService):
                 'data': None,
                 'error_type': 'not_found'
             }
-        person, aprendiz, enterprise, boss, human_talent, modality, request_asignation, regional, center, sede = result
+        aprendiz, enterprise, boss, human_talent, modality, request_asignation, regional, center, sede = result
         request_item = {
             'aprendiz_id': aprendiz.id,
             'ficha_id': aprendiz.ficha_id if aprendiz.ficha else None,
