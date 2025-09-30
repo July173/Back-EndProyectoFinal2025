@@ -178,8 +178,10 @@ SWAGGER_SETTINGS = {
         'drf_yasg.inspectors.StringDefaultFieldInspector',
     ],
 }
+
 REDOC_SETTINGS = {'LAZY_RENDERING': False}
 
+X_FRAME_OPTIONS = 'ALLOWALL'
 # ============================
 # INTERNACIONALIZACIÓN
 # ============================
@@ -216,6 +218,7 @@ CORS_ALLOWED_ORIGINS = [
     ## forntend movil
     "http://198.168.1.21:8000",
     "http://192.168.1.8:8000",
+    "http://127.0.0.1:8000"
     
 ]
 
@@ -249,7 +252,7 @@ DEFAULT_FROM_EMAIL = 'Serviciodecorreossena@gmail.com'
 # ARCHIVOS MEDIA (IMÁGENES, ETC)
 # ============================
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'Media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 LOGGING = {
     'version': 1,
