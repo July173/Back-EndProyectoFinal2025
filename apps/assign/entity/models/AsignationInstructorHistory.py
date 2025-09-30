@@ -1,6 +1,5 @@
 from django.db import models
 from apps.assign.entity.models import AsignationInstructor
-from apps.security.entity.models import User
 
 class AsignationInstructorHistory(models.Model):
     def __str__(self):

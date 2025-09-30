@@ -7,8 +7,12 @@ from .Regional import Regional
 from .Sede import Sede
 from .PersonSede import PersonSede
 from .KnowledgeArea import KnowledgeArea
+from .Colors import Colors
+from .TypeOfQueries import TypeOfQueries
+from .SupportSchedule import SupportSchedule
 
 __all__ = [
     'Aprendiz', 'Center', 'Ficha',
     'Instructor', 'Program', 'Regional', 'Sede', 'PersonSede', 'KnowledgeArea'
+    'Colors', 'TypeOfQueries', 'SupportSchedule'
 ]

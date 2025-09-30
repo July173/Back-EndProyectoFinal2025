@@ -87,15 +87,6 @@ DATABASES = {
         'OPTIONS': {'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"},
     }
     
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': os.environ.get('DB_NAME', 'bdautogestion'),
-    #     'USER': os.environ.get('DB_USER', 'root'),
-    #     'PASSWORD': os.environ.get('DB_PASS', '123456'),
-    #     'HOST': os.environ.get('DB_HOST', 'localhost'),
-    #     'PORT': os.environ.get('DB_PORT', '3306'),
-    #     'OPTIONS': {'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"},
-    # }
 }
 # ============================
 # CELERY CONFIG (para Docker Compose)
