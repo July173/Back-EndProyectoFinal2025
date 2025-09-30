@@ -103,15 +103,35 @@ class RequestAsignationService(BaseService):
                 'error_type': 'not_found'
             }
         person, aprendiz, enterprise, boss, human_talent, modality, request_asignation, regional, center, sede = result
+        # Obtener correo del aprendiz desde User
+        user = User.objects.filter(person=person).first()
+        correo_aprendiz = user.email if user else None
+        # Obtener sede, centro y regional desde PersonSede
+        personsede = PersonSede.objects.filter(PersonId=person).first()
+        sede_obj = personsede.SedeId if personsede else sede
+        center_obj = sede_obj.center if sede_obj and hasattr(sede_obj, 'center') else center
+        regional_obj = center_obj.regional if center_obj and hasattr(center_obj, 'regional') else regional
+        # Datos de talento humano
+        talento_humano = {
+            'nombre': getattr(human_talent, 'name', None),
+            'correo': getattr(human_talent, 'email', None),
+            'telefono': getattr(human_talent, 'phone_number', None)
+        } if human_talent else None
+        # Obtener número de ficha y nombre del programa
+        ficha = aprendiz.ficha if hasattr(aprendiz, 'ficha') and aprendiz.ficha else None
+        numero_ficha = ficha.file_number if ficha and hasattr(ficha, 'file_number') else None
+        programa = ficha.program if ficha and hasattr(ficha, 'program') else None
+        nombre_programa = programa.name if programa and hasattr(programa, 'name') else None
         request_item = {
             'aprendiz_id': aprendiz.id,
             'nombre_aprendiz': f"{getattr(person, 'first_name', '')} {getattr(person, 'first_last_name', '')} {getattr(person, 'second_last_name', '')}",
             'tipo_identificacion': getattr(person, 'type_identification', None),
-            'numero_identificacion': getattr(person, 'identification', None),
+            'numero_identificacion': getattr(person, 'number_identification', None),
             'telefono_aprendiz': getattr(person, 'phone_number', None),
-            'correo_aprendiz': getattr(person, 'email', None),
-            'ficha_id': aprendiz.ficha_id if aprendiz.ficha else None,
-            'programa': aprendiz.program.name if hasattr(aprendiz, 'program') and aprendiz.program else None,
+            'correo_aprendiz': correo_aprendiz,
+            'ficha_id': ficha.id if ficha else None,
+            'numero_ficha': numero_ficha,
+            'programa': nombre_programa,
             'empresa_nombre': enterprise.name_enterprise,
             'empresa_nit': enterprise.nit_enterprise,
             'empresa_ubicacion': enterprise.locate,
@@ -120,14 +140,16 @@ class RequestAsignationService(BaseService):
             'jefe_telefono': boss.phone_number,
             'jefe_correo': boss.email_boss,
             'jefe_cargo': boss.position,
-            'regional': regional.name if regional else None,
-            'center': center.name if center else None,
-            'sede': sede.name if sede else None,
+            'regional': regional_obj.name if regional_obj else None,
+            'center': center_obj.name if center_obj else None,
+            'sede': sede_obj.name if sede_obj else None,
             'fecha_solicitud': request_asignation.request_date,
             'fecha_inicio_etapa_practica': request_asignation.date_start_production_stage,
             'fecha_fin_etapa_practica': getattr(request_asignation, 'date_end_production_stage', None),
             'modality_productive_stage': modality.name_modality if hasattr(modality, 'name_modality') else None,
-            'request_state': request_asignation.request_state
+            'request_state': request_asignation.request_state,
+            'pdf_url': request_asignation.pdf_request.url if request_asignation.pdf_request else None,
+            'talento_humano': talento_humano
         }
         return {
             'success': True,
@@ -222,37 +244,20 @@ class RequestAsignationService(BaseService):
 
     def list_form_requests(self):
         """
-        Listar solicitudes - solo delega al repository sin validaciones.
-        El GET no necesita validaciones de negocio.
+        Listar solicitudes mostrando solo Nombre, Tipo de identificación, Número y Fecha Solicitud.
         """
         try:
-            logger.info("Obteniendo lista de solicitudes")
-            
-            # Delegar directamente al repository (solo BD)
+            logger.info("Obteniendo lista de solicitudes (solo datos personales básicos)")
             form_requests = self.repository.get_all_form_requests()
-            
-            # Procesar datos para respuesta: solo los campos del FormRequestSerializer
             requests_data = []
-            for _, aprendiz, enterprise, boss, human_talent, sede, modality, request_asignation in form_requests:
+            for person, aprendiz, enterprise, boss, human_talent, sede, modality, request_asignation in form_requests:
                 request_item = {
-                    'aprendiz_id': aprendiz.id,
-                    'ficha_id': aprendiz.ficha_id if aprendiz.ficha else None,
-                    'fecha_inicio_contrato': request_asignation.date_start_production_stage,
-                    'fecha_fin_contrato': getattr(request_asignation, 'date_end_production_stage', None),
-                    'enterprise_name': enterprise.name_enterprise,
-                    'enterprise_nit': enterprise.nit_enterprise,
-                    'enterprise_location': enterprise.locate,
-                    'enterprise_email': enterprise.email_enterprise,
-                    'boss_name': boss.name_boss,
-                    'boss_phone': boss.phone_number,
-                    'boss_email': boss.email_boss,
-                    'boss_position': boss.position,
-                    'human_talent_name': human_talent.name,
-                    'human_talent_email': human_talent.email,
-                    'human_talent_phone': human_talent.phone_number,
-                    'sede': sede.id if sede else None,
-                    'modality_productive_stage': modality.id,
-                    'request_state': request_asignation.request_state
+                    'id': request_asignation.id,  # id de la solicitud
+                    'aprendiz_id': aprendiz.id,   # id del aprendiz
+                    'nombre': f"{getattr(person, 'first_name', '')} {getattr(person, 'first_last_name', '')} {getattr(person, 'second_last_name', '')}",
+                    'tipo_identificacion': getattr(person, 'type_identification', None),
+                    'numero_identificacion': getattr(person, 'number_identification', None),
+                    'fecha_solicitud': request_asignation.request_date
                 }
                 requests_data.append(request_item)
             logger.info(f"Se encontraron {len(requests_data)} solicitudes")
@@ -262,7 +267,6 @@ class RequestAsignationService(BaseService):
                 'count': len(requests_data),
                 'data': requests_data
             }
-            
         except Exception as e:
             logger.error(f"Error al listar solicitudes: {str(e)}")
             return {
