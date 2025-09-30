@@ -9,6 +9,8 @@ from apps.assign.entity.serializers.AsignationInstructor.AsignationInstructorSer
 
 
 class AsignationInstructorViewset(BaseViewSet):
+    service_class = AsignationInstructorService
+    serializer_class = AsignationInstructorSerializer
     
     @swagger_auto_schema(
         operation_description="Obtiene una lista de todas las asignaciones de instructor.",
@@ -75,7 +77,6 @@ class AsignationInstructorViewset(BaseViewSet):
         )
 
 
-
     @swagger_auto_schema(
         method='post',
         operation_description="Crea una asignación de instructor personalizada (fecha automática)",
@@ -96,5 +97,4 @@ class AsignationInstructorViewset(BaseViewSet):
         asignation = service.create_custom(instructor_id, request_asignation_id)
         serializer = self.serializer_class(asignation)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    service_class = AsignationInstructorService
-    serializer_class = AsignationInstructorSerializer
+    

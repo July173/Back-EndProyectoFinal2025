@@ -9,7 +9,6 @@ from apps.security.emails.AsignacionInstructor import send_instructor_assignment
 from apps.security.emails.AsignacionInstructor import send_assignment_to_instructor_email
 
 
-
 class AsignationInstructorService(BaseService):
     def __init__(self):
         self.repository = AsignationInstructorRepository()

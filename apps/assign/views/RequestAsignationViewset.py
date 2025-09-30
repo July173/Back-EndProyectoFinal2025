@@ -14,6 +14,18 @@ from drf_yasg import openapi
 from apps.assign.entity.serializers.form.FormRequestSerializer import FormRequestSerializer
 
 class RequestAsignationViewset(BaseViewSet):
+    service_class = RequestAsignationService
+    serializer_class = RequestAsignationSerializer
+    parser_classes = [JSONParser, MultiPartParser, FormParser]
+
+    def get_serializer(self, *args, **kwargs):
+        # Usa FormRequestSerializer solo en acciones específicas
+        if hasattr(self, 'action') and self.action in [
+            'create_form_request', 'list_form_requests', 'form_request_detail', 'reject_form_request', 'get_pdf_url'
+        ]:
+            return FormRequestSerializer(*args, **kwargs)
+        return self.serializer_class(*args, **kwargs)
+    
     @swagger_auto_schema(
         operation_description="Obtiene la información detallada de una solicitud de formulario por su ID.",
         tags=["FormRequest"],
@@ -97,14 +109,8 @@ class RequestAsignationViewset(BaseViewSet):
         )
 
 
-
-
-    service_class = RequestAsignationService
-    serializer_class = FormRequestSerializer
-    parser_classes = [JSONParser, MultiPartParser, FormParser]  # JSON y archivos
     
-    def get_serializer(self, *args, **kwargs):
-        return self.serializer_class(*args, **kwargs)
+   
 
     @swagger_auto_schema(
         operation_description="Crear una nueva solicitud de formulario (sin PDF)",
@@ -229,4 +235,4 @@ class RequestAsignationViewset(BaseViewSet):
             return Response(result, status=status.HTTP_200_OK)
         else:
             return Response(result, status=status.HTTP_404_NOT_FOUND)
-    serializer_class = RequestAsignationSerializer
+    

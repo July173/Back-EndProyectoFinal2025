@@ -3,9 +3,6 @@ from apps.assign.repositories.FormRequestRepository import FormRequestRepository
 from django.db import transaction
 import logging
 
-# Importar validaciones
-from core.utils.Validation import is_soy_sena_email
-
 logger = logging.getLogger(__name__)
 
 class FormRequestService(BaseService):
@@ -13,17 +10,6 @@ class FormRequestService(BaseService):
         self.repository = FormRequestRepository()
     
     def upload_pdf_to_request(self, request_id, validated_data):
-        """
-        Cargar archivo PDF a una solicitud existente.
-        Validaciones de negocio + delegación al repository.
-        
-        Args:
-            request_id: ID de la solicitud a actualizar
-            validated_data: Datos validados del serializer con pdf_file
-            
-        Returns:
-            dict: Resultado de la operación
-        """
         try:
             logger.info(f"Iniciando carga de PDF para solicitud ID: {request_id}")
             

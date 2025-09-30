@@ -1,6 +1,5 @@
 from django.db import models
 
-
 class Center(models.Model):
     name = models.CharField(max_length=100)
     codeCenter = models.BigIntegerField()

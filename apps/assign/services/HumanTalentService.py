@@ -1,4 +1,3 @@
-# HumanTalentService.py
 from core.base.services.implements.baseService.BaseService import BaseService
 from apps.assign.repositories.HumanTalentRepository import HumanTalentRepository
 

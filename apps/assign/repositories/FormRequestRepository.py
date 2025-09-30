@@ -6,21 +6,9 @@ logger = logging.getLogger(__name__)
 
 class FormRequestRepository(BaseRepository):
     def __init__(self):
-        # Repository independiente para manejar FormRequests
-        pass
+        super().__init__(RequestAsignation)
     
     def update_request_pdf(self, request_id, pdf_file):
-        """
-        Actualizar una solicitud existente con un archivo PDF.
-        SOLO maneja comunicación con BD - SIN validaciones de negocio.
-        
-        Args:
-            request_id: ID de la solicitud a actualizar
-            pdf_file: Archivo PDF a asociar
-            
-        Returns:
-            RequestAsignation: Objeto actualizado o None si falla
-        """
         try:
             logger.info(f"Actualizando PDF para solicitud ID: {request_id}")
             
