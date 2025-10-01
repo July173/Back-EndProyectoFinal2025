@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from apps.security.entity.enums.document_type_enum import DocumentType
-from apps.general.entity.enums.contract_type_enum import ContractType
+from apps.security.entity.models.DocumentType import DocumentType
+from apps.general.entity.models.TypeContract import TypeContract
 
 
 class CreateInstructorSerializer(serializers.Serializer):
@@ -10,13 +10,13 @@ class CreateInstructorSerializer(serializers.Serializer):
     first_last_name = serializers.CharField()
     second_last_name = serializers.CharField(required=False, allow_blank=True)
     phone_number = serializers.IntegerField(required=False)
-    type_identification = serializers.ChoiceField(choices=[dt.name for dt in DocumentType])
+    type_identification = serializers.PrimaryKeyRelatedField(queryset=DocumentType.objects.all())
     number_identification = serializers.IntegerField(required=True)
     # Campos de User
     email = serializers.EmailField()
     role_id = serializers.IntegerField()
     # Campos de Instructor
-    contractType = serializers.ChoiceField(choices=[ct.name for ct in ContractType])
+    contractType = serializers.PrimaryKeyRelatedField(queryset=TypeContract.objects.all())
     contractStartDate = serializers.DateField()
     contractEndDate = serializers.DateField()
     knowledgeArea = serializers.IntegerField()

@@ -1,4 +1,3 @@
-
 def is_soy_sena_email(email):
 	"""Valida si el correo termina en @soy.sena.edu.co."""
 	if not email:
