@@ -4,13 +4,14 @@ from apps.security.repositories.RoleRepository import RoleRepository
 
 
 class RoleService(BaseService):
+    def __init__(self):
+        self.repository = RoleRepository()
+    
     def filter_rols_by_active(self, active=True):
         """
         Delegar filtrado por estado activo/inactivo al repository.
         """
         return self.repository.filter_rols_by_active(active)
-    def __init__(self):
-        self.repository = RoleRepository()
 
     def set_active_role_and_users(self, role_id, active):
         """
