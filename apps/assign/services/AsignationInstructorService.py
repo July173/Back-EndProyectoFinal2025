@@ -6,6 +6,7 @@ from apps.assign.entity.models import RequestAsignation
 from apps.assign.entity.enums.request_state_enum import RequestState
 from apps.security.entity.models import User
 from apps.security.emails.AsignacionInstructor import send_instructor_assignment_email
+from apps.security.emails.AsignacionInstructor import send_assignment_to_instructor_email
 
 
 class AsignationInstructorService(BaseService):
@@ -39,7 +40,6 @@ class AsignationInstructorService(BaseService):
         instructor_user = User.objects.filter(person=instructor.person).first()
         instructor_email = instructor_user.email if instructor_user else None
         if instructor_email:
-            from apps.security.emails.AsignacionInstructor import send_assignment_to_instructor_email
             send_assignment_to_instructor_email(
                 instructor_email,
                 f"{person.first_name} {person.first_last_name}",

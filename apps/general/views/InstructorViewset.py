@@ -11,25 +11,7 @@ from apps.general.entity.serializers.CreateInstructor.CreateInstructorSerializer
 from apps.general.entity.serializers.CreateInstructor.GetInstructorSerializer import GetInstructorSerializer
 
 
-
 class InstructorViewset(BaseViewSet):
-    @swagger_auto_schema(
-        operation_description="Filtra instructores por nombre de área de conocimiento (case-insensitive, partial match)",
-        tags=["Instructor"],
-        manual_parameters=[
-            openapi.Parameter('knowledge_area_name', openapi.IN_QUERY, description="Nombre del área de conocimiento", type=openapi.TYPE_STRING)
-        ],
-        responses={200: openapi.Response("Lista de instructores filtrados")}
-    )
-    @action(detail=False, methods=['get'], url_path='filter-by-knowledge-area')
-    def filter_by_knowledge_area(self, request):
-        area_name = request.query_params.get('knowledge_area_name', None)
-        if not area_name:
-            return Response({"detail": "Debe proporcionar el parámetro knowledge_area_name."}, status=status.HTTP_400_BAD_REQUEST)
-        instructors = self.service.filter_by_knowledge_area(area_name)
-        serializer = self.serializer_class(instructors, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
     service_class = InstructorService
     serializer_class = InstructorSerializer
 
@@ -250,4 +232,21 @@ class InstructorViewset(BaseViewSet):
         numero_documento = request.query_params.get('numero_documento', '')
         instructores = self.service.filter_by_document_number(numero_documento)
         serializer = self.serializer_class(instructores, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    @swagger_auto_schema(
+        operation_description="Filtra instructores por nombre de área de conocimiento (case-insensitive, partial match)",
+        tags=["Instructor"],
+        manual_parameters=[
+            openapi.Parameter('knowledge_area_name', openapi.IN_QUERY, description="Nombre del área de conocimiento", type=openapi.TYPE_STRING)
+        ],
+        responses={200: openapi.Response("Lista de instructores filtrados")}
+    )
+    @action(detail=False, methods=['get'], url_path='filter-by-knowledge-area')
+    def filter_by_knowledge_area(self, request):
+        area_name = request.query_params.get('knowledge_area_name', None)
+        if not area_name:
+            return Response({"detail": "Debe proporcionar el parámetro knowledge_area_name."}, status=status.HTTP_400_BAD_REQUEST)
+        instructors = self.service.filter_by_knowledge_area(area_name)
+        serializer = self.serializer_class(instructors, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

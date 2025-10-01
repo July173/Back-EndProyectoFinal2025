@@ -1,4 +1,3 @@
-from core.base.repositories.implements.baseRepository.BaseRepository import BaseRepository
 from apps.assign.entity.models.AsignationInstructorHistory import AsignationInstructorHistory
 
 class AsignationInstructorHistoryRepository:

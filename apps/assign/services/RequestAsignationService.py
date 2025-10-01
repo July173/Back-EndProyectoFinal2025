@@ -2,8 +2,6 @@ from core.base.services.implements.baseService.BaseService import BaseService
 from apps.assign.repositories.RequestAsignationRepository import RequestAsignationRepository
 from django.db import transaction
 import logging
-
-# Importar modelos necesarios
 from apps.general.entity.models import Aprendiz, Ficha, Sede
 from apps.assign.entity.models import ModalityProductiveStage
 from apps.assign.entity.enums.request_state_enum import RequestState

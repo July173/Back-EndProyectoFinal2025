@@ -3,13 +3,14 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-
 from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.assign.services.AsignationInstructorService import AsignationInstructorService
 from apps.assign.entity.serializers.AsignationInstructor.AsignationInstructorSerializer import AsignationInstructorSerializer
 
 
 class AsignationInstructorViewset(BaseViewSet):
+    service_class = AsignationInstructorService
+    serializer_class = AsignationInstructorSerializer
     
     @swagger_auto_schema(
         operation_description="Obtiene una lista de todas las asignaciones de instructor.",
@@ -76,7 +77,6 @@ class AsignationInstructorViewset(BaseViewSet):
         )
 
 
-
     @swagger_auto_schema(
         method='post',
         operation_description="Crea una asignación de instructor personalizada (fecha automática)",
@@ -97,5 +97,4 @@ class AsignationInstructorViewset(BaseViewSet):
         asignation = service.create_custom(instructor_id, request_asignation_id)
         serializer = self.serializer_class(asignation)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    service_class = AsignationInstructorService
-    serializer_class = AsignationInstructorSerializer
+    

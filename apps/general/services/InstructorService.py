@@ -39,8 +39,6 @@ class InstructorService(BaseService):
                 sede = Sede.objects.get(id=sede_id)
             except ObjectDoesNotExist:
                 raise ValueError(f'La sede con id {sede_id} no existe.')
-            center = sede.center if sede else None
-            regional = center.regional if center else None
 
             # Preparar datos para KnowledgeArea
             knowledge_area_id = instructor_data.pop('knowledgeArea')
