@@ -3,7 +3,6 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-
 from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.security.services.UserService import UserService
 from apps.security.entity.serializers.UserSerializer import UserSerializer
@@ -13,6 +12,8 @@ from rest_framework import status
 
 
 class UserViewSet(BaseViewSet):
+    service_class = UserService
+    serializer_class = UserSerializer
 
     # ----------- LIST -----------
     @swagger_auto_schema(
@@ -144,8 +145,7 @@ class UserViewSet(BaseViewSet):
         new_password = request.data.get('new_password')
         result = self.service.reset_password(email, new_password)
         return Response(result['data'], status=result['status'])
-    service_class = UserService
-    serializer_class = UserSerializer
+    
 
 
     @swagger_auto_schema(
