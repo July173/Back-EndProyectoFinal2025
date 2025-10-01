@@ -51,7 +51,7 @@ class PersonViewSet(BaseViewSet):
                                 'first_last_name': openapi.Schema(type=openapi.TYPE_STRING),
                                 'number_identification': openapi.Schema(type=openapi.TYPE_STRING),
                                 'phone_number': openapi.Schema(type=openapi.TYPE_STRING),
-                                'type_identification': openapi.Schema(type=openapi.TYPE_STRING),
+                                'type_identification': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID de DocumentType"),
                                 'email': openapi.Schema(type=openapi.TYPE_STRING)
                             }
                         ),
@@ -82,7 +82,7 @@ class PersonViewSet(BaseViewSet):
                             'first_last_name': 'Pérez',
                             'number_identification': '1234567890',
                             'phone_number': '3001234567',
-                            'type_identification': 'CC',
+                            'type_identification': 1,
                             'email': 'juan.perez@soy.sena.edu.co'
                         },
                         'usuario': {

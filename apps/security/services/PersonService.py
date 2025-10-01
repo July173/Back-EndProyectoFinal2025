@@ -10,7 +10,7 @@ from django.contrib.auth.hashers import make_password
 
 from apps.security.entity.models import Person, User
 from django.db import transaction
-from apps.security.entity.enums.document_type_enum import DocumentType
+from apps.security.entity.models.DocumentType import DocumentType
 from apps.general.entity.models import Aprendiz
 
 
@@ -68,12 +68,13 @@ class PersonService(BaseService):
                 'status': status.HTTP_400_BAD_REQUEST
             }
         
-        # Validar tipo de identificación según enum
-        
-        valid_types = [doc_type.name for doc_type in DocumentType]
-        if type_identification not in valid_types:
+
+        # Validar tipo de identificación según DocumentType activo
+        if not DocumentType.objects.filter(pk=type_identification, active=True).exists():
+            valid_types = DocumentType.objects.filter(active=True).values_list('id', 'name')
+            valid_types_str = ', '.join([f"{id}: {name}" for id, name in valid_types])
             return {
-                'data': {'error': f'Tipo de identificación inválido. Opciones válidas: {", ".join(valid_types)}'},
+                'data': {'error': f'Tipo de identificación inválido. Opciones válidas: {valid_types_str}'},
                 'status': status.HTTP_400_BAD_REQUEST
             }
         

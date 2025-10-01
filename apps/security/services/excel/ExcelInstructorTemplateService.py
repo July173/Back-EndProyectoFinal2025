@@ -8,7 +8,7 @@ from django.contrib.auth.hashers import make_password
 from io import BytesIO
 from apps.security.entity.models import Role, Person, User
 from apps.general.entity.models import KnowledgeArea, Instructor
-from apps.security.entity.enums.document_type_enum import DocumentType
+from apps.security.entity.models.DocumentType import DocumentType
 from apps.security.emails.SendEmailsActivate import enviar_activacion_usuario
 from datetime import datetime
 import string
@@ -532,13 +532,14 @@ class ExcelInstructorTemplateService:
         """Crea un registro completo de instructor (Person + User + Instructor)"""
         try:
             # 1. Crear Person
+            doc_type = DocumentType.objects.get(acronyms=data['tipo_identificacion'], active=True)
             person = Person.objects.create(
                 first_name=data['primer_nombre'],
                 second_name=data.get('segundo_nombre', ''),
                 first_last_name=data['primer_apellido'],
                 second_last_name=data.get('segundo_apellido', ''),
                 phone_number=data['telefono'],
-                type_identification=data['tipo_identificacion'],
+                type_identification=doc_type,
                 number_identification=data['numero_identificacion'],
                 active=True
             )

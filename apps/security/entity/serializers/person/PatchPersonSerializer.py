@@ -1,9 +1,10 @@
 from rest_framework import serializers
 from apps.security.entity.models import Person
-
+from apps.security.entity.models.DocumentType import DocumentType
 
 class PatchPersonSerializer(serializers.ModelSerializer):
     image = serializers.ImageField(use_url=True, required=False)
+    type_identification = serializers.PrimaryKeyRelatedField(queryset=DocumentType.objects.filter(active=True), required=False)
 
     class Meta:
         model = Person

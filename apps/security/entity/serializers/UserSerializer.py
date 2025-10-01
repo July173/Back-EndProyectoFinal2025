@@ -1,8 +1,8 @@
 from apps.security.entity.models import User
-from core.base.serializers.implements.BaseSerializer import BaseSerializer
+from rest_framework import serializers
 
 
-class UserSerializer(BaseSerializer):
+class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User

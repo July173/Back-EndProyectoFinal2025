@@ -4,6 +4,9 @@ from apps.security.entity.serializers.UserSerializer import UserSerializer
 
 
 class UserRepository(BaseRepository):
+    def __init__(self):
+        from apps.security.entity.models import User
+        super().__init__(User)
     
     def __init__(self):
         super().__init__(User)

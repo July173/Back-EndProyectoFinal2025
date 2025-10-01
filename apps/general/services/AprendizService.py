@@ -5,7 +5,7 @@ from apps.general.entity.models import Aprendiz, Ficha
 from apps.security.emails.CreacionCuentaUsers import send_account_created_email
 from django.db import transaction
 from core.utils.Validation import is_unique_email, is_unique_document_number, is_valid_phone_number
-from apps.security.entity.enums.document_type_enum import DocumentType
+from apps.security.entity.models.DocumentType import DocumentType
 from django.utils.crypto import get_random_string
 from core.utils.Validation import is_soy_sena_email
 

@@ -7,7 +7,7 @@ class Person(models.Model):
     first_last_name = models.CharField(max_length=100)
     second_last_name = models.CharField(max_length=100, null=True, blank=True)
     phone_number = models.BigIntegerField()
-    type_identification = models.CharField(max_length=20)
+    type_identification = models.ForeignKey('DocumentType', on_delete=models.PROTECT, related_name='persons')
     number_identification = models.CharField(max_length=20)
     delete_at = models.DateTimeField(null=True, blank=True)
     active = models.BooleanField(default=True)
