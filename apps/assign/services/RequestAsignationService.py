@@ -16,22 +16,21 @@ logger = logging.getLogger(__name__)
 
 
 class RequestAsignationService(BaseService):
-    
     def __init__(self):
         self.repository = RequestAsignationRepository()
 
+    def error_response(self, message, error_type="error"):
+        return {"success": False, "error_type": error_type, "message": str(message), "data": None}
 
     def filter_by_state(self, request_state):
-        """
-        Filtra las solicitudes por el campo request_state.
-        """
-        
-        if request_state in ['ASIGNADO', 'SIN_ASIGNAR', 'RECHAZADO']:
-            solicitudes = RequestAsignation.objects.filter(request_state=request_state)
-        else:
-            solicitudes = RequestAsignation.objects.all()
-        return solicitudes
-
+        try:
+            if request_state in ['ASIGNADO', 'SIN_ASIGNAR', 'RECHAZADO']:
+                solicitudes = RequestAsignation.objects.filter(request_state=request_state)
+            else:
+                solicitudes = RequestAsignation.objects.all()
+            return solicitudes
+        except Exception as e:
+            return self.error_response(f"Error al filtrar por estado: {e}", "filter_by_state")
 
     def get_pdf_url(self, request_id):
         try:
@@ -42,28 +41,18 @@ class RequestAsignationService(BaseService):
                     'pdf_url': solicitud.pdf_request.url
                 }
             else:
-                return {
-                    'success': False,
-                    'message': 'La solicitud no tiene PDF adjunto.'
-                }
+                return self.error_response('La solicitud no tiene PDF adjunto.', "no_pdf")
         except RequestAsignation.DoesNotExist:
-            return {
-                'success': False,
-                'message': 'Solicitud no encontrada.'
-            }
-
+            return self.error_response('Solicitud no encontrada.', "not_found")
+        except Exception as e:
+            return self.error_response(f"Error al obtener PDF: {e}", "get_pdf_url")
 
     def reject_request(self, request_id, rejection_message):
-        """
-        Rechaza una solicitud cambiando el estado y guardando el mensaje de rechazo. Envía correo al aprendiz.
-        """
-
         try:
             request = RequestAsignation.objects.get(pk=request_id)
             request.request_state = RequestState.RECHAZADO
             request.rejectionMessage = rejection_message
             request.save()
-            # Obtener datos del aprendiz
             aprendiz = request.aprendiz
             person = aprendiz.person
             nombre_aprendiz = f"{person.first_name} {person.first_last_name}"
@@ -81,151 +70,126 @@ class RequestAsignationService(BaseService):
                 }
             }
         except RequestAsignation.DoesNotExist:
-            return {
-                'success': False,
-                'message': 'Solicitud no encontrada',
-                'data': None
-            }
-
+            return self.error_response('Solicitud no encontrada', "not_found")
+        except Exception as e:
+            return self.error_response(f"Error al rechazar solicitud: {e}", "reject_request")
 
     def get_form_request_by_id(self, request_id):
-        """
-        Obtener una solicitud de formulario por su ID, retornando solo los campos del formulario y el request_state.
-        """
-        result = self.repository.get_form_request_by_id(request_id)
-        if not result:
-            return {
-                'success': False,
-                'message': 'Solicitud no encontrada',
-                'data': None,
-                'error_type': 'not_found'
+        try:
+            result = self.repository.get_form_request_by_id(request_id)
+            if not result:
+                return self.error_response('Solicitud no encontrada', "not_found")
+            aprendiz, enterprise, boss, human_talent, modality, request_asignation, regional, center, sede = result
+            request_item = {
+                'aprendiz_id': aprendiz.id,
+                'ficha_id': aprendiz.ficha_id if aprendiz.ficha else None,
+                'fecha_inicio_contrato': request_asignation.date_start_production_stage,
+                'fecha_fin_contrato': getattr(request_asignation, 'date_end_production_stage', None),
+                'enterprise_name': enterprise.name_enterprise,
+                'enterprise_nit': enterprise.nit_enterprise,
+                'enterprise_location': enterprise.locate,
+                'enterprise_email': enterprise.email_enterprise,
+                'boss_name': boss.name_boss,
+                'boss_phone': boss.phone_number,
+                'boss_email': boss.email_boss,
+                'boss_position': boss.position,
+                'human_talent_name': human_talent.name,
+                'human_talent_email': human_talent.email,
+                'human_talent_phone': human_talent.phone_number,
+                'regional': regional.id if regional else None,
+                'center': center.id if center else None,
+                'sede': sede.id if sede else None,
+                'modality_productive_stage': modality.id,
+                'request_state': request_asignation.request_state
             }
-        aprendiz, enterprise, boss, human_talent, modality, request_asignation, regional, center, sede = result
-        request_item = {
-            'aprendiz_id': aprendiz.id,
-            'ficha_id': aprendiz.ficha_id if aprendiz.ficha else None,
-            'fecha_inicio_contrato': request_asignation.date_start_production_stage,
-            'fecha_fin_contrato': getattr(request_asignation, 'date_end_production_stage', None),
-            'enterprise_name': enterprise.name_enterprise,
-            'enterprise_nit': enterprise.nit_enterprise,
-            'enterprise_location': enterprise.locate,
-            'enterprise_email': enterprise.email_enterprise,
-            'boss_name': boss.name_boss,
-            'boss_phone': boss.phone_number,
-            'boss_email': boss.email_boss,
-            'boss_position': boss.position,
-            'human_talent_name': human_talent.name,
-            'human_talent_email': human_talent.email,
-            'human_talent_phone': human_talent.phone_number,
-            'regional': regional.id if regional else None,
-            'center': center.id if center else None,
-            'sede': sede.id if sede else None,
-            'modality_productive_stage': modality.id,
-            'request_state': request_asignation.request_state
-        }
-        return {
-            'success': True,
-            'message': 'Solicitud encontrada',
-            'data': request_item
-        }
+            return {
+                'success': True,
+                'message': 'Solicitud encontrada',
+                'data': request_item
+            }
+        except Exception as e:
+            return self.error_response(f"Error al obtener detalle de solicitud: {e}", "get_form_request_by_id")
 
     def create_form_request(self, validated_data):
-        """
-        Crear solicitud de formulario con validaciones integradas.
-        Vincula aprendiz existente y actualiza su ficha.
-        """
-        logger.info(f"Iniciando creación de solicitud para aprendiz ID: {validated_data.get('aprendiz_id')}")
-        # Validar que el aprendiz y la ficha existan
         try:
+            logger.info(f"Iniciando creación de solicitud para aprendiz ID: {validated_data.get('aprendiz_id')}")
             aprendiz = Aprendiz.objects.get(pk=validated_data['aprendiz_id'])
             ficha = Ficha.objects.get(pk=validated_data['ficha_id'])
-        except (Aprendiz.DoesNotExist, Ficha.DoesNotExist) as e:
-            raise ValueError(f"Entidad no encontrada: {str(e)}")
-        # Validar que el aprendiz solo pueda enviar el formulario si su último request_state fue RECHAZADO
-        last_request = RequestAsignation.objects.filter(aprendiz=aprendiz).order_by('-id').first()
-        if last_request and last_request.request_state != RequestState.RECHAZADO:
-            raise ValueError("Solo puedes volver a enviar el formulario si tu última solicitud fue rechazada.")
-        # Validar que las entidades de referencia existan
-        try:
+            last_request = RequestAsignation.objects.filter(aprendiz=aprendiz).order_by('-id').first()
+            if last_request and last_request.request_state != RequestState.RECHAZADO:
+                return self.error_response("Solo puedes volver a enviar el formulario si tu última solicitud fue rechazada.", "invalid_state")
             sede = Sede.objects.get(pk=validated_data['sede'])
             ModalityProductiveStage.objects.get(pk=validated_data['modality_productive_stage'])
-        except (Sede.DoesNotExist, ModalityProductiveStage.DoesNotExist) as e:
-            raise ValueError(f"Entidad de referencia no encontrada: {str(e)}")
-        # Validar que haya al menos 6 meses entre fecha de inicio y fin de contrato (puede tener días extra, pero nunca menos de 6 meses)
-        fecha_inicio = validated_data.get('fecha_inicio_contrato')
-        fecha_fin = validated_data.get('fecha_fin_contrato')
-        if fecha_inicio and fecha_fin:
-            diferencia = relativedelta(fecha_fin, fecha_inicio)
-            meses = diferencia.years * 12 + diferencia.months
-            if meses < 6 or (meses == 6 and diferencia.days < 0):
-                raise ValueError("La diferencia entre la fecha de inicio y fin de contrato debe ser de al menos 6 meses.")
-        logger.info("Validaciones completadas exitosamente")
-        with transaction.atomic():
-            aprendiz, ficha, enterprise, boss, human_talent, sede, modality, request_asignation = self.repository.create_all_dates_form_request(validated_data)
-            # Guardar la relación en PersonSede
-            person = aprendiz.person
-            PersonSede.objects.update_or_create(
-                PersonId=person,
-                defaults={"SedeId": sede}
-            )
-            response = {
-                'success': True,
-                'message': 'Solicitud creada exitosamente',
-                'data': {
-                    'aprendiz': {
-                        'id': aprendiz.id,
-                        'ficha_id': ficha.id,
-                        'active': aprendiz.active
-                    },
-                    'enterprise': {
-                        'id': enterprise.id,
-                        'name': enterprise.name_enterprise,
-                        'nit': enterprise.nit_enterprise,
-                        'location': enterprise.locate,
-                        'email': enterprise.email_enterprise
-                    },
-                    'boss': {
-                        'id': boss.id,
-                        'name': boss.name_boss,
-                        'phone': boss.phone_number,
-                        'email': boss.email_boss,
-                        'position': boss.position
-                    },
-                    'human_talent': {
-                        'id': human_talent.id,
-                        'name': human_talent.name,
-                        'email': human_talent.email,
-                        'phone': human_talent.phone_number
-                    },
-                    'references': {
-                        'sede': {'id': sede.id, 'name': sede.name},
-                        'modality': {'id': modality.id, 'name': modality.name_modality}
-                    },
-                    'request_asignation': {
-                        'id': request_asignation.id,
-                        'request_date': request_asignation.request_date,
-                        'date_start_production_stage': request_asignation.date_start_production_stage,
-                        'date_end_production_stage': getattr(request_asignation, 'date_end_production_stage', None),
-                        'request_state': request_asignation.request_state
+            fecha_inicio = validated_data.get('fecha_inicio_contrato')
+            fecha_fin = validated_data.get('fecha_fin_contrato')
+            if fecha_inicio and fecha_fin:
+                diferencia = relativedelta(fecha_fin, fecha_inicio)
+                meses = diferencia.years * 12 + diferencia.months
+                if meses < 6 or (meses == 6 and diferencia.days < 0):
+                    return self.error_response("La diferencia entre la fecha de inicio y fin de contrato debe ser de al menos 6 meses.", "invalid_dates")
+            logger.info("Validaciones completadas exitosamente")
+            with transaction.atomic():
+                aprendiz, ficha, enterprise, boss, human_talent, sede, modality, request_asignation = self.repository.create_all_dates_form_request(validated_data)
+                person = aprendiz.person
+                PersonSede.objects.update_or_create(
+                    PersonId=person,
+                    defaults={"SedeId": sede}
+                )
+                response = {
+                    'success': True,
+                    'message': 'Solicitud creada exitosamente',
+                    'data': {
+                        'aprendiz': {
+                            'id': aprendiz.id,
+                            'ficha_id': ficha.id,
+                            'active': aprendiz.active
+                        },
+                        'enterprise': {
+                            'id': enterprise.id,
+                            'name': enterprise.name_enterprise,
+                            'nit': enterprise.nit_enterprise,
+                            'location': enterprise.locate,
+                            'email': enterprise.email_enterprise
+                        },
+                        'boss': {
+                            'id': boss.id,
+                            'name': boss.name_boss,
+                            'phone': boss.phone_number,
+                            'email': boss.email_boss,
+                            'position': boss.position
+                        },
+                        'human_talent': {
+                            'id': human_talent.id,
+                            'name': human_talent.name,
+                            'email': human_talent.email,
+                            'phone': human_talent.phone_number
+                        },
+                        'references': {
+                            'sede': {'id': sede.id, 'name': sede.name},
+                            'modality': {'id': modality.id, 'name': modality.name_modality}
+                        },
+                        'request_asignation': {
+                            'id': request_asignation.id,
+                            'request_date': request_asignation.request_date,
+                            'date_start_production_stage': request_asignation.date_start_production_stage,
+                            'date_end_production_stage': getattr(request_asignation, 'date_end_production_stage', None),
+                            'request_state': request_asignation.request_state
+                        }
                     }
                 }
-            }
-            logger.info("Solicitud creada exitosamente")
-            return response
-
+                logger.info("Solicitud creada exitosamente")
+                return response
+        except (Aprendiz.DoesNotExist, Ficha.DoesNotExist) as e:
+            return self.error_response(f"Entidad no encontrada: {str(e)}", "not_found")
+        except (Sede.DoesNotExist, ModalityProductiveStage.DoesNotExist) as e:
+            return self.error_response(f"Entidad de referencia no encontrada: {str(e)}", "not_found")
+        except Exception as e:
+            return self.error_response(f"Error al crear solicitud: {e}", "create_form_request")
 
     def list_form_requests(self):
-        """
-        Listar solicitudes - solo delega al repository sin validaciones.
-        El GET no necesita validaciones de negocio.
-        """
         try:
             logger.info("Obteniendo lista de solicitudes")
-            
-            # Delegar directamente al repository (solo BD)
             form_requests = self.repository.get_all_form_requests()
-            
-            # Procesar datos para respuesta: solo los campos del FormRequestSerializer
             requests_data = []
             for _, aprendiz, enterprise, boss, human_talent, sede, modality, request_asignation in form_requests:
                 request_item = {
@@ -256,12 +220,6 @@ class RequestAsignationService(BaseService):
                 'count': len(requests_data),
                 'data': requests_data
             }
-            
         except Exception as e:
             logger.error(f"Error al listar solicitudes: {str(e)}")
-            return {
-                'success': False,
-                'message': f'Error al obtener las solicitudes: {str(e)}',
-                'data': [],
-                'error_type': 'database_error'
-            }
+            return self.error_response(f"Error al obtener las solicitudes: {str(e)}", "list_form_requests")

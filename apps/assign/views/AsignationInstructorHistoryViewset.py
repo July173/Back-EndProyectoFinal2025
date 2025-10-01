@@ -20,7 +20,11 @@ class AsignationInstructorHistoryViewset(ViewSet):
     @swagger_auto_schema(
         operation_description="Reasigna un instructor y guarda el historial automáticamente.",
         request_body=ReasignationInstructorSerializer,
-        tags=["AsignationInstructorHistory"]
+        tags=["AsignationInstructorHistory"],
+        responses={
+            200: openapi.Response("Reasignación realizada correctamente."),
+            400: openapi.Response("Error: {'status': 'error', 'type': 'not_found', 'message': 'No existe la asignación'}")
+        }
     )
     @action(detail=False, methods=['post'], url_path='reasignar-instructor')
     def reasignar_instructor(self, request):
@@ -30,15 +34,14 @@ class AsignationInstructorHistoryViewset(ViewSet):
         new_instructor_id = serializer.validated_data['new_instructor_id']
         message = serializer.validated_data['message']
         service = self.get_service()
-        try:
-            asignation_instructor = service.reasignar_instructor(
-                asignation_instructor_id,
-                new_instructor_id,
-                message
-            )
-            return Response({"detail": "Reasignación realizada y guardada en historial."}, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        result = service.reasignar_instructor(
+            asignation_instructor_id,
+            new_instructor_id,
+            message
+        )
+        if isinstance(result, dict) and result.get('status') == 'error':
+            return Response(result, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"detail": "Reasignación realizada y guardada en historial."}, status=status.HTTP_200_OK)
     
 
     @swagger_auto_schema(
@@ -46,13 +49,19 @@ class AsignationInstructorHistoryViewset(ViewSet):
         manual_parameters=[
             openapi.Parameter('asignation_instructor_id', openapi.IN_QUERY, description="ID de la asignación", type=openapi.TYPE_INTEGER)
         ],
-        tags=["AsignationInstructorHistory"]
+        tags=["AsignationInstructorHistory"],
+        responses={
+            200: openapi.Response("Historial obtenido correctamente."),
+            400: openapi.Response("Error: {'status': 'error', 'type': 'list_by_asignation', 'message': 'No se pudo obtener el historial: ...'}")
+        }
     )
     @action(detail=False, methods=['get'], url_path='list-history')
     def list_history(self, request):
         asignation_instructor_id = request.query_params.get('asignation_instructor_id')
         service = self.get_service()
         history = service.list_by_asignation(asignation_instructor_id)
+        if isinstance(history, dict) and history.get('status') == 'error':
+            return Response(history, status=status.HTTP_400_BAD_REQUEST)
         serializer = self.get_serializer(history, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

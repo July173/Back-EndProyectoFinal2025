@@ -83,7 +83,7 @@ class AsignationInstructorViewset(BaseViewSet):
         request_body=AsignationInstructorSerializer,
         responses={
             201: openapi.Response("Asignación creada correctamente", AsignationInstructorSerializer),
-            400: "Datos inválidos"
+            400: openapi.Response("Error: {'status': 'error', 'type': 'not_found', 'message': 'El instructor no existe.'}")
         },
         tags=["AsignationInstructor"]
     )
@@ -92,9 +92,11 @@ class AsignationInstructorViewset(BaseViewSet):
         instructor_id = request.data.get('instructor')
         request_asignation_id = request.data.get('request_asignation')
         if not instructor_id or not request_asignation_id:
-            return Response({"detail": "Faltan datos obligatorios."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"status": "error", "type": "missing_data", "message": "Faltan datos obligatorios."}, status=status.HTTP_400_BAD_REQUEST)
         service = self.service_class()
-        asignation = service.create_custom(instructor_id, request_asignation_id)
-        serializer = self.serializer_class(asignation)
+        result = service.create_custom(instructor_id, request_asignation_id)
+        if isinstance(result, dict) and result.get('status') == 'error':
+            return Response(result, status=status.HTTP_400_BAD_REQUEST)
+        serializer = self.serializer_class(result)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
