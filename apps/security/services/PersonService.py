@@ -7,7 +7,6 @@ from apps.security.emails.SendEmails import enviar_registro_pendiente
 from rest_framework import status
 from datetime import datetime
 from django.contrib.auth.hashers import make_password
-
 from apps.security.entity.models import Person, User
 from django.db import transaction
 from apps.security.entity.models.DocumentType import DocumentType

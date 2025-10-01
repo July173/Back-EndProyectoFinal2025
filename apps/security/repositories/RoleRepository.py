@@ -1,5 +1,6 @@
 from core.base.repositories.implements.baseRepository.BaseRepository import BaseRepository
-from apps.security.entity.models import Role
+from apps.security.entity.models import User, Role
+from django.db import transaction
 
 
 class RoleRepository(BaseRepository):    
@@ -23,8 +24,7 @@ class RoleRepository(BaseRepository):
         """
         Activa o desactiva el rol y todos los usuarios vinculados a ese rol.
         """
-        from apps.security.entity.models import User, Role
-        from django.db import transaction
+        
         with transaction.atomic():
             role = Role.objects.get(pk=role_id)
             role.active = active
@@ -38,7 +38,6 @@ class RoleRepository(BaseRepository):
         """
         Lista roles con cantidad de usuarios activos asignados.
         """
-        from apps.security.entity.models import User
         roles = self.model.objects.all()
         data = []
         for role in roles:

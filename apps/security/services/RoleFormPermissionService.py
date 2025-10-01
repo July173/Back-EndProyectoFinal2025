@@ -1,11 +1,14 @@
 from apps.security.entity.serializers.RolFormPermission.MenuSerializer import MenuSerializer
 from core.base.services.implements.baseService.BaseService import BaseService
 from apps.security.repositories.RoleFormPermissionRepository import RolFormPermissionRepository
-from apps.security.entity.serializers.RolFormPermission.MenuSerializer import MenuSerializer
+from apps.security.entity.models import Role, Form, Permission, RolFormPermission
+
+
 class RolFormPermissionService(BaseService):
+    def __init__(self):
+        self.repository = RolFormPermissionRepository()
 
     def get_permission_matrix(self):
-        from apps.security.entity.models import Role, Form, Permission, RolFormPermission
         roles = Role.objects.all()
         forms = Form.objects.all()
         permissions = Permission.objects.all()
@@ -35,19 +38,7 @@ class RolFormPermissionService(BaseService):
         return serializer.data
 
     def update_role_with_permissions(self, pk, data):
-        """
-        Actualiza un rol y sus permisos por formulario.
-        data = {
-            'type_role': str,
-            'description': str,
-            'active': bool,
-            'formularios': [
-                {'form_id': int, 'permission_ids': [int, ...]},
-                ...
-            ]
-        }
-        """
-        from apps.security.entity.models import Role, Form, Permission, RolFormPermission
+        
         role = Role.objects.get(pk=pk)
         role.type_role = data['type_role']
         role.description = data.get('description', '')
@@ -71,19 +62,6 @@ class RolFormPermissionService(BaseService):
 
 
     def create_role_with_permissions(self, data):
-        """
-        Crea un nuevo rol y asigna permisos a uno o varios formularios.
-        data = {
-            'type_role': str,
-            'description': str,
-            'active': bool,
-            'formularios': [
-                {'form_id': int, 'permission_ids': [int, ...]},
-                ...
-            ]
-        }
-        """
-        from apps.security.entity.models import Role, Form, Permission, RolFormPermission
         role = Role.objects.create(
             type_role=data['type_role'],
             description=data.get('description', ''),
@@ -102,8 +80,7 @@ class RolFormPermissionService(BaseService):
             'role_id': role.id,
             'created_permissions': total_created
         }
-    def __init__(self):
-        self.repository = RolFormPermissionRepository()
+    
 
     def get_menu(self, user_id: int):
         # Llama al repository para obtener la data cruda
