@@ -12,6 +12,9 @@ from apps.general.views.KnowledgeAreaViewset import KnowledgeAreaViewset
 from apps.general.views.ColorsViewset import ColorsViewset
 from apps.general.views.TypeOfQueriesViewset import TypeOfQueriesViewset
 from apps.general.views.SupportScheduleViewset import SupportScheduleViewset
+from apps.general.views.SupportContactViewset import SupportContactViewset
+from apps.general.views.LegalDocumentViewset import LegalDocumentViewset
+from apps.general.views.LegalSectionViewset import LegalSectionViewset
 
 router = DefaultRouter()
 router.register(r'aprendices', AprendizViewset, basename='general_aprendices')
@@ -26,6 +29,9 @@ router.register(r'knowledge-areas', KnowledgeAreaViewset, basename='general_know
 router.register(r'colors', ColorsViewset, basename='general_colors')
 router.register(r'type-of-queries', TypeOfQueriesViewset, basename='general_type_of_queries')
 router.register(r'support-schedules', SupportScheduleViewset, basename='general_support_schedules')
+router.register(r'support-contacts', SupportContactViewset, basename='general_support_contacts')
+router.register(r'legal-documents', LegalDocumentViewset, basename='general_legal_documents')
+router.register(r'legal-sections', LegalSectionViewset, basename='general_legal_sections')
 
 
 urlpatterns = [

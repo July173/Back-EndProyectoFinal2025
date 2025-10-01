@@ -3,7 +3,6 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-
 from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.security.services.PersonService import PersonService
 from apps.security.entity.serializers.person.PatchPersonSerializer import PatchPersonSerializer
@@ -12,10 +11,6 @@ from apps.security.entity.serializers.person.RegisterAprendizSerializer import R
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
-from apps.security.services.UserService import UserService
-from apps.security.entity.serializers.UserSerializer import UserSerializer
-from apps.security.emails.SendEmails import enviar_registro_pendiente
-from datetime import datetime
 
 
 class PersonViewSet(BaseViewSet):

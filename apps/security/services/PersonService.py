@@ -8,12 +8,15 @@ from rest_framework import status
 from datetime import datetime
 from django.contrib.auth.hashers import make_password
 
-from apps.security.entity.models import Person
-from apps.security.entity.models import User
+from apps.security.entity.models import Person, User
 from django.db import transaction
 from apps.security.entity.enums.document_type_enum import DocumentType
+from apps.general.entity.models import Aprendiz
+
 
 class PersonService(BaseService):
+    def __init__(self):
+        super().__init__(PersonRepository())
 
     def update(self, pk, data):
         person = self.get(pk)
@@ -30,8 +33,7 @@ class PersonService(BaseService):
             if hasattr(person.image, 'path') and os.path.isfile(person.image.path):
                 os.remove(person.image.path)
         return self.repository.update_person(person, data)
-    def __init__(self):
-        super().__init__(PersonRepository())
+    
 
     def register_aprendiz(self, data):
         """
@@ -112,7 +114,7 @@ class PersonService(BaseService):
                 user = user_serializer.save()
                 
                 # Crear Aprendiz vinculado a la persona (ficha se asignará después por el administrador)
-                from apps.general.entity.models import Aprendiz
+                
                 aprendiz = Aprendiz.objects.create(person=person, ficha=None)
                 
                 # Si todo es exitoso, enviar correo de registro pendiente

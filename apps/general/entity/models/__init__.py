@@ -10,9 +10,13 @@ from .KnowledgeArea import KnowledgeArea
 from .Colors import Colors
 from .TypeOfQueries import TypeOfQueries
 from .SupportSchedule import SupportSchedule
+from .SupportContact import SupportContact
+from .LegalDocument import LegalDocument
+from .LegalSection import LegalSection
 
 __all__ = [
     'Aprendiz', 'Center', 'Ficha',
     'Instructor', 'Program', 'Regional', 'Sede', 'PersonSede', 'KnowledgeArea'
-    'Colors', 'TypeOfQueries', 'SupportSchedule'
+    'Colors', 'TypeOfQueries', 'SupportSchedule', 'SupportContact', 'LegalDocument', 
+    'LegalSection'
 ]
