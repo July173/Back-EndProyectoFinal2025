@@ -3,7 +3,8 @@ from apps.general.entity.models import Aprendiz
 from apps.security.entity.models import User
 
 class GetAprendizSerializer(serializers.ModelSerializer):
-    type_identification = serializers.CharField(source='person.type_identification')
+    # Usar type_identification_id para obtener el ID en lugar del objeto completo
+    type_identification = serializers.IntegerField(source='person.type_identification_id')
     number_identification = serializers.CharField(source='person.number_identification')
     first_name = serializers.CharField(source='person.first_name')
     second_name = serializers.CharField(source='person.second_name')
