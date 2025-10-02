@@ -53,10 +53,12 @@ class ExcelInstructorTemplateService:
         }
 
     def _get_document_types(self):
-        return [doc_type.name for doc_type in DocumentType]
+        """Obtiene las siglas de tipos de documento desde la BD"""
+        return list(DocumentType.objects.filter(active=True).values_list('acronyms', flat=True))
 
     def _get_document_type_display_values(self):
-        return [(doc_type.name, doc_type.value) for doc_type in DocumentType]
+        """Obtiene pares (acronyms, name) de tipos de documento desde la BD"""
+        return list(DocumentType.objects.filter(active=True).values_list('acronyms', 'name'))
 
     def _apply_style(self, cell, style_dict):
         for style_type, style_value in style_dict.items():
@@ -175,30 +177,32 @@ class ExcelInstructorTemplateService:
         self._auto_adjust_columns(ws)
 
     def _create_contract_types_sheet(self, workbook):
-        """Crea una hoja con los tipos de contrato disponibles desde Enum"""
+        """Crea una hoja con los tipos de contrato disponibles desde la BD"""
+        from apps.general.entity.models.TypeContract import TypeContract
         ws = workbook.create_sheet("Tipos de Contrato")
-        cell = ws.cell(row=1, column=1, value='TIPOS DE CONTRATO DISPONIBLES')
-        self._apply_style(cell, self.header_style)
-        try:
-            from apps.general.entity.enums.contract_type_enum import ContractType
-            contract_types = [ct.name for ct in ContractType]
-        except Exception:
-            contract_types = ['Planta', 'Contratista', 'Temporal', 'Prestación de Servicios', 'Cátedra']
-        for row_idx, contract_type in enumerate(contract_types, 2):
-            ws.cell(row=row_idx, column=1, value=contract_type)
-        self._auto_adjust_columns(ws)
-
-    def _create_identification_types_sheet(self, workbook):
-        """Crea una hoja con los tipos de identificación desde el enum"""
-        ws = workbook.create_sheet("Tipos de Identificación")
-        headers = ['CÓDIGO', 'DESCRIPCIÓN']
+        headers = ['ID', 'NOMBRE', 'DESCRIPCIÓN']
         for col_idx, header in enumerate(headers, 1):
             cell = ws.cell(row=1, column=col_idx, value=header)
             self._apply_style(cell, self.header_style)
-        document_types = self._get_document_type_display_values()
-        for row_idx, (code, description) in enumerate(document_types, 2):
-            ws.cell(row=row_idx, column=1, value=code)
-            ws.cell(row=row_idx, column=2, value=description)
+        contract_types = TypeContract.objects.filter(active=True).order_by('name')
+        for row_idx, contract_type in enumerate(contract_types, 2):
+            ws.cell(row=row_idx, column=1, value=contract_type.id)
+            ws.cell(row=row_idx, column=2, value=contract_type.name)
+            ws.cell(row=row_idx, column=3, value=contract_type.description or '')
+        self._auto_adjust_columns(ws)
+
+    def _create_identification_types_sheet(self, workbook):
+        """Crea una hoja con los tipos de identificación desde la BD"""
+        ws = workbook.create_sheet("Tipos de Identificación")
+        headers = ['ID', 'SIGLAS', 'NOMBRE']
+        for col_idx, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col_idx, value=header)
+            self._apply_style(cell, self.header_style)
+        document_types = DocumentType.objects.filter(active=True).order_by('acronyms')
+        for row_idx, doc_type in enumerate(document_types, 2):
+            ws.cell(row=row_idx, column=1, value=doc_type.id)
+            ws.cell(row=row_idx, column=2, value=doc_type.acronyms)
+            ws.cell(row=row_idx, column=3, value=doc_type.name)
         self._auto_adjust_columns(ws)
 
     def _create_regionales_sheet(self, workbook):
@@ -312,12 +316,9 @@ class ExcelInstructorTemplateService:
         self._add_data_validation(worksheet, 'L', knowledge_areas, sheet_name="Áreas de Conocimiento", col_aux="B")
 
         # Tipo de Contrato (columna M)
-        try:
-            from apps.general.entity.enums.contract_type_enum import ContractType
-            contract_types = [ct.name for ct in ContractType]
-        except Exception:
-            contract_types = ['Planta', 'Contratista', 'Temporal', 'Prestación de Servicios', 'Cátedra']
-        self._add_data_validation(worksheet, 'M', contract_types, sheet_name="Tipos de Contrato", col_aux="A")
+        from apps.general.entity.models.TypeContract import TypeContract
+        contract_types = list(TypeContract.objects.filter(active=True).values_list('name', flat=True))
+        self._add_data_validation(worksheet, 'M', contract_types, sheet_name="Tipos de Contrato", col_aux="B")
 
     def _save_workbook_to_response(self, workbook, filename):
         """Guarda el workbook en un HttpResponse para descarga"""
@@ -526,42 +527,55 @@ class ExcelInstructorTemplateService:
         if area_nombre and not KnowledgeArea.objects.filter(name=area_nombre, active=True).exists():
             errors.append('El área de conocimiento no existe o no está activa')
         
+        # Validar que el tipo de contrato exista en la BD
+        from apps.general.entity.models.TypeContract import TypeContract
+        tipo_contrato = data.get('tipo_contrato', '')
+        if tipo_contrato and not TypeContract.objects.filter(name=tipo_contrato, active=True).exists():
+            errors.append('El tipo de contrato no existe o no está activo')
+        
         return errors
 
     def _create_instructor_record(self, data, final_password):
         """Crea un registro completo de instructor (Person + User + Instructor)"""
         try:
-            # 1. Crear Person
+            from apps.general.entity.models.TypeContract import TypeContract
+            
+            # 1. Obtener el ID del tipo de documento desde la BD
             doc_type = DocumentType.objects.get(acronyms=data['tipo_identificacion'], active=True)
+            
+            # 2. Crear Person usando type_identification_id directamente
             person = Person.objects.create(
                 first_name=data['primer_nombre'],
                 second_name=data.get('segundo_nombre', ''),
                 first_last_name=data['primer_apellido'],
                 second_last_name=data.get('segundo_apellido', ''),
                 phone_number=data['telefono'],
-                type_identification=doc_type,
+                type_identification_id=doc_type.id,  # Usar el ID directamente
                 number_identification=data['numero_identificacion'],
                 active=True
             )
             
-            # 2. Crear User (activo automáticamente)
+            # 3. Crear User (activo automáticamente)
             hashed_password = make_password(final_password)
             user = User.objects.create(
                 email=data['email'],
                 password=hashed_password,
                 person=person,
                 is_active=True,  # Activo automáticamente
-                role_id=3,  # Rol de Instructor (ajustar según tu BD)
+                role_id=3,  # Rol de Instructor
                 registered=False  # No registrado
             )
             
-            # 3. Obtener área de conocimiento
+            # 4. Obtener área de conocimiento
             knowledge_area = KnowledgeArea.objects.get(name=data['area_conocimiento'], active=True)
             
-            # 4. Crear Instructor
+            # 5. Obtener tipo de contrato desde la BD
+            contract_type = TypeContract.objects.get(name=data['tipo_contrato'], active=True)
+            
+            # 6. Crear Instructor
             instructor = Instructor.objects.create(
                 person=person,
-                contractType=data['tipo_contrato'],
+                contractType_id=contract_type.id,  # Usar el ID directamente
                 contractStartDate=data['fecha_inicio'],
                 contractEndDate=data['fecha_fin'],
                 knowledgeArea=knowledge_area,
