@@ -5,7 +5,10 @@ from apps.security.entity.models.DocumentType import DocumentType
 
 class PersonSerializer(serializers.ModelSerializer):
     image = serializers.ImageField(use_url=True, allow_null=True, required=False)
-    type_identification = serializers.PrimaryKeyRelatedField(queryset=DocumentType.objects.filter(active=True))
+    # PrimaryKeyRelatedField maneja automáticamente la conversión ID <-> Objeto
+    type_identification = serializers.PrimaryKeyRelatedField(
+        queryset=DocumentType.objects.filter(active=True)
+    )
 
     class Meta:
         model = Person

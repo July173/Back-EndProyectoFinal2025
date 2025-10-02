@@ -14,7 +14,16 @@ class PersonRepository(BaseRepository):
         return person
 
     def create_person(self, data):
-        serializer = PersonSerializer(data=data)
+        # Extraer solo los campos que pertenecen al modelo Person
+        person_fields = {
+            'first_name', 'second_name', 'first_last_name', 'second_last_name',
+            'phone_number', 'type_identification', 'number_identification', 
+            'active', 'image'
+        }
+        person_data = {k: v for k, v in data.items() if k in person_fields}
+        
+        # El serializer maneja automáticamente la conversión del ID a objeto DocumentType
+        serializer = PersonSerializer(data=person_data)
         if serializer.is_valid():
             person = serializer.save()
             return person, serializer.data, None

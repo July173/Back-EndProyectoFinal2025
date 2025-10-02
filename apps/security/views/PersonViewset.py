@@ -125,12 +125,9 @@ class PersonViewSet(BaseViewSet):
         Controller: Solo orquesta la llamada al servicio.
         No contiene validaciones ni lógica de negocio.
         """
-        # Usar el serializer solo para transformar los datos de entrada
-        serializer = self.get_serializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
-        result = self.service.register_aprendiz(serializer.validated_data)
+        # Pasar los datos directamente al service sin validar en la vista
+        # El service y repository se encargan de la validación
+        result = self.service.register_aprendiz(request.data)
         return Response(result['data'], status=result['status'])
     # ----------- LIST -----------
     @swagger_auto_schema(
