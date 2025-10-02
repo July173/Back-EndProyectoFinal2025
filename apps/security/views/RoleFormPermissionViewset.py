@@ -3,7 +3,6 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-
 from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.security.services.RoleFormPermissionService import RolFormPermissionService
 from apps.security.entity.serializers.RolFormPermission.RoleFormPermissionSerializer import RolFormPermissionSerializer
@@ -11,6 +10,8 @@ from apps.security.entity.serializers.RolFormPermission.CreateRoleWithPermission
 
 
 class RolFormPermissionViewSet(BaseViewSet):
+    service_class = RolFormPermissionService
+    serializer_class = RolFormPermissionSerializer
 
     @swagger_auto_schema(
         operation_description="Obtiene la matriz de permisos por rol, formulario y tipo de permiso.",
@@ -82,8 +83,7 @@ class RolFormPermissionViewSet(BaseViewSet):
         result = self.service.create_role_with_permissions(serializer.validated_data)
         return Response(result, status=status.HTTP_201_CREATED)
     
-    service_class = RolFormPermissionService
-    serializer_class = RolFormPermissionSerializer
+    
 
     # ----------- LIST -----------
     @swagger_auto_schema(

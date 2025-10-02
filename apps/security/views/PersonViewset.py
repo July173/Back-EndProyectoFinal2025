@@ -130,7 +130,6 @@ class PersonViewSet(BaseViewSet):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
-        # Delegar toda la lógica al servicio
         result = self.service.register_aprendiz(serializer.validated_data)
         return Response(result['data'], status=result['status'])
     # ----------- LIST -----------

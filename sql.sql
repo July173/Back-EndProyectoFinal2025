@@ -1,4 +1,38 @@
 USE bdautogestion;
+INSERT INTO `general_supportcontact` (`id`, `type`, `label`, `value`, `extra_info`, `active`) VALUES
+	(1, 'Email', 'Soporte por correo electrónico', 'servicio@sena.edu.co', 'Respuesta en 24-48 horas', 1),
+	(2, 'Teléfono', 'Linea gratuita nacional', '01 8000 910 270', 'Lunes a viernes: 7:00 AM - 7:00 PM', 1),
+	(3, 'Enlaces útiles', 'Sofia Plus - Oferta Educativa', 'https://betowa.sena.edu.co/', 'Ninguna', 1);
+
+INSERT INTO `general_supportschedule` (`id`, `day_range`, `hours`, `is_closed`, `notes`) VALUES
+	(1, 'Lunes a Viernes', '7:00 AM - 7:00 PM', 0, ''),
+	(2, 'Sábados', '8:00 AM - 4:00 PM', 0, ''),
+	(3, 'Domingos y festivos', 'ninguna', 1, '');
+
+INSERT INTO `general_typecontract` (`id`, `name`, `description`, `active`, `delete_at`) VALUES
+	(1, 'Planta', 'Es un contrato estable y permanente, con todos los beneficios laborales de ley.', 1, NULL),
+	(2, 'Contrato', 'Es un acuerdo laboral formal que puede ser por tiempo definido o indefinido, según lo pactado.', 1, NULL),
+	(3, 'OPS', 'Significa Orden de Prestación de Servicios, se usa mucho en el sector público. No genera relación laboral ni prestaciones sociales, solo el pago por el servicio prestado.', 1, NULL),
+	(4, 'Provisional', 'Es un contrato temporal en un cargo mientras se adelanta un concurso o proceso de selección definitivo.', 1, NULL),
+	(5, 'Temporal', 'Es una vinculación por un periodo limitado para cubrir una necesidad específica de la empresa o institución.', 1, NULL),
+	(6, 'Prestación de Servicios', 'Es un contrato civil o comercial, donde se paga por realizar una actividad, sin subordinación ni prestaciones sociales.', 1, NULL);
+
+INSERT INTO `general_typeofqueries` (`id`, `name`, `description`, `active`) VALUES
+	(1, 'Soporte Técnico', 'Para consultas técnicas del sistema', 1),
+	(2, 'Consulta Académica', 'Para consultas académicas del sistema', 1),
+	(3, 'Problemas con las plataforma', 'Para consulta sobre problemas con el sistema', 1),
+	(4, 'Otros', 'Para consulta sobre el sistema', 1);
+
+INSERT INTO `security_documenttype` (`id`, `name`, `acronyms`, `active`, `delete_at`) VALUES
+	(1, 'Cédula de Ciudadanía', 'CC', 1, NULL),
+	(2, 'Tarjeta de Identidad', 'TI', 1, NULL),
+	(3, 'Cédula de Extranjería', 'CE', 1, NULL),
+	(4, 'Pasaporte', 'PASSPORT', 1, NULL),
+	(5, 'Número ciego - SENA', 'NUMERO_CIEGO_SENA', 1, NULL),
+	(6, 'Documento Nacional de Identificación', 'DNI', 1, NULL),
+	(7, 'Número de Identificación Tributaria', 'NIT', 1, NULL),
+	(8, 'Permiso por Protección Temporal', 'PERMISO_TEMPORAL', 1, NULL);
+
 
 INSERT INTO general_regional (name, codeRegional, description, active, address) VALUES
 ('Distrito Capital', '001', 'Regional que atiende Bogotá D.C. con formación técnica y tecnológica especializada', true, 'Calle 57 No. 8-69, Bogotá D.C.'),

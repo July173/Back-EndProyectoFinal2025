@@ -3,7 +3,6 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-
 from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.security.services.RoleService import RoleService
 from apps.security.entity.serializers.RoleSerializer import RoleSerializer
@@ -11,6 +10,8 @@ from apps.security.entity.models import Role, User  # Asegúrate de importar Use
 
 
 class RoleViewSet(BaseViewSet):
+    service_class = RoleService
+    serializer_class = RoleSerializer
    
     # ----------- LIST -----------
     @swagger_auto_schema(
@@ -147,7 +148,6 @@ class RoleViewSet(BaseViewSet):
         Activa si está desactivado y desactiva si está activo el rol y todos los usuarios vinculados. Solo se requiere el id en la URL.
         """
         # Obtener el estado actual del rol
-        from apps.security.entity.models import Role
         try:
             role = Role.objects.get(pk=pk)
         except Role.DoesNotExist:
@@ -155,8 +155,7 @@ class RoleViewSet(BaseViewSet):
         nuevo_estado = not role.active
         result = self.service_class().set_active_role_and_users(pk, nuevo_estado)
         return Response(result)
-    service_class = RoleService
-    serializer_class = RoleSerializer
+    
     
     
     @swagger_auto_schema(

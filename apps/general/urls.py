@@ -15,6 +15,7 @@ from apps.general.views.SupportScheduleViewset import SupportScheduleViewset
 from apps.general.views.SupportContactViewset import SupportContactViewset
 from apps.general.views.LegalDocumentViewset import LegalDocumentViewset
 from apps.general.views.LegalSectionViewset import LegalSectionViewset
+from apps.general.views.TypeContractViewset import TypeContractViewset
 
 router = DefaultRouter()
 router.register(r'aprendices', AprendizViewset, basename='general_aprendices')
@@ -32,6 +33,7 @@ router.register(r'support-schedules', SupportScheduleViewset, basename='general_
 router.register(r'support-contacts', SupportContactViewset, basename='general_support_contacts')
 router.register(r'legal-documents', LegalDocumentViewset, basename='general_legal_documents')
 router.register(r'legal-sections', LegalSectionViewset, basename='general_legal_sections')
+router.register(r'type-contracts', TypeContractViewset, basename='general_type_contracts')
 
 
 urlpatterns = [
