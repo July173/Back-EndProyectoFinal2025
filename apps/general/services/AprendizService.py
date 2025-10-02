@@ -4,6 +4,7 @@ from apps.security.entity.models import User, Role, Person
 from apps.general.entity.models import Aprendiz, Ficha
 from apps.security.emails.CreacionCuentaUsers import send_account_created_email
 from django.db import transaction
+from django.db import models
 from core.utils.Validation import is_unique_email, is_unique_document_number, is_valid_phone_number
 from apps.security.entity.models.DocumentType import DocumentType
 from django.utils.crypto import get_random_string
@@ -29,14 +30,33 @@ class AprendizService(BaseService):
         """
         Crea un aprendiz, usuario y persona. Valida datos y envía correo de bienvenida.
         """
-        # Validar tipo de documento usando enum
+        # Validar tipo de documento desde la BD
         type_identification = validated_data['type_identification']
-        valid_types = [doc_type.name for doc_type in DocumentType]
-        if type_identification not in valid_types:
-            raise ValueError(f'Tipo de identificación inválido. Opciones válidas: {", ".join(valid_types)}')
+        
+        # Verificar que el tipo de documento exista y esté activo en la BD
+        if isinstance(type_identification, int):
+            # Si viene como ID, verificar que exista
+            if not DocumentType.objects.filter(pk=type_identification, active=True).exists():
+                valid_types = DocumentType.objects.filter(active=True).values_list('id', 'name')
+                valid_types_str = ', '.join([f"{id}: {name}" for id, name in valid_types])
+                raise ValueError(f'Tipo de identificación inválido. Opciones válidas: {valid_types_str}')
+        else:
+            # Si viene como string (acronym o name), buscar el ID
+            doc_type = DocumentType.objects.filter(
+                models.Q(acronyms=type_identification) | models.Q(name=type_identification),
+                active=True
+            ).first()
+            if not doc_type:
+                valid_types = DocumentType.objects.filter(active=True).values_list('acronyms', 'name')
+                valid_types_str = ', '.join([f"{acronym} ({name})" for acronym, name in valid_types])
+                raise ValueError(f'Tipo de identificación inválido. Opciones válidas: {valid_types_str}')
+            # Reemplazar con el ID para usarlo después
+            type_identification = doc_type.id
+            validated_data['type_identification'] = doc_type.id
+        
         # Construcción de datos de persona
         person_data = {
-            'type_identification': validated_data['type_identification'],
+            'type_identification_id': type_identification,  # Usar _id para el campo ForeignKey
             'number_identification': validated_data['number_identification'],
             'first_name': validated_data['first_name'],
             'second_name': validated_data.get('second_name', ''),
@@ -80,7 +100,7 @@ class AprendizService(BaseService):
             email = user_data.get('email')
             temp_password = password_temporal
             ficha = Ficha.objects.get(pk=ficha_id)
-            aprendiz, user, person = self.repository.create_all_dates_aprendiz(person_data, user_data, ficha)
+            aprendiz, user, person = self.repository.create_all_dates_apprentice(person_data, user_data, ficha)
 
             # Envía correo de bienvenida
             email_sent = False
@@ -103,9 +123,26 @@ class AprendizService(BaseService):
         Actualiza los datos de aprendiz, usuario y persona. Valida datos y roles.
         """
         
+        # Validar y obtener el ID del tipo de documento
+        type_identification = validated_data.get('type_identification')
+        if type_identification:
+            if isinstance(type_identification, int):
+                # Si viene como ID, verificar que exista
+                if not DocumentType.objects.filter(pk=type_identification, active=True).exists():
+                    raise ValueError('Tipo de identificación inválido')
+            else:
+                # Si viene como string (acronym o name), buscar el ID
+                doc_type = DocumentType.objects.filter(
+                    models.Q(acronyms=type_identification) | models.Q(name=type_identification),
+                    active=True
+                ).first()
+                if not doc_type:
+                    raise ValueError('Tipo de identificación inválido')
+                type_identification = doc_type.id
+        
         # Construcción de datos de persona
         person_data = {
-            'type_identification': validated_data['type_identification'],
+            'type_identification_id': type_identification,  # Usar _id para el campo ForeignKey
             'number_identification': validated_data['number_identification'],
             'first_name': validated_data['first_name'],
             'second_name': validated_data.get('second_name', ''),
@@ -145,7 +182,7 @@ class AprendizService(BaseService):
                 user_data['role_id'] = role.id
             except Role.DoesNotExist:
                 user_data['role_id'] = 2
-            self.repository.update_all_dates_aprendiz(aprendiz, person_data, user_data, ficha)
+            self.repository.update_all_dates_apprentice(aprendiz, person_data, user_data, ficha)
             return aprendiz
 
     def get_aprendiz(self, aprendiz_id):
@@ -166,7 +203,7 @@ class AprendizService(BaseService):
         """
         with transaction.atomic():
             aprendiz = Aprendiz.objects.get(pk=aprendiz_id)
-            self.repository.delete_all_dates_aprendiz(aprendiz)
+            self.repository.delete_all_dates_apprentice(aprendiz)
 
     def logical_delete_aprendiz(self, aprendiz_id):
         """
@@ -175,10 +212,10 @@ class AprendizService(BaseService):
         with transaction.atomic():
             aprendiz = Aprendiz.objects.get(pk=aprendiz_id)
             if not aprendiz.active:
-                self.repository.set_active_state_dates_aprendiz(aprendiz, active=True)
+                self.repository.set_active_state_dates_apprentice(aprendiz, active=True)
                 return "Aprendiz reactivado correctamente."
             else:
-                self.repository.set_active_state_dates_aprendiz(aprendiz, active=False)
+                self.repository.set_active_state_dates_apprentice(aprendiz, active=False)
                 return "Eliminación lógica realizada correctamente."
 
 
@@ -186,10 +223,10 @@ class AprendizService(BaseService):
         """
         Delegar el filtro por nombre al repository.
         """
-        return self.repository.filter_by_nombre(nombre)
+        return self.repository.filter_by_name(nombre)
     
     def filter_by_number_document(self, numero_documento):
         """
         Delegar el filtro por número de documento al repository.
         """
-        return self.repository.filter_by_number_document(numero_documento)
+        return self.repository.filter_by_document_number(numero_documento)
