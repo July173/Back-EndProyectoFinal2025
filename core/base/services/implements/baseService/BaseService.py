@@ -6,57 +6,65 @@ T = TypeVar("T")
 class BaseService:
     """
     Implementación concreta del servicio con funcionalidades extendidas.
-
-    Métodos principales:
-    - list: Obtiene todos los registros del modelo.
-    - get: Obtiene un registro por su ID.
-    - create: Crea un nuevo registro con los datos dados.
-    - update: Actualiza todos los campos de una instancia existente (PUT).
-    - partial_update: Actualiza parcialmente los campos de una instancia existente (PATCH).
-    - delete: Elimina físicamente un registro por ID.
-    - soft_delete: Realiza borrado lógico (cambia active y delete_at).
     """
 
     def __init__(self, repository: IBaseRepository[T]):
         self.repository = repository
 
+    def error_response(self, message, error_type="error"):
+        return {"status": "error", "type": error_type, "message": str(message)}
+
     def list(self) -> List[T]:
-        """Obtiene todos los registros del modelo."""
-        return self.repository.get_all()
+        try:
+            return self.repository.get_all()
+        except Exception as e:
+            return self.error_response(f"Error al listar: {e}", "list")
 
     def get(self, id: int) -> Optional[T]:
-        """Obtiene un registro por su ID."""
-        return self.repository.get_by_id(id)
+        try:
+            return self.repository.get_by_id(id)
+        except Exception as e:
+            return self.error_response(f"Error al obtener: {e}", "get")
 
     def create(self, data: Dict[str, Any]) -> T:
-        """Crea una nueva instancia a partir de los datos."""
-        return self.repository.create(data)
+        try:
+            return self.repository.create(data)
+        except Exception as e:
+            return self.error_response(f"Error al crear: {e}", "create")
 
     def update(self, id: int, data: Dict[str, Any]) -> T:
-        """Actualiza todos los campos de una instancia existente (PUT)."""
-        instance = self.get(id)
-        if instance is None:
-            raise ValueError(f"Instancia con id {id} no encontrada")
-        for key, value in data.items():
-            if value in [None, ""]:
-                raise ValueError(f"El campo '{key}' no puede estar vacío")
-            setattr(instance, key, value)
-        return self.repository.update(instance)
+        try:
+            instance = self.get(id)
+            if instance is None or (isinstance(instance, dict) and instance.get('status') == 'error'):
+                return self.error_response(f"Instancia con id {id} no encontrada", "not_found")
+            for key, value in data.items():
+                if value in [None, ""]:
+                    return self.error_response(f"El campo '{key}' no puede estar vacío", "invalid_field")
+                setattr(instance, key, value)
+            return self.repository.update(instance)
+        except Exception as e:
+            return self.error_response(f"Error al actualizar: {e}", "update")
 
     def partial_update(self, id: int, data: Dict[str, Any]) -> T:
-        """Actualiza parcialmente los campos de una instancia existente (PATCH)."""
-        instance = self.get(id)
-        if instance is None:
-            raise ValueError(f"Instancia con id {id} no encontrada")
-        for key, value in data.items():
-            if value not in [None, ""]:
-                setattr(instance, key, value)
-        return self.repository.update(instance)
+        try:
+            instance = self.get(id)
+            if instance is None or (isinstance(instance, dict) and instance.get('status') == 'error'):
+                return self.error_response(f"Instancia con id {id} no encontrada", "not_found")
+            for key, value in data.items():
+                if value not in [None, ""]:
+                    setattr(instance, key, value)
+            return self.repository.update(instance)
+        except Exception as e:
+            return self.error_response(f"Error al actualizar parcialmente: {e}", "partial_update")
 
     def delete(self, id: int) -> bool:
-        """Elimina físicamente un registro por ID."""
-        return self.repository.delete(id)
+        try:
+            return self.repository.delete(id)
+        except Exception as e:
+            return self.error_response(f"Error al eliminar: {e}", "delete")
 
     def soft_delete(self, id: int) -> bool:
-        """Realiza borrado lógico (cambia active y delete_at)."""
-        return self.repository.soft_delete(id)
+        try:
+            return self.repository.soft_delete(id)
+        except Exception as e:
+            return self.error_response(f"Error al eliminar lógicamente: {e}", "soft_delete")

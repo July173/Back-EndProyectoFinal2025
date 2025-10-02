@@ -5,18 +5,6 @@ from django.db import models
 T = TypeVar("T", bound=models.Model)
 
 class BaseRepository(IBaseRepository[T]):
-    """
-    Implementación concreta del repositorio con funcionalidades extendidas.
-
-    Métodos principales:
-    - get_all: Obtiene todos los registros del modelo.
-    - get_by_id: Obtiene un registro por su ID.
-    - create: Crea un nuevo registro con los datos dados.
-    - update: Guarda los cambios de una instancia existente.
-    - partial_update: Actualiza parcialmente los campos de una instancia existente.
-    - delete: Elimina físicamente un registro por ID.
-    - soft_delete: Realiza borrado lógico (cambia active y delete_at).
-    """
 
     def __init__(self, model: type[T]):
         self.model = model

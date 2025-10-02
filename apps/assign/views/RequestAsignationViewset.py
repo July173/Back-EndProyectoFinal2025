@@ -31,12 +31,11 @@ class RequestAsignationViewset(BaseViewSet):
         tags=["FormRequest"],
         responses={
             200: openapi.Response("Solicitud encontrada con todos los datos detallados."),
-            404: openapi.Response("Solicitud no encontrada."),
+            404: openapi.Response("Error: {'success': False, 'error_type': 'not_found', 'message': 'Solicitud no encontrada', 'data': None}")
         }
     )
     @action(detail=True, methods=['get'], url_path='form-request-detail')
     def form_request_detail(self, request, pk=None):
-        """Obtener la solicitud de formulario con todos los datos detallados"""
         result = self.service_class().get_form_request_by_id(pk)
         if result['success']:
             return Response(result, status=status.HTTP_200_OK)
@@ -117,13 +116,12 @@ class RequestAsignationViewset(BaseViewSet):
         tags=["FormRequest"],
         request_body=FormRequestSerializer,
         responses={
-            201: "Solicitud creada exitosamente",
-            400: "Error en validación de datos"
+            201: openapi.Response("Solicitud creada exitosamente"),
+            400: openapi.Response("Error: {'success': False, 'error_type': 'not_found', 'message': 'Entidad no encontrada', 'data': None}")
         }
     )
     @action(detail=False, methods=['post'], url_path='form-request')
     def create_form_request(self, request):
-        """Crear nueva solicitud de formulario (sin PDF)"""
         serializer = FormRequestSerializer(data=request.data)
         if not serializer.is_valid():
             return Response({
@@ -131,18 +129,12 @@ class RequestAsignationViewset(BaseViewSet):
                 'message': 'Error en los datos de entrada',
                 'errors': serializer.errors
             }, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            result = self.service_class().create_form_request(serializer.validated_data)
-            if result['success']:
-                request_id = result['data']['request_asignation']['id'] if result['data'] and 'request_asignation' in result['data'] else None
-                return Response({"id": request_id}, status=status.HTTP_201_CREATED)
-            else:
-                return Response(result, status=status.HTTP_400_BAD_REQUEST)
-        except ValueError as e:
-            return Response({
-                "success": False,
-                "message": str(e)
-            }, status=status.HTTP_400_BAD_REQUEST)
+        result = self.service_class().create_form_request(serializer.validated_data)
+        if result['success']:
+            request_id = result['data']['request_asignation']['id'] if result['data'] and 'request_asignation' in result['data'] else None
+            return Response({"id": request_id}, status=status.HTTP_201_CREATED)
+        else:
+            return Response(result, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
         operation_description="Obtener lista de todas las solicitudes de formulario",
@@ -159,12 +151,11 @@ class RequestAsignationViewset(BaseViewSet):
                     }
                 }
             ),
-            500: "Error interno del servidor"
+            500: openapi.Response("Error: {'success': False, 'error_type': 'list_form_requests', 'message': 'Error al obtener las solicitudes', 'data': None}")
         }
     )
     @action(detail=False, methods=['get'], url_path='form-request-list')
     def list_form_requests(self, request):
-        """Obtener lista de solicitudes de formulario"""
         result = self.service_class().list_form_requests()
         if result['success']:
             return Response(result, status=status.HTTP_200_OK)
@@ -193,7 +184,7 @@ class RequestAsignationViewset(BaseViewSet):
         tags=["FormRequest PDF"],
         responses={
             200: openapi.Response("URL del PDF obtenida correctamente."),
-            404: openapi.Response("Solicitud no encontrada."),
+            404: openapi.Response("Error: {'success': False, 'error_type': 'not_found', 'message': 'Solicitud no encontrada', 'data': None}")
         }
     )
     @action(detail=True, methods=['get'], url_path='form-request-pdf-url')
@@ -218,12 +209,11 @@ class RequestAsignationViewset(BaseViewSet):
         ),
         responses={
             200: openapi.Response("Solicitud rechazada correctamente."),
-            404: openapi.Response("Solicitud no encontrada."),
+            404: openapi.Response("Error: {'success': False, 'error_type': 'not_found', 'message': 'Solicitud no encontrada', 'data': None}")
         }
     )
     @action(detail=True, methods=['patch'], url_path='form-request-reject')
     def reject_form_request(self, request, pk=None):
-        """Rechaza una solicitud de formulario"""
         rejection_message = request.data.get('rejectionMessage')
         if not rejection_message:
             return Response({

@@ -35,14 +35,16 @@ class BaseViewSet(viewsets.ViewSet, IBaseViewSet):
 
     def list(self, request: Request) -> Response:
         items = self.service.list()
+        if isinstance(items, dict) and items.get('status') == 'error':
+            return Response(items, status=status.HTTP_400_BAD_REQUEST)
         serializer = self.get_serializer(items, many=True)
         return Response(serializer.data)
 
     def retrieve(self, request: Request, pk: Any = None) -> Response:
         item = self.service.get(pk)
-        if not item:
+        if not item or (isinstance(item, dict) and item.get('status') == 'error'):
             return Response(
-                {"detail": "No encontrado"},
+                item if isinstance(item, dict) else {"detail": "No encontrado"},
                 status=status.HTTP_404_NOT_FOUND
             )
         serializer = self.get_serializer(item)
@@ -52,33 +54,40 @@ class BaseViewSet(viewsets.ViewSet, IBaseViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         instance = self.service.create(serializer.validated_data)
+        if isinstance(instance, dict) and instance.get('status') == 'error':
+            return Response(instance, status=status.HTTP_400_BAD_REQUEST)
         output_serializer = self.get_serializer(instance)
         return Response(output_serializer.data, status=status.HTTP_201_CREATED)
 
     def update(self, request: Request, pk: Any = None) -> Response:
         instance = self.service.get(pk)
-        if not instance:
+        if not instance or (isinstance(instance, dict) and instance.get('status') == 'error'):
             return Response(
-                {"detail": "No encontrado"},
+                instance if isinstance(instance, dict) else {"detail": "No encontrado"},
                 status=status.HTTP_404_NOT_FOUND
             )
 
         serializer = self.get_serializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
         updated_instance = self.service.update(pk, serializer.validated_data)
+        if isinstance(updated_instance, dict) and updated_instance.get('status') == 'error':
+            return Response(updated_instance, status=status.HTTP_400_BAD_REQUEST)
         output_serializer = self.get_serializer(updated_instance)
         return Response(output_serializer.data)
 
     def partial_update(self, request: Request, pk: Any = None) -> Response:
-        # Solo delega la petición al service
         serializer = self.get_serializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         updated_instance = self.service.partial_update(pk, serializer.validated_data)
+        if isinstance(updated_instance, dict) and updated_instance.get('status') == 'error':
+            return Response(updated_instance, status=status.HTTP_400_BAD_REQUEST)
         response_serializer = self.get_serializer(updated_instance)
         return Response(response_serializer.data)
 
     def destroy(self, request: Request, pk: Any = None) -> Response:
         deleted = self.service.delete(pk)
+        if isinstance(deleted, dict) and deleted.get('status') == 'error':
+            return Response(deleted, status=status.HTTP_400_BAD_REQUEST)
         if deleted:
             return Response({"detail": "Eliminado correctamente."}, status=status.HTTP_204_NO_CONTENT)
         return Response({"detail": "No encontrado."}, status=status.HTTP_404_NOT_FOUND)
@@ -86,6 +95,8 @@ class BaseViewSet(viewsets.ViewSet, IBaseViewSet):
     @action(detail=True, methods=['delete'], url_path='soft-delete')
     def soft_destroy(self, request: Request, pk: Any = None) -> Response:
         deleted = self.service.soft_delete(pk)
+        if isinstance(deleted, dict) and deleted.get('status') == 'error':
+            return Response(deleted, status=status.HTTP_400_BAD_REQUEST)
         if deleted:
             return Response({"detail": "Eliminado lógicamente correctamente."}, status=status.HTTP_204_NO_CONTENT)
         return Response({"detail": "No encontrado."}, status=status.HTTP_404_NOT_FOUND)
