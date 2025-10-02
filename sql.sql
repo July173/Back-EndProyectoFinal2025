@@ -183,4 +183,209 @@ INSERT INTO security_formmodule VALUES
 INSERT INTO security_rolformpermission VALUES 
 (16,3,1,2),(17,3,1,3),(18,4,1,2),(19,4,4,2),(20,2,1,4),(21,2,2,4),(22,2,3,4),(23,2,4,4),(24,2,5,4),(25,3,1,4),(26,3,2,4),(27,3,3,4),(28,3,4,4),(29,3,5,4),(30,5,1,4),(31,5,2,4),(32,5,3,4),(33,5,4,4),(34,5,5,4),(35,7,1,4),(36,7,2,4),(37,7,3,4),(38,7,4,4),(39,7,5,4),(40,8,1,4),(41,8,2,4),(42,8,3,4),(43,8,4,4),(44,8,5,4),(45,9,1,4),(46,9,2,4),(47,9,3,4),(48,9,4,4),(49,9,5,4),(50,3,1,3),(51,6,1,3),(52,6,2,3),(53,6,3,3),(54,6,4,3),(55,6,5,3),(56,7,1,3),(57,7,2,3),(58,7,3,3),(59,7,4,3),(60,7,5,3),(106,1,1,1),(107,1,2,1),(108,1,3,1),(109,1,4,1),(110,1,5,1),(111,1,1,1),(112,1,2,1),(113,1,3,1),(114,1,4,1),(115,1,5,1),(116,2,1,1),(117,2,2,1),(118,2,3,1),(119,2,4,1),(120,2,5,1),(121,2,1,1),(122,2,2,1),(123,2,3,1),(124,2,4,1),(125,2,5,1),(126,3,1,1),(127,3,2,1),(128,3,3,1),(129,3,4,1),(130,3,5,1),(131,3,1,1),(132,3,2,1),(133,3,3,1),(134,3,4,1),(135,3,5,1),(136,5,1,1),(137,5,2,1),(138,5,3,1),(139,5,4,1),(140,5,5,1),(141,7,1,1),(142,7,2,1),(143,7,3,1),(144,7,4,1),(145,7,5,1),(146,8,1,1),(147,8,2,1),(148,8,3,1),(149,8,4,1),(150,8,5,1),(151,9,1,1),(152,9,2,1),(153,9,3,1),(154,9,4,1),(155,9,5,1);
 
+USE bdautogestion;
+
+INSERT INTO `general_legaldocument` (`type`, `title`, `effective_date`, `last_update`, `active`)
+VALUES ('terms', 'Términos y condiciones', '2025-10-01', '2025-10-01', 1);
+
+SET @docId = LAST_INSERT_ID();
+
+
+INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
+VALUES 
+(1, '1', 'Aceptación de los términos',
+ 'Al acceder y utilizar los servicios del SENA (Servicio Nacional de Aprendizaje), usted acepta estar sujeto a estos términos y condiciones de uso. Si no está de acuerdo con alguno de estos términos, no debe utilizar nuestros servicios. El SENA se reserva el derecho de modificar estos términos en cualquier momento. Las modificaciones entrarán en vigor inmediatamente después de su publicación en este sitio web.',
+ 1, @docId, NULL);
+SET @s1 = LAST_INSERT_ID();
+
+INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
+VALUES 
+(2, '2', 'Descripción de los servicios',
+ 'El SENA ofrece formación profesional integral gratuita en los siguientes servicios:
+ - Programas de formación técnica y tecnológica
+ - Cursos complementarios virtuales y presenciales
+ - Servicios de empleabilidad y emprendimiento
+ - Plataformas educativas digitales (Sofia Plus, LMS SENA)
+ - Servicios de bienestar al aprendiz
+ - Certificación de competencias laborales',
+ 1, @docId, NULL);
+SET @s2 = LAST_INSERT_ID();
+
+
+INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
+VALUES (3, '3', 'Obligaciones del usuario', NULL, 1, @docId, NULL);
+SET @s3 = LAST_INSERT_ID();
+
+
+INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
+VALUES 
+(1, '3.1', 'Requisitos de registro',
+ '- Proporcionar información verdadera, precisa y completa
+ - Mantener actualizada su información personal
+ - Ser responsables de la confidencialidad de sus credenciales
+ - Cumplir con los requisitos académicos establecidos',
+ 1, @docId, @s3);
+SET @s31 = LAST_INSERT_ID();
+
+INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
+VALUES 
+(2, '3.2', 'Conducta del usuario',
+ '- Respetar las normas de convivencia institucional
+ - No utilizar los servicios para fines ilegales o no autorizados
+ - Mantener un comportamiento ético y profesional
+ - Respetar los derechos de propiedad intelectual
+ - No compartir contenido inapropiado o ofensivo',
+ 1, @docId, @s3);
+SET @s32 = LAST_INSERT_ID();
+
+
+INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
+VALUES
+(4, '4', 'Derechos de propiedad intelectual',
+ 'Todo el contenido disponible en las plataformas del SENA, incluyendo pero no limitado a textos, gráficos, logotipos, iconos, imágenes, clips de audio, descargas digitales y compilaciones de datos, es propiedad del SENA o de sus proveedores de contenido y está protegido por las leyes de derechos de autor de Colombia e internacionales. Los usuarios pueden utilizar el contenido únicamente para fines educativos personales y no comerciales, respetando siempre los créditos correspondientes.',
+ 1, @docId, NULL),
+
+(5, '5', 'Protección de datos personales',
+ 'El SENA se compromete a proteger la privacidad de los usuarios conforme a la Ley 1581 de 2012 y el Decreto 1377 de 2013 sobre Protección de Datos Personales en Colombia. Para más información sobre cómo recopilamos, utilizamos y protegemos sus datos personales, consulte nuestra Política de Privacidad.',
+ 1, @docId, NULL),
+
+(6, '6', 'Limitación de responsabilidad',
+ 'El SENA no será responsable por daños directos, indirectos, incidentales, especiales o consecuenciales que resulten del uso o la imposibilidad de uso de nuestros servicios. Nos esforzamos por mantener la disponibilidad continua de nuestros servicios, pero no garantizamos que estén libres de interrupciones, errores o virus.',
+ 1, @docId, NULL),
+
+(7, '7', 'Terminación del servicio',
+ 'El SENA se reserva el derecho de suspender o terminar el acceso a sus servicios a cualquier usuario que viole estos términos y condiciones, sin previo aviso. Los usuarios pueden solicitar la terminación de su cuenta en cualquier momento contactando a nuestro servicio de soporte.',
+ 1, @docId, NULL),
+
+(8, '8', 'Ley Aplicable y jurisdicción',
+ 'Estos términos y condiciones se rigen por las leyes de la República de Colombia. Cualquier disputa que surja en relación con estos términos será sometida a la jurisdicción exclusiva de los tribunales competentes de Bogotá D.C., Colombia.',
+ 1, @docId, NULL);
+USE bdautogestion;
+
+INSERT INTO `general_legaldocument` (`type`, `title`, `effective_date`, `last_update`, `active`)
+VALUES ('privacy', 'Política de privacidad', '2025-10-01', '2025-10-01', 1);
+
+SET @docId = LAST_INSERT_ID();
+
+INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
+VALUES (1, '1', 'Información que recopilamos', NULL, 1, @docId, NULL);
+
+SET @s1 = LAST_INSERT_ID();
+
+INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
+VALUES (1, '1.1', 'Información personal',
+'Nombres y apellidos completos
+Número de identificación
+Fecha de nacimiento
+Dirección de residencia
+Correo electrónico
+Número de teléfono
+Información académica y profesional
+Estado socioeconómico (cuando aplique)', 
+1, @docId, @s1);
+
+INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
+VALUES (2, '1.2', 'Información técnica',
+'Dirección IP
+Tipo de navegador y versión
+Sistema operativo
+Páginas visitadas y tiempo de permanencia
+Cookies y tecnologías similares',
+1, @docId, @s1);
+
+INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
+VALUES (2, '2', 'Uso de la información', NULL, 1, @docId, NULL);
+
+SET @s2 = LAST_INSERT_ID();
+
+INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
+VALUES (1, '2.1', 'Servicios educativos',
+'Gestión de inscripciones y matrículas
+Seguimiento académico y evaluación
+Emisión de certificados y títulos
+Comunicación sobre programas y cursos',
+1, @docId, @s2);
+
+INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
+VALUES (2, '2.2', 'Servicios administrativos',
+'Verificación de identidad
+Gestión de pagos (cuando aplique)
+Soporte técnico y atención al usuario
+Cumplimiento de obligaciones legales',
+1, @docId, @s2);
+
+INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
+VALUES (3, '2.3', 'Mejora de servicios',
+'Análisis estadístico y de rendimiento
+Personalización de la experiencia educativa
+Desarrollo de nuevos programas formativos
+Investigación educativa institucional',
+1, @docId, @s2);
+
+INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
+VALUES (3, '3', 'Protección de datos', NULL, 1, @docId, NULL);
+
+SET @s3 = LAST_INSERT_ID();
+
+INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
+VALUES (1, '3.1', 'Medidas técnicas',
+'Cifrado de datos en tránsito y en reposo
+Firewalls y sistemas de detección de intrusiones
+Copias de seguridad regulares
+Actualizaciones de seguridad constantes
+Control de acceso basado en roles',
+1, @docId, @s3);
+
+INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
+VALUES (2, '3.2', 'Medidas organizativas',
+'Políticas internas de manejo de datos
+Capacitación del personal en protección de datos
+Procedimientos de respuesta a incidentes
+Auditorías regulares de seguridad
+Acuerdos de confidencialidad con terceros',
+1, @docId, @s3);
+
+INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
+VALUES (4, '4', 'Derechos sobre los datos',
+'Acceso: Conocer qué datos tenemos sobre usted
+Rectificación: Corregir datos inexactos o incompletos
+Actualización: Mantener sus datos actualizados
+Supresión: Solicitar la eliminación de sus datos (cuando sea posible)
+Oposición: Oponerse al tratamiento de sus datos en ciertos casos
+Portabilidad: Obtener una copia de sus datos en formato estructurado
+
+Para ejercer estos derechos, puede contactarnos a través de los canales indicados al final de esta política.',
+1, @docId, NULL);
+
+INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
+VALUES (5, '5', 'Compartir información', NULL, 1, @docId, NULL);
+
+SET @s5 = LAST_INSERT_ID();
+
+INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
+VALUES 
+(1, '5.1', 'Entidades Gubernamentales', 'Con entidades del gobierno colombiano cuando sea requerido por ley o para cumplir con obligaciones regulatorias.', 1, @docId, @s5),
+(2, '5.2', 'Proveedores de Servicios', 'Con proveedores de servicios tecnológicos bajo estrictos acuerdos de confidencialidad.', 1, @docId, @s5),
+(3, '5.3', 'Instituciones Educativas', 'Con otras instituciones educativas para fines de articulación académica y reconocimiento de estudios.', 1, @docId, @s5),
+(4, '5.4', 'Empleadores', 'Con empleadores potenciales, con su consentimiento expreso, para fines de empleabilidad.', 1, @docId, @s5);
+
+INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
+VALUES (6, '6', 'Retención de datos',
+'Datos académicos: permanentes para efectos de certificación
+Datos de contacto: mientras mantenga relación activa con el SENA
+Datos técnicos: máximo 2 años
+Datos financieros: según legislación contable y tributaria',
+1, @docId, NULL);
+
+INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
+VALUES (7, '7', 'Menores de edad',
+'Los menores de edad pueden utilizar nuestros servicios con el consentimiento de sus padres o tutores legales. 
+Medidas adicionales:
+- Verificación del consentimiento parental
+- Limitación en la recopilación de datos personales
+- Supervisión adicional en el procesamiento de datos
+- Derechos especiales de eliminación de datos',
+1, @docId, NULL);
+
+
 SELECT 'Datos insertados correctamente en bdautogestion' as mensaje;
