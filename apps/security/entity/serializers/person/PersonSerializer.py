@@ -5,7 +5,8 @@ from apps.security.entity.models.DocumentType import DocumentType
 
 class PersonSerializer(serializers.ModelSerializer):
     image = serializers.ImageField(use_url=True, allow_null=True, required=False)
-    type_identification = serializers.PrimaryKeyRelatedField(queryset=DocumentType.objects.filter(active=True))
+    # Usar IntegerField para recibir el id del tipo de documento
+    type_identification = serializers.IntegerField()
 
     class Meta:
         model = Person
@@ -22,3 +23,9 @@ class PersonSerializer(serializers.ModelSerializer):
             'image'
         ]
         ref_name = "PersonModelSerializer"
+    
+    def validate_type_identification(self, value):
+        """Validar que el tipo de documento exista y esté activo"""
+        if not DocumentType.objects.filter(pk=value, active=True).exists():
+            raise serializers.ValidationError("Tipo de identificación inválido")
+        return value
