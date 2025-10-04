@@ -216,8 +216,8 @@ CORS_ALLOWED_ORIGINS = [
 # Email settings
 EMAILS_ENABLED = True
 EMAILS_FROM_NAME = "AutoGestion SENA"
-EMAILS_FROM_EMAIL: str = "Serviciodecorreossena@gmail.com"
-SMTP_USER: str = "Serviciodecorreossena@gmail.com"  # Tu correo completo
+EMAILS_FROM_EMAIL: str = "ciesautogestion@gmail.com"
+SMTP_USER: str = "ciesautogestion@gmail.com"  # Tu correo completo
 SMTP_PASSWORD: str = "oyfr yvax zjfj rwsw"
 SMTP_HOST: str = "smtp.gmail.com"
 SMTP_PORT: int = 587
@@ -233,9 +233,9 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'Serviciodecorreossena@gmail.com'  # Tu correo completo
+EMAIL_HOST_USER = 'ciesautogestion@gmail.com'  # Tu correo completo
 EMAIL_HOST_PASSWORD = 'oyfr yvax zjfj rwsw'  # Tu contraseña de aplicación de Gmail
-DEFAULT_FROM_EMAIL = 'Serviciodecorreossena@gmail.com'
+DEFAULT_FROM_EMAIL = 'ciesautogestion@gmail.com'
 
 # ============================
 # ARCHIVOS MEDIA (IMÁGENES, ETC)
