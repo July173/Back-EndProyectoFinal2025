@@ -1,17 +1,20 @@
-# Importa crontab para la programación de tareas periódicas
 from celery.schedules import crontab
 from pathlib import Path
 from datetime import timedelta
+from dotenv import load_dotenv
 import os
+
+# Cargar variables del archivo .env
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ============================
 # CONFIGURACIÓN BÁSICA
 # ============================
-SECRET_KEY = 'django-insecure-igo_*_$d=s2s+x#u=!whln50*b2(+(9a=3z5rv)tr$v!1h%ty&'
-DEBUG = True
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '*']
+SECRET_KEY = os.getenv('SECRET_KEY')
+DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
 
 # ============================
 # APPS INSTALADAS
@@ -29,6 +32,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_yasg',
     'corsheaders',
+
     # Apps locales
     'apps.security',
     'apps.general',
@@ -43,7 +47,6 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -72,40 +75,39 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
-
 # ============================
-# BASE DE DATOS (MySQL) y configuración normal sin despliegue de docker
+# BASE DE DATOS (MySQL)
 # ============================
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'bdautogestion',
-        'USER': 'root',
-        'PASSWORD': '123456',
-        'HOST': 'localhost',
-        'PORT': '3306',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
         'OPTIONS': {'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"},
     }
-    
 }
+
 # ============================
-# CELERY CONFIG (para Docker Compose)
+# CELERY CONFIG
 # ============================
-CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379/0')
-CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 TIME_ZONE = 'America/Bogota'
 CELERY_TIMEZONE = TIME_ZONE
 
-# Tarea periódica para desactivar instructores cuyo contrato terminó
 CELERY_BEAT_SCHEDULE = {
     'deactivate-expired-instructors-daily': {
         'task': 'apps.general.tasks.deactivate_expired_instructors',
-        'schedule': crontab(hour=0, minute=1),  # todos los días a las 00:01
+        'schedule': crontab(hour=0, minute=1),
     },
 }
+
 # ============================
 # MODELO DE USUARIO PERSONALIZADO
 # ============================
@@ -122,22 +124,19 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # ============================
-# DJANGO REST FRAMEWORK (DRF) #
+# DRF y JWT
 # ============================
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
-        # 'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
-    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
 }
 
-# Configuración de JWT
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
@@ -149,30 +148,14 @@ SIMPLE_JWT = {
 # ============================
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
-        'Bearer': {
-            'type': 'apiKey',
-            'name': 'Authorization',
-            'in': 'header'
-        }
+        'Bearer': {'type': 'apiKey', 'name': 'Authorization', 'in': 'header'}
     },
     'USE_SESSION_AUTH': False,
     'JSON_EDITOR': True,
-    'SUPPORTED_SUBMIT_METHODS': ['get', 'post', 'put', 'delete', 'patch'],
-    'DEFAULT_FIELD_INSPECTORS': [
-        'drf_yasg.inspectors.CamelCaseJSONFilter',
-        'drf_yasg.inspectors.ReferencingSerializerInspector',
-        'drf_yasg.inspectors.RelatedFieldInspector',
-        'drf_yasg.inspectors.ChoiceFieldInspector',
-        'drf_yasg.inspectors.FileFieldInspector',  # PARA ARCHIVOS
-        'drf_yasg.inspectors.DictFieldInspector',
-        'drf_yasg.inspectors.SimpleFieldInspector',
-        'drf_yasg.inspectors.StringDefaultFieldInspector',
-    ],
 }
 
 REDOC_SETTINGS = {'LAZY_RENDERING': False}
 
-X_FRAME_OPTIONS = 'ALLOWALL'
 # ============================
 # INTERNACIONALIZACIÓN
 # ============================
@@ -182,67 +165,43 @@ USE_I18N = True
 USE_TZ = True
 
 # ============================
-# ARCHIVOS ESTÁTICOS
+# ARCHIVOS ESTÁTICOS / MEDIA
 # ============================
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-# =============================
-# CORS configuration
-# ==============================
+
+# ============================
+# CORS
+# ============================
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
-    # Backend
     "http://127.0.0.1:8000",
-    # Frontend - diferentes puertos comunes
-    "http://localhost:3000",    # React/Next.js
-    "http://localhost:8080",    # React/Next.js
-    "http://localhost:82",      # Otros dev servers
-    "http://localhost:5173",    # Vite
-    "http://127.0.0.1:3000",
-    "http://localhost:8081",    # Otros dev servers
-    "http://127.0.0.1:3000",
-    "http://localhost:8085",
+    "http://localhost:3000",
+    "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "http://localhost:8080",
     "http://127.0.0.1:8080",
-    ## forntend movil
-    "http://198.168.1.21:8000",
-    "http://192.168.1.8:8000",
-    "http://127.0.0.1:8000"
-    
 ]
 
-# Email settings
-EMAILS_ENABLED = True
-EMAILS_FROM_NAME = "AutoGestion SENA"
-EMAILS_FROM_EMAIL: str = "ciesautogestion@gmail.com"
-SMTP_USER: str = "ciesautogestion@gmail.com"  # Tu correo completo
-SMTP_PASSWORD: str = "oyfr yvax zjfj rwsw"
-SMTP_HOST: str = "smtp.gmail.com"
-SMTP_PORT: int = 587
-SMTP_TLS: bool = True
-SMTP_SSL: bool = False
-
-EMAIL_RESET_TOKEN_EXPIRE_MINUTES: int = 5
-EMAIL_VERIFICATION_TOKEN_EXPIRE_MINUTES: int = 5
-FRONTEND_HOST: str = ""
-BACKEND_HOST: str = "http://localhost:8000"
-
+# ============================
+# EMAIL CONFIG (desde .env)
+# ============================
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'ciesautogestion@gmail.com'  # Tu correo completo
-EMAIL_HOST_PASSWORD = 'oyfr yvax zjfj rwsw'  # Tu contraseña de aplicación de Gmail
-DEFAULT_FROM_EMAIL = 'ciesautogestion@gmail.com'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = os.getenv('EMAIL_HOST_USER')
+EMAILS_FROM_NAME = os.getenv('EMAIL_FROM_NAME', 'AutoGestion SENA')
 
 # ============================
-# ARCHIVOS MEDIA (IMÁGENES, ETC)
+# LOGGING
 # ============================
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -254,10 +213,6 @@ LOGGING = {
         },
     },
     'loggers': {
-        'django': {
-            'handlers': ['file'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
+        'django': {'handlers': ['file'], 'level': 'ERROR', 'propagate': True},
     },
 }
