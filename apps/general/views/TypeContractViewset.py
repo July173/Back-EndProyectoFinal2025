@@ -1,3 +1,4 @@
+from urllib import request
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -55,19 +56,17 @@ class TypeContractViewset(BaseViewSet):
         return super().destroy(request, *args, **kwargs)
 
     @swagger_auto_schema(
-        method='delete',
-        operation_description="Realiza un borrado lógico (soft delete) del tipo de contrato especificado.",
-        tags=["TypeContract"],
-        responses={
-            204: openapi.Response("Eliminado lógicamente correctamente."),
-            404: openapi.Response("No encontrado.")
-        }
+    method='delete',
+    operation_description="Realiza un borrado lógico (soft delete) del tipo de contrato especificado.",
+    tags=["TypeContract"],
+    responses={
+        204: openapi.Response("Eliminado lógicamente correctamente."),
+        404: openapi.Response("No encontrado.")
+    }
     )
     @action(detail=True, methods=['delete'], url_path='soft-delete')
     def soft_destroy(self, request, pk=None):
-        contract_type = self.get_object()
-        if contract_type:
-            contract_type.active = False
-            contract_type.save()
-            return Response({"detail": "Eliminado lógicamente correctamente."}, status=status.HTTP_204_NO_CONTENT)
-        return Response({"detail": "No encontrado."}, status=status.HTTP_404_NOT_FOUND)
+        """
+            Realiza un borrado lógico del tipo de contrato especificado.
+        """
+        return super().soft_destroy(request, pk)

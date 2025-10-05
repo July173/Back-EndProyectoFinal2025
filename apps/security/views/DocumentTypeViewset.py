@@ -65,9 +65,13 @@ class DocumentTypeViewset(BaseViewSet):
     )
     @action(detail=True, methods=['delete'], url_path='soft-delete')
     def soft_destroy(self, request, pk=None):
-        doc_type = self.get_object()
-        if doc_type:
-            doc_type.active = False
-            doc_type.save()
-            return Response({"detail": "Eliminado lógicamente correctamente."}, status=status.HTTP_204_NO_CONTENT)
-        return Response({"detail": "No encontrado."}, status=status.HTTP_404_NOT_FOUND)
+        deleted = self.service_class().soft_delete(pk)
+        if deleted:
+            return Response(
+                {"detail": "Eliminado lógicamente correctamente."},
+                status=status.HTTP_204_NO_CONTENT
+            )
+        return Response(
+            {"detail": "No encontrado."},
+            status=status.HTTP_404_NOT_FOUND
+        )
