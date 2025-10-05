@@ -79,7 +79,7 @@ class RequestAsignationService(BaseService):
             result = self.repository.get_form_request_by_id(request_id)
             if not result:
                 return self.error_response('Solicitud no encontrada', "not_found")
-            aprendiz, enterprise, boss, human_talent, modality, request_asignation, regional, center, sede = result
+            person, aprendiz, enterprise, boss, human_talent, modality, request_asignation, regional, center, sede = result
             request_item = {
                 'aprendiz_id': aprendiz.id,
                 'ficha_id': aprendiz.ficha_id if aprendiz.ficha else None,
@@ -125,7 +125,7 @@ class RequestAsignationService(BaseService):
             request_item = {
                 'aprendiz_id': aprendiz.id,
                 'nombre_aprendiz': f"{getattr(person, 'first_name', '')} {getattr(person, 'first_last_name', '')} {getattr(person, 'second_last_name', '')}",
-                'tipo_identificacion': getattr(person, 'type_identification', None),
+                'tipo_identificacion': getattr(person, 'type_identification_id', None),
                 'numero_identificacion': getattr(person, 'number_identification', None),
                 'telefono_aprendiz': getattr(person, 'phone_number', None),
                 'correo_aprendiz': correo_aprendiz,
@@ -250,7 +250,7 @@ class RequestAsignationService(BaseService):
                     'id': request_asignation.id,  # id de la solicitud
                     'aprendiz_id': aprendiz.id,   # id del aprendiz
                     'nombre': f"{getattr(person, 'first_name', '')} {getattr(person, 'first_last_name', '')} {getattr(person, 'second_last_name', '')}",
-                    'tipo_identificacion': getattr(person, 'type_identification', None),
+                    'tipo_identificacion': getattr(person, 'type_identification_id', None),
                     'numero_identificacion': getattr(person, 'number_identification', None),
                     'fecha_solicitud': request_asignation.request_date
                 }

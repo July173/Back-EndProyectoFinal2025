@@ -2,7 +2,7 @@ USE bdautogestion;
 INSERT INTO `general_supportcontact` (`id`, `type`, `label`, `value`, `extra_info`, `active`) VALUES
 	(1, 'Email', 'Soporte por correo electrónico', 'servicio@sena.edu.co', 'Respuesta en 24-48 horas', 1),
 	(2, 'Teléfono', 'Linea gratuita nacional', '01 8000 910 270', 'Lunes a viernes: 7:00 AM - 7:00 PM', 1),
-	(3, 'Enlaces útiles', 'Sofia Plus - Oferta Educativa', 'https://betowa.sena.edu.co/', 'Ninguna', 1);
+	(3, 'Enlaces útiles', 'Sofia Plus - Oferta Educativa', 'https://betowa.sena.edu.co/', 'enlace', 1);
 
 INSERT INTO `general_supportschedule` (`id`, `day_range`, `hours`, `is_closed`, `notes`) VALUES
 	(1, 'Lunes a Viernes', '7:00 AM - 7:00 PM', 0, ''),
