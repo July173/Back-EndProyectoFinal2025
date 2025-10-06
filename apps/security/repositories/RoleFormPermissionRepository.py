@@ -13,7 +13,7 @@ class RolFormPermissionRepository(BaseRepository):
             """
             datos = (
                 RolFormPermission.objects
-                .filter(role__user__id=user_id)  # User -> Role
+                .filter(role__user__id=user_id, form__formmodule__module__active=True)  # Filtrar por usuario y módulos activos
                 .select_related("role", "form__formmodule__module", "form")
                 .values(
                     "role__type_role",                       # nombre del rol
