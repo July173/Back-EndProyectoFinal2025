@@ -11,11 +11,6 @@ from core.utils.Validation import is_sena_email
 from django.core.exceptions import ObjectDoesNotExist
 
 class InstructorService(BaseService):
-    def filter_by_knowledge_area(self, area_name):
-        """
-        Delegar el filtro por nombre de área de conocimiento al repository.
-        """
-        return self.repository.filter_by_knowledge_area(area_name)
 
     def __init__(self):
         self.repository = InstructorRepository()
@@ -160,14 +155,3 @@ class InstructorService(BaseService):
             return "Eliminación lógica realizada correctamente."
 
 
-    def filter_by_nombre(self, nombre):
-        """
-        Delegar el filtro por nombre al repository.
-        """
-        return self.repository.filter_by_name(nombre)
-
-    def filter_by_document_number(self, numero_documento):
-        """
-        Delegar el filtro por número de documento al repository.
-        """
-        return self.repository.filter_by_document_number(numero_documento)

@@ -6,17 +6,6 @@ from django.db import transaction
 
 class AprendizRepository(BaseRepository):
     
-    def filter_by_file_number(self, file_number):
-        """
-        Filtra aprendices por número de ficha.
-        """
-        return self.model.objects.filter(ficha__file_number=file_number)
-    def filter_by_program(self, program_name):
-        """
-        Filtra aprendices por nombre de programa de formación (case-insensitive, partial match).
-        """
-        return self.model.objects.filter(ficha__program__name__icontains=program_name)
-    
     def __init__(self):
         super().__init__(Aprendiz)
 
@@ -95,22 +84,3 @@ class AprendizRepository(BaseRepository):
             return apprentice
 
 
-    def filter_by_name(self, name):
-        """
-        Filtra aprendices por nombre (en cualquier campo de la persona asociada).
-        """
-        return self.model.objects.filter(
-            person__first_name__icontains=name
-        ) | self.model.objects.filter(
-            person__second_name__icontains=name
-        ) | self.model.objects.filter(
-            person__first_last_name__icontains=name
-        ) | self.model.objects.filter(
-            person__second_last_name__icontains=name
-        )
-        
-    def filter_by_document_number(self, document_number):
-        """
-        Filtra aprendices por número de documento de la persona asociada.
-        """
-        return self.model.objects.filter(person__number_identification=document_number)

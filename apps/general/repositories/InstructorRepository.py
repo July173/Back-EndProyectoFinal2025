@@ -5,12 +5,6 @@ from apps.general.entity.models import Instructor, PersonSede, Sede
 from django.db import transaction
 
 class InstructorRepository(BaseRepository):
-    def filter_by_knowledge_area(self, area_name):
-        """
-        Filtra instructores por nombre de área de conocimiento (case-insensitive, partial match).
-        """
-        return self.model.objects.filter(knowledgeArea__name__icontains=area_name)
-
     def __init__(self):
         super().__init__(Instructor)
 
@@ -111,22 +105,3 @@ class InstructorRepository(BaseRepository):
             return instructor
 
     
-    def filter_by_name(self, nombre):
-        """
-        Filtra instructores por nombre (en cualquier campo de la persona asociada).
-        """
-        return self.model.objects.filter(
-            person__first_name__icontains=nombre
-        ) | self.model.objects.filter(
-            person__second_name__icontains=nombre
-        ) | self.model.objects.filter(
-            person__first_last_name__icontains=nombre
-        ) | self.model.objects.filter(
-            person__second_last_name__icontains=nombre
-        )
-
-    def filter_by_document_number(self, numero_documento):
-        """
-        Filtra instructores por número de documento de la persona asociada.
-        """
-        return self.model.objects.filter(person__number_identification=numero_documento)

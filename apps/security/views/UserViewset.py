@@ -12,8 +12,7 @@ from rest_framework import status
 
 
 class UserViewSet(BaseViewSet):
-    service_class = UserService
-    serializer_class = UserSerializer
+
 
     # ----------- LIST -----------
     @swagger_auto_schema(
@@ -99,24 +98,6 @@ class UserViewSet(BaseViewSet):
             {"detail": "No encontrado."},
             status=status.HTTP_404_NOT_FOUND
         )
-
-
-
-
-    @swagger_auto_schema(
-        operation_description="Filtra usuarios por estado usando un solo parámetro select: activo, inactivo o registrados.",
-        tags=["User"],
-        manual_parameters=[
-            openapi.Parameter('status', openapi.IN_QUERY, description="Filtrar por estado: activo, inactivo, registrados", type=openapi.TYPE_STRING, enum=['activo', 'inactivo', 'registrados'])
-        ],
-        responses={200: openapi.Response("Lista de usuarios filtrados")}
-    )
-    @action(detail=False, methods=['get'], url_path='filter-by-status')
-    def filter_by_status(self, request):
-        status_param = request.query_params.get('status')
-        users = self.service_class().filter_by_status(status_param)
-        serializer = self.serializer_class(users, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
         operation_description=(
@@ -204,3 +185,23 @@ class UserViewSet(BaseViewSet):
         result = self.service.send_password_reset_code(email)
         return Response(result['data'], status=result['status'])
     
+
+    @swagger_auto_schema(
+        operation_description="Filtra usuarios por rol y búsqueda en nombre o documento.",
+        tags=["User"],
+        manual_parameters=[
+            openapi.Parameter('role', openapi.IN_QUERY, description="Nombre del rol", type=openapi.TYPE_STRING),
+            openapi.Parameter('search', openapi.IN_QUERY, description="Texto de búsqueda (nombre o documento)", type=openapi.TYPE_STRING)
+        ],
+        responses={200: openapi.Response("Lista de usuarios filtrados")}
+    )
+    @action(detail=False, methods=['get'], url_path='filter')
+    def filter_users(self, request):
+        role = request.query_params.get('role')
+        search = request.query_params.get('search')
+        service = self.service_class()
+        users = service.get_filtered_users(role, search)
+        serializer = self.get_serializer(users, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    service_class = UserService
+    serializer_class = UserSerializer

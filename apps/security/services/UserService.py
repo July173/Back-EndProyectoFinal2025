@@ -17,16 +17,9 @@ from apps.security.emails.SendEmailsActivate import enviar_activacion_usuario
 
 
 class UserService(BaseService):
-    
+
     def __init__(self):
         self.repository = UserRepository()
-
-    def filter_by_status(self, status_param):
-        """
-        Delegar filtrado al repository.
-        """
-        return self.repository.filter_by_status(status_param)
-
 
     def update(self, pk, data):
         # Si se envía una nueva contraseña, hashearla antes de actualizar
@@ -245,3 +238,19 @@ class UserService(BaseService):
             motivo
         )
         return True
+
+    
+    def get_filtered_users(self, role=None, search=None):
+        from django.db import models
+        queryset = self.repository.get_queryset()
+        if role:
+            queryset = queryset.filter(role__type_role__icontains=role)
+        if search:
+            queryset = queryset.filter(
+                models.Q(person__first_name__icontains=search) |
+                models.Q(person__second_name__icontains=search) |
+                models.Q(person__first_last_name__icontains=search) |
+                models.Q(person__second_last_name__icontains=search) |
+                models.Q(person__number_identification__icontains=search)
+            )
+        return list(queryset)
