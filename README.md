@@ -5,6 +5,7 @@ Pasos:
   2) Configura variables de entorno MySQL o edita core/settings.py
   3) python manage.py makemigrations
   4) python manage.py migrate
+  6) Actualizar la base de datos con el sql que esta predispuesto en la raiz del proyecto como sql.sql
   5) python manage.py createsuperuser
   6) python manage.py runserver
   7) celery -A core worker --loglevel=info
