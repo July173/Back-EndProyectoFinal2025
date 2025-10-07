@@ -3,16 +3,15 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-
 from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.assign.services.AsignationInstructorService import AsignationInstructorService
-from apps.assign.entity.serializers.AsignationInstructorSerializer import AsignationInstructorSerializer
+from apps.assign.entity.serializers.AsignationInstructor.AsignationInstructorSerializer import AsignationInstructorSerializer
 
 
 class AsignationInstructorViewset(BaseViewSet):
     service_class = AsignationInstructorService
     serializer_class = AsignationInstructorSerializer
-
+    
     @swagger_auto_schema(
         operation_description="Obtiene una lista de todas las asignaciones de instructor.",
         tags=["AsignationInstructor"]
@@ -76,3 +75,28 @@ class AsignationInstructorViewset(BaseViewSet):
             {"detail": "No encontrado."},
             status=status.HTTP_404_NOT_FOUND
         )
+
+
+    @swagger_auto_schema(
+        method='post',
+        operation_description="Crea una asignación de instructor personalizada (fecha automática)",
+        request_body=AsignationInstructorSerializer,
+        responses={
+            201: openapi.Response("Asignación creada correctamente", AsignationInstructorSerializer),
+            400: openapi.Response("Error: {'status': 'error', 'type': 'not_found', 'message': 'El instructor no existe.'}")
+        },
+        tags=["AsignationInstructor"]
+    )
+    @action(detail=False, methods=['post'], url_path='custom-create')
+    def custom_create(self, request):
+        instructor_id = request.data.get('instructor')
+        request_asignation_id = request.data.get('request_asignation')
+        if not instructor_id or not request_asignation_id:
+            return Response({"status": "error", "type": "missing_data", "message": "Faltan datos obligatorios."}, status=status.HTTP_400_BAD_REQUEST)
+        service = self.service_class()
+        result = service.create_custom(instructor_id, request_asignation_id)
+        if isinstance(result, dict) and result.get('status') == 'error':
+            return Response(result, status=status.HTTP_400_BAD_REQUEST)
+        serializer = self.serializer_class(result)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    

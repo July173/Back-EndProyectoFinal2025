@@ -1,8 +1,8 @@
 from apps.security.entity.models import Permission
-from core.base.serializers.implements.BaseSerializer import BaseSerializer
+from rest_framework import serializers
 
 
-class PermissionSerializer(BaseSerializer):
+class PermissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Permission
         fields = ['id', 'type_permission', 'description']

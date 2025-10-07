@@ -3,10 +3,10 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-
 from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.general.services.RegionalService import RegionalService
-from apps.general.entity.serializers.RegionalSerializer import RegionalSerializer
+from apps.general.entity.serializers.Regional.RegionalSerializer import RegionalSerializer
+from apps.general.entity.serializers.Regional.RegionalNestedSerializer import RegionalNestedSerializer
 
 
 class RegionalViewset(BaseViewSet):
@@ -97,3 +97,30 @@ class RegionalViewset(BaseViewSet):
             {"detail": "No encontrado."},
             status=status.HTTP_404_NOT_FOUND
         )
+        
+        
+        
+    @swagger_auto_schema(
+        operation_description="Obtiene una regional por id con sus centros anidados.",
+        tags=["Regional"],
+        responses={200: RegionalNestedSerializer()}
+    )
+    @action(detail=True, methods=['get'], url_path='with-centers')
+    def with_centers_by_id(self, request, pk=None):
+        regional = self.service_class().get_regional_with_centers_by_id(pk)
+        if not regional:
+            return Response({"detail": "No encontrado."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = RegionalNestedSerializer(regional)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    @swagger_auto_schema(
+        operation_description="Obtiene todas las regionales con sus centros anidados.",
+        tags=["Regional"],
+        responses={200: RegionalNestedSerializer(many=True)}
+    )
+    @action(detail=False, methods=['get'], url_path='with-centers')
+    def with_centers(self, request):
+        queryset = self.service_class().get_all_regionals_with_centers()
+        serializer = RegionalNestedSerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    

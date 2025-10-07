@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from apps.security.entity.models.DocumentType import DocumentType
+from apps.general.entity.models.TypeContract import TypeContract
 
 
 class CreateInstructorSerializer(serializers.Serializer):
@@ -7,21 +9,19 @@ class CreateInstructorSerializer(serializers.Serializer):
     second_name = serializers.CharField(required=False, allow_blank=True)
     first_last_name = serializers.CharField()
     second_last_name = serializers.CharField(required=False, allow_blank=True)
-    phone_number = serializers.CharField(required=False, allow_blank=True)
-    type_identification = serializers.CharField()
-    number_identification = serializers.CharField()
+    phone_number = serializers.IntegerField(required=False)
+    type_identification = serializers.PrimaryKeyRelatedField(queryset=DocumentType.objects.all())
+    number_identification = serializers.IntegerField(required=True)
     # Campos de User
     email = serializers.EmailField()
-    role_id = serializers.IntegerField()  # <-- Agrega este campo
+    role_id = serializers.IntegerField()
     # Campos de Instructor
-    contractType = serializers.CharField()
+    contractType = serializers.PrimaryKeyRelatedField(queryset=TypeContract.objects.all())
     contractStartDate = serializers.DateField()
     contractEndDate = serializers.DateField()
     knowledgeArea = serializers.IntegerField()
-    # IDs de relación
-    center_id = serializers.IntegerField()
+    # ID de relación
     sede_id = serializers.IntegerField()
-    regional_id = serializers.IntegerField()
 
     class Meta:
         ref_name = "CreateInstructorInputSerializer"

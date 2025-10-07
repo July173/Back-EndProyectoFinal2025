@@ -1,12 +1,15 @@
 from rest_framework import serializers
 from apps.security.entity.models import Person
 
+from apps.security.entity.models.DocumentType import DocumentType
 
 class PersonSerializer(serializers.ModelSerializer):
-
-    # Permitir que la imagen sea opcional cuando se registra una persona
     image = serializers.ImageField(use_url=True, allow_null=True, required=False)
-    
+    # PrimaryKeyRelatedField maneja automáticamente la conversión ID <-> Objeto
+    type_identification = serializers.PrimaryKeyRelatedField(
+        queryset=DocumentType.objects.filter(active=True)
+    )
+
     class Meta:
         model = Person
         fields = [

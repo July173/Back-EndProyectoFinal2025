@@ -13,6 +13,7 @@ from apps.general.entity.serializers.CreateAprendiz.AprendizSerializer import Ap
 
 
 class AprendizViewset(BaseViewSet):
+
     service_class = AprendizService
     serializer_class = AprendizSerializer
 
@@ -88,6 +89,7 @@ class AprendizViewset(BaseViewSet):
         )
 #--------------------------------------------------------------------------------------------
 
+    # ----------- RETRIEVE (custom) -----------
     @swagger_auto_schema(
         operation_description="Obtiene un aprendiz por su ID (nuevo endpoint avanzado).",
         responses={200: GetAprendizSerializer},
@@ -101,7 +103,7 @@ class AprendizViewset(BaseViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response({"detail": "Aprendiz no encontrado."}, status=status.HTTP_404_NOT_FOUND)
 
-
+    # ----------- CREATE (custom) -----------
     @swagger_auto_schema(
         request_body=CreateAprendizSerializer,
         operation_description="Crea un nuevo aprendiz (nuevo endpoint avanzado).",
@@ -120,7 +122,7 @@ class AprendizViewset(BaseViewSet):
             "email": user.email
         }, status=status.HTTP_201_CREATED)
 
-
+    # ----------- LIST (custom) -----------
     @swagger_auto_schema(
         operation_description="Lista todos los aprendices (nuevo endpoint avanzado).",
         responses={200: GetAprendizSerializer(many=True)},
@@ -132,7 +134,7 @@ class AprendizViewset(BaseViewSet):
         serializer = GetAprendizSerializer(aprendices, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
+    # ----------- UPDATE (custom) -----------
     @swagger_auto_schema(
         request_body=UpdateAprendizSerializer,
         operation_description="Actualiza los datos de un aprendiz (nuevo endpoint avanzado).",
@@ -150,7 +152,7 @@ class AprendizViewset(BaseViewSet):
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-
+    # ----------- DELETE (custom) -----------
     @swagger_auto_schema(
         operation_description="Elimina un aprendiz (delete persistencial, nuevo endpoint avanzado).",
         tags=["Aprendiz"]
@@ -165,7 +167,8 @@ class AprendizViewset(BaseViewSet):
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-
+    
+    # ----------- LOGICAL DELETE OR REACTIVATE -----------
     @swagger_auto_schema(
         operation_description="Elimina lógicamente o reactiva un aprendiz (nuevo endpoint avanzado).",
         tags=["Aprendiz"]
@@ -179,3 +182,5 @@ class AprendizViewset(BaseViewSet):
             return Response({"detail": "Aprendiz no encontrado."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+        

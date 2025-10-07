@@ -8,7 +8,7 @@ from django.contrib.auth.hashers import make_password
 from io import BytesIO
 from apps.security.entity.models import Role, Person, User
 from apps.general.entity.models import Program, Ficha, Aprendiz
-from apps.security.entity.enums.document_type_enum import DocumentType
+from apps.security.entity.models.DocumentType import DocumentType
 from apps.security.emails.SendEmailsActivate import enviar_activacion_usuario
 from datetime import datetime
 import string
@@ -53,10 +53,12 @@ class ExcelAprendizTemplateService:
         }
 
     def _get_document_types(self):
-        return [doc_type.name for doc_type in DocumentType]
+        """Obtiene las siglas de tipos de documento desde la BD"""
+        return list(DocumentType.objects.filter(active=True).values_list('acronyms', flat=True))
 
     def _get_document_type_display_values(self):
-        return [(doc_type.name, doc_type.value) for doc_type in DocumentType]
+        """Obtiene pares (acronyms, name) de tipos de documento desde la BD"""
+        return list(DocumentType.objects.filter(active=True).values_list('acronyms', 'name'))
 
     def _apply_style(self, cell, style_dict):
         for style_type, style_value in style_dict.items():
@@ -162,16 +164,17 @@ class ExcelAprendizTemplateService:
         self._auto_adjust_columns(ws)
 
     def _create_identification_types_sheet(self, workbook):
-        """Crea una hoja con los tipos de identificación desde el enum"""
+        """Crea una hoja con los tipos de identificación desde la BD"""
         ws = workbook.create_sheet("Tipos de Identificación")
-        headers = ['CÓDIGO', 'DESCRIPCIÓN']
+        headers = ['ID', 'SIGLAS', 'NOMBRE']
         for col_idx, header in enumerate(headers, 1):
             cell = ws.cell(row=1, column=col_idx, value=header)
             self._apply_style(cell, self.header_style)
-        document_types = self._get_document_type_display_values()
-        for row_idx, (code, description) in enumerate(document_types, 2):
-            ws.cell(row=row_idx, column=1, value=code)
-            ws.cell(row=row_idx, column=2, value=description)
+        document_types = DocumentType.objects.filter(active=True).order_by('acronyms')
+        for row_idx, doc_type in enumerate(document_types, 2):
+            ws.cell(row=row_idx, column=1, value=doc_type.id)
+            ws.cell(row=row_idx, column=2, value=doc_type.acronyms)
+            ws.cell(row=row_idx, column=3, value=doc_type.name)
         self._auto_adjust_columns(ws)
 
     def _create_regionales_sheet(self, workbook):
@@ -453,29 +456,33 @@ class ExcelAprendizTemplateService:
     def _create_aprendiz_record(self, data, final_password):
         """Crea un registro completo de aprendiz (Person + User)"""
         try:
-            # 1. Crear Person
+            # 1. Obtener el ID del tipo de documento desde la BD
+            doc_type = DocumentType.objects.get(acronyms=data['tipo_identificacion'], active=True)
+            
+            # 2. Crear Person usando type_identification_id directamente
             person = Person.objects.create(
                 first_name=data['primer_nombre'],
                 second_name=data.get('segundo_nombre', ''),
                 first_last_name=data['primer_apellido'],
                 second_last_name=data.get('segundo_apellido', ''),
                 phone_number=data['telefono'],
-                type_identification=data['tipo_identificacion'],
+                type_identification_id=doc_type.id,  # Usar el ID directamente
                 number_identification=data['numero_identificacion'],
                 active=True
             )
             
-            # 2. Crear User (activo automáticamente)
+            # 3. Crear User (activo automáticamente)
             hashed_password = make_password(final_password)
             user = User.objects.create(
                 email=data['email'],
                 password=hashed_password,
                 person=person,
                 is_active=True,  # Activo automáticamente
-                role_id=2  # Rol de Aprendiz (ajustar según tu BD)
+                role_id=2,  # Rol de Aprendiz
+                registered=False  # No registrado, ya que se activa automáticamente
             )
             
-            # 3. Crear Aprendiz (sin ficha específica por ahora)
+            # 4. Crear Aprendiz (sin ficha específica por ahora)
             aprendiz = Aprendiz.objects.create(
                 person=person,
                 ficha=None,  # Se asignará posteriormente

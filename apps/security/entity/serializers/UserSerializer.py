@@ -1,10 +1,19 @@
 from apps.security.entity.models import User
-from core.base.serializers.implements.BaseSerializer import BaseSerializer
+from rest_framework import serializers
+from apps.security.entity.serializers.person.PersonSerializer import PersonSerializer
+from apps.security.entity.serializers.RoleSerializer import RoleSerializer
 
+class UserSerializer(serializers.ModelSerializer):
 
-class UserSerializer(BaseSerializer):
+    person = PersonSerializer(read_only=True)
+    role = RoleSerializer(read_only=True)
 
+ 
     class Meta:
         model = User
         fields = ['id', 'email', 'password', 'person', 'role', 'is_active', 'registered']
         ref_name = "UserModelSerializer"
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
+       

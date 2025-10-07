@@ -12,11 +12,6 @@ from apps.security.services.excel.ExcelAprendizTemplateService import ExcelApren
 
 
 class ExcelTemplateViewSet(ViewSet):
-    """
-    ViewSet para generar y descargar plantillas de Excel para el registro masivo
-    de instructores y aprendices.
-    """
-    
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.instructor_service = ExcelInstructorTemplateService()

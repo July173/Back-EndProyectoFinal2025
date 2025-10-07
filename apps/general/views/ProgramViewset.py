@@ -3,12 +3,9 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-
 from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.general.services.ProgramService import ProgramService
 from apps.general.entity.serializers.ProgramSerializer import ProgramSerializer
-
-
 from apps.general.entity.serializers.FichaSerializer import FichaSerializer
 
 class ProgramViewset(BaseViewSet):
@@ -20,7 +17,7 @@ class ProgramViewset(BaseViewSet):
         operation_description=(
             "Obtiene una lista de todos los programas registrados."
         ),
-        tags=["Programas"]
+        tags=["Program"]
     )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
@@ -30,7 +27,7 @@ class ProgramViewset(BaseViewSet):
         operation_description=(
             "Crea un nuevo programa con la información proporcionada."
         ),
-        tags=["Programas"]
+        tags=["Program"]
     )
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
@@ -40,7 +37,7 @@ class ProgramViewset(BaseViewSet):
         operation_description=(
             "Obtiene la información de un programa específico."
         ),
-        tags=["Programas"]
+        tags=["Program"]
     )
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
@@ -50,7 +47,7 @@ class ProgramViewset(BaseViewSet):
         operation_description=(
             "Actualiza la información completa de un programa."
         ),
-        tags=["Programas"]
+        tags=["Program"]
     )
     def update(self, request, *args, **kwargs):
         return super().update(request, *args, **kwargs)
@@ -60,7 +57,7 @@ class ProgramViewset(BaseViewSet):
         operation_description=(
             "Actualiza solo algunos campos de un programa."
         ),
-        tags=["Programas"]
+        tags=["Program"]
     )
     def partial_update(self, request, *args, **kwargs):
         return super().partial_update(request, *args, **kwargs)
@@ -70,7 +67,7 @@ class ProgramViewset(BaseViewSet):
         operation_description=(
             "Elimina físicamente un programa de la base de datos."
         ),
-        tags=["Programas"]
+        tags=["Program"]
     )
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)
@@ -81,7 +78,7 @@ class ProgramViewset(BaseViewSet):
         operation_description=(
             "Realiza un borrado lógico (soft delete) del programa especificado."
         ),
-        tags=["Programas"],
+        tags=["Program"],
         responses={
             204: openapi.Response("Eliminado lógicamente correctamente."),
             404: openapi.Response("No encontrado.")
@@ -104,10 +101,35 @@ class ProgramViewset(BaseViewSet):
     @swagger_auto_schema(
         operation_description="Obtiene todas las fichas vinculadas a un programa específico.",
         responses={200: FichaSerializer(many=True)},
-        tags=["Programas"]
+        tags=["Program"]
     )
     @action(detail=True, methods=['get'], url_path='fichas')
     def get_fichas_by_program(self, request, pk=None):
         fichas = self.service_class().get_fichas_by_program(pk)
         serializer = FichaSerializer(fichas, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    # ----------- DISABLE PROGRAM WITH FICHAS (custom) -----------
+    @swagger_auto_schema(
+        method='delete',
+        operation_description="Deshabilita o reactiva un programa y todas sus fichas vinculadas.",
+        tags=["Program"],
+        responses={
+            200: "Acción realizada correctamente",
+            400: "Error de validación", 
+            404: "Programa no encontrado"
+        }
+    )
+    @action(detail=True, methods=['delete'], url_path='disable-with-fichas')
+    def disable_program_with_fichas(self, request, pk=None):
+        try:
+            mensaje = self.service_class().logical_delete_program(pk)
+            return Response(
+                {"detail": mensaje},
+                status=status.HTTP_200_OK
+            )
+        except ValueError as e:
+            return Response(
+                {"error": str(e)}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )

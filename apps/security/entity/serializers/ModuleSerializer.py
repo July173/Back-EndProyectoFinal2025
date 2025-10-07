@@ -1,8 +1,8 @@
 from apps.security.entity.models import Module
-from core.base.serializers.implements.BaseSerializer import BaseSerializer
+from rest_framework import serializers
 
 
-class ModuleSerializer(BaseSerializer):
+class ModuleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Module
         fields = ['id', 'name', 'description', 'active']

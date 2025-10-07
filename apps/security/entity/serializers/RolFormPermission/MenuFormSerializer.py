@@ -1,4 +1,3 @@
-
 from rest_framework import serializers
 from apps.security.entity.serializers.FormItemSerializer import FormItemSerializer
 

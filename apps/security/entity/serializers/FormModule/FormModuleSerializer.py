@@ -1,8 +1,8 @@
 from apps.security.entity.models import FormModule
-from core.base.serializers.implements.BaseSerializer import BaseSerializer
+from rest_framework import serializers
 
 
-class FormModuleSerializer(BaseSerializer):
+class FormModuleSerializer(serializers.ModelSerializer):
     class Meta:
         model = FormModule
         fields = ['id', 'form', 'module', ]

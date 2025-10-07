@@ -6,12 +6,14 @@ from apps.security.entity.models import User, Person
 from apps.general.entity.models import Instructor
 from apps.security.emails.CreacionCuentaUsers import send_account_created_email
 from core.utils.Validation import is_unique_email, is_unique_document_number, is_valid_phone_number
-
+from django.utils.crypto import get_random_string
+from core.utils.Validation import is_sena_email
+from django.core.exceptions import ObjectDoesNotExist
 
 class InstructorService(BaseService):
+
     def __init__(self):
         self.repository = InstructorRepository()
-
 
     def list_instructors(self):
         """
@@ -25,13 +27,13 @@ class InstructorService(BaseService):
         """
         return Instructor.objects.filter(pk=instructor_id).first()
 
-    def create_instructor(self, person_data, user_data, instructor_data, sede_id, center_id, regional_id):
-        from core.utils.Validation import is_sena_email
+    def create_instructor(self, person_data, user_data, instructor_data, sede_id):
         with transaction.atomic():
-            # Validar y obtener entidades relacionadas usando el ORM de Django
-            regional = Regional.objects.get(id=regional_id)
-            center = Center.objects.get(id=center_id, regional=regional)
-            sede = Sede.objects.get(id=sede_id, center=center)
+            # Obtener la sede y sus relaciones
+            try:
+                sede = Sede.objects.get(id=sede_id)
+            except ObjectDoesNotExist:
+                raise ValueError(f'La sede con id {sede_id} no existe.')
 
             # Preparar datos para KnowledgeArea
             knowledge_area_id = instructor_data.pop('knowledgeArea')
@@ -39,9 +41,13 @@ class InstructorService(BaseService):
             instructor_data['knowledgeArea'] = knowledge_area_instance
 
             # Preparar datos para user
-            user_data['password'] = person_data['number_identification']  # Asigna la contraseña automáticamente
+          
+            numero_identificacion = str(person_data['number_identification'])
+            caracteres_adicionales = get_random_string(length=2)
+            password_temporal = numero_identificacion + caracteres_adicionales
+            user_data['password'] = password_temporal
             temp_email = user_data.get('email')
-            temp_password = user_data.get('password')
+            temp_password = password_temporal
 
             # Validación de correo institucional @sena.edu.co
             if not temp_email or not is_sena_email(temp_email):
@@ -79,9 +85,7 @@ class InstructorService(BaseService):
                 "person_id": person.id,
                 "user_id": user.id,
                 "instructor_id": instructor.id,
-                "sede_id": sede.id,
-                "center_id": center.id,
-                "regional_id": regional.id
+                "sede_id": sede.id
             }
 
     def update_instructor(self, instructor_id, person_data, user_data, instructor_data, sede_id):
@@ -92,12 +96,18 @@ class InstructorService(BaseService):
                 knowledge_area_id = instructor_data.pop('knowledgeArea')
                 instructor_data['knowledgeArea'] = KnowledgeArea.objects.get(pk=knowledge_area_id)
 
-            # Validaciones reutilizables para update (excluyendo el instructor actual)
-            if not is_unique_email(user_data['email'], User, exclude_user_id=instructor.user.id):
+            # Obtener el usuario usando el objeto Person vinculado al Instructor
+            person = instructor.person
+            user = User.objects.filter(person=person).first()
+
+            # Validaciones reutilizables para update (excluyendo el usuario actual)
+            if not is_unique_email(user_data['email'], User, exclude_user_id=user.id if user else None):
                 raise ValueError('El correo ya está registrado.')
-            if not is_unique_document_number(person_data['number_identification'], Person, exclude_person_id=instructor.person.id):
-                raise ValueError('El número de documento ya está registrado.')
-            # Validación de número de documento numérico eliminada
+            # Permitir que el número de identificación sea el mismo que el actual
+            if int(person_data['number_identification']) != int(person.number_identification):
+                if not is_unique_document_number(person_data['number_identification'], Person, exclude_person_id=person.id):
+                    raise ValueError('El número de documento ya está registrado.')
+            # Validación de número de teléfono
             if person_data.get('phone_number') and not is_valid_phone_number(person_data['phone_number']):
                 raise ValueError('El número de teléfono debe tener exactamente 10 dígitos.')
 
@@ -108,8 +118,6 @@ class InstructorService(BaseService):
                 instructor_data,
                 sede_id=sede_id
             )
-            person = instructor.person
-            user = User.objects.filter(person=person).first()
             return {
                 "person_id": person.id,
                 "user_id": user.id if user else None,
@@ -145,3 +153,5 @@ class InstructorService(BaseService):
                 return "Instructor reactivado correctamente."
             self.repository.set_active_state_dates_instructor(instructor, active=False)
             return "Eliminación lógica realizada correctamente."
+
+

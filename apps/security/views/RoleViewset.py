@@ -3,7 +3,6 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-
 from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.security.services.RoleService import RoleService
 from apps.security.entity.serializers.RoleSerializer import RoleSerializer
@@ -13,7 +12,7 @@ from apps.security.entity.models import Role, User  # Asegúrate de importar Use
 class RoleViewSet(BaseViewSet):
     service_class = RoleService
     serializer_class = RoleSerializer
-
+   
     # ----------- LIST -----------
     @swagger_auto_schema(
         operation_description=(
@@ -118,3 +117,62 @@ class RoleViewSet(BaseViewSet):
                 "cantidad_usuarios": user_count
             })
         return Response(data, status=status.HTTP_200_OK)
+
+
+    @swagger_auto_schema(
+        operation_description="Filtra roles por tipo (ej: Administrador, Aprendiz, Instructor)",
+        tags=["Role"],
+        manual_parameters=[
+            openapi.Parameter('type_role', openapi.IN_QUERY, description="Tipo de rol a filtrar", type=openapi.TYPE_STRING, required=True)
+        ],
+        responses={200: openapi.Response("Lista de roles filtrados")}
+    )
+    @action(detail=False, methods=['get'], url_path='filter-by-type')
+    def filter_by_type(self, request):
+        type_role = request.query_params.get('type_role')
+        if not type_role:
+            return Response({"detail": "Debe proporcionar el parámetro 'type_role'"}, status=status.HTTP_400_BAD_REQUEST)
+        roles = self.service_class().filter_roles_by_type(type_role)
+        serializer = self.serializer_class(roles, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    @swagger_auto_schema(
+        method='delete',
+        operation_description="Activa si está desactivado y desactiva si está activo el rol y todos los usuarios vinculados. Solo se requiere el id en la URL.",
+        responses={200: openapi.Response('Resultado de la operación')},
+        tags=["Role"]
+    )
+    @action(detail=True, methods=['delete'], url_path='logical-delete-with-users')
+    def logical_delete_with_users(self, request, pk=None):
+        """
+        Activa si está desactivado y desactiva si está activo el rol y todos los usuarios vinculados. Solo se requiere el id en la URL.
+        """
+        # Obtener el estado actual del rol
+        try:
+            role = Role.objects.get(pk=pk)
+        except Role.DoesNotExist:
+            return Response({'detail': 'Rol no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+        nuevo_estado = not role.active
+        result = self.service_class().set_active_role_and_users(pk, nuevo_estado)
+        return Response(result)
+    
+    
+    
+    @swagger_auto_schema(
+        operation_description="Filtra roles por estado activo/inactivo.",
+        tags=["Role"],
+        manual_parameters=[
+            openapi.Parameter('active', openapi.IN_QUERY, description="Filtrar por estado activo (true) o inactivo (false)", type=openapi.TYPE_BOOLEAN)
+        ],
+        responses={200: openapi.Response("Lista de roles filtrados")}
+    )
+    @action(detail=False, methods=['get'], url_path='filter-by-active')
+    def filter_by_active(self, request):
+        active_param = request.query_params.get('active', None)
+        if active_param is None:
+            return Response({"detail": "Debe proporcionar el parámetro 'active' (true/false)."}, status=status.HTTP_400_BAD_REQUEST)
+        active = str(active_param).lower() == 'true'
+        roles = self.service_class().filter_rols_by_active(active)
+        serializer = self.serializer_class(roles, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    

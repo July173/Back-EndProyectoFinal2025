@@ -5,11 +5,10 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.general.services.InstructorService import InstructorService
-from apps.general.entity.serializers.InstructorSerializer import InstructorSerializer
+from apps.general.entity.serializers.CreateInstructor.InstructorSerializer import InstructorSerializer
 from apps.general.entity.models import Instructor
 from apps.general.entity.serializers.CreateInstructor.CreateInstructorSerializer import CreateInstructorSerializer
 from apps.general.entity.serializers.CreateInstructor.GetInstructorSerializer import GetInstructorSerializer
-
 
 
 class InstructorViewset(BaseViewSet):
@@ -133,9 +132,7 @@ class InstructorViewset(BaseViewSet):
             {k: data[k] for k in ['first_name', 'second_name', 'first_last_name', 'second_last_name', 'phone_number', 'type_identification', 'number_identification']},
             {k: data[k] for k in ['email', 'role_id', 'password'] if k in data},
             {k: data[k] for k in ['contractType', 'contractStartDate', 'contractEndDate', 'knowledgeArea']},
-            data['sede_id'],
-            data['center_id'],
-            data['regional_id']
+            data['sede_id']
         )
         return Response({"detail": "Instructor creado correctamente.", "ids": result}, status=status.HTTP_201_CREATED)
 
@@ -203,3 +200,5 @@ class InstructorViewset(BaseViewSet):
             return Response({"detail": "Instructor no encontrado."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+

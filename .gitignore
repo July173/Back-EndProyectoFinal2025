@@ -16,6 +16,7 @@ env/
 ENV/
 *.env
 .env.*
+.env
 
 # Archivos de configuración del IDE
 .vscode/
@@ -27,6 +28,10 @@ ENV/
 **/migrations/**__pycache__/
 **/migrations/*.pyc
 **/migrations/*.pyo
+
+# Ignorar todas las carpetas de migraciones y su contenido
+**/migrations/*
+!**/migrations/__init__.py
 
 # Archivos estáticos y media generados
 /staticfiles/

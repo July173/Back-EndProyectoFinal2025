@@ -4,20 +4,49 @@ from apps.security.entity.models import User, Role, Person
 from apps.general.entity.models import Aprendiz, Ficha
 from apps.security.emails.CreacionCuentaUsers import send_account_created_email
 from django.db import transaction
+from django.db import models
 from core.utils.Validation import is_unique_email, is_unique_document_number, is_valid_phone_number
+from apps.security.entity.models.DocumentType import DocumentType
+from django.utils.crypto import get_random_string
+from core.utils.Validation import is_soy_sena_email
+
 
 class AprendizService(BaseService):
+
     def __init__(self):
         self.repository = AprendizRepository()
 
     def create_aprendiz(self, validated_data):
         """
-        Recibe los datos validados del serializer y ejecuta la lógica de creación.
-        Retorna aprendiz, user y person.
+        Crea un aprendiz, usuario y persona. Valida datos y envía correo de bienvenida.
         """
-        from core.utils.Validation import is_soy_sena_email
+        # Validar tipo de documento desde la BD
+        type_identification = validated_data['type_identification']
+        
+        # Verificar que el tipo de documento exista y esté activo en la BD
+        if isinstance(type_identification, int):
+            # Si viene como ID, verificar que exista
+            if not DocumentType.objects.filter(pk=type_identification, active=True).exists():
+                valid_types = DocumentType.objects.filter(active=True).values_list('id', 'name')
+                valid_types_str = ', '.join([f"{id}: {name}" for id, name in valid_types])
+                raise ValueError(f'Tipo de identificación inválido. Opciones válidas: {valid_types_str}')
+        else:
+            # Si viene como string (acronym o name), buscar el ID
+            doc_type = DocumentType.objects.filter(
+                models.Q(acronyms=type_identification) | models.Q(name=type_identification),
+                active=True
+            ).first()
+            if not doc_type:
+                valid_types = DocumentType.objects.filter(active=True).values_list('acronyms', 'name')
+                valid_types_str = ', '.join([f"{acronym} ({name})" for acronym, name in valid_types])
+                raise ValueError(f'Tipo de identificación inválido. Opciones válidas: {valid_types_str}')
+            # Reemplazar con el ID para usarlo después
+            type_identification = doc_type.id
+            validated_data['type_identification'] = doc_type.id
+        
+        # Construcción de datos de persona
         person_data = {
-            'type_identification': validated_data['type_identification'],
+            'type_identification_id': type_identification,  # Usar _id para el campo ForeignKey
             'number_identification': validated_data['number_identification'],
             'first_name': validated_data['first_name'],
             'second_name': validated_data.get('second_name', ''),
@@ -25,26 +54,31 @@ class AprendizService(BaseService):
             'second_last_name': validated_data.get('second_last_name', ''),
             'phone_number': validated_data.get('phone_number', ''),
         }
+        # Construcción de datos de usuario
         user_data = {
             'email': validated_data['email'],
             'person_id': None  # Se asigna en el repo
         }
         ficha_id = validated_data['ficha_id']
 
-        # Validación de correo institucional @soy.sena.edu.co
+        # Validación de correo institucional
         if not user_data['email'] or not is_soy_sena_email(user_data['email']):
             raise ValueError('Solo se permiten correos institucionales (@soy.sena.edu.co) para aprendices.')
 
-        # Validaciones reutilizables
+        # Validaciones de unicidad y formato
         if not is_unique_email(user_data['email'], User):
             raise ValueError('El correo ya está registrado.')
         if not is_unique_document_number(person_data['number_identification'], Person):
             raise ValueError('El número de documento ya está registrado.')
         if person_data['phone_number'] and not is_valid_phone_number(person_data['phone_number']):
             raise ValueError('El número de teléfono debe tener exactamente 10 dígitos.')
+
         with transaction.atomic():
-            user_data['password'] = person_data['number_identification']  # Asigna la contraseña automáticamente
-            # Assign default role id=2 if not provided
+            # Asigna la contraseña como número de documento + 2 caracteres aleatorios
+            numero_identificacion = str(person_data['number_identification'])
+            caracteres_adicionales = get_random_string(length=2)
+            password_temporal = numero_identificacion + caracteres_adicionales
+            user_data['password'] = password_temporal
             if not user_data.get('role_id'):
                 try:
                     default_role = Role.objects.get(pk=2)
@@ -52,11 +86,13 @@ class AprendizService(BaseService):
                 except Role.DoesNotExist:
                     pass
 
+            # Obtiene ficha y crea registros
             email = user_data.get('email')
-            temp_password = user_data.get('password')
+            temp_password = password_temporal
             ficha = Ficha.objects.get(pk=ficha_id)
-            aprendiz, user, person = self.repository.create_all_dates_aprendiz(person_data, user_data, ficha)
-            # Validar datos antes de enviar el correo
+            aprendiz, user, person = self.repository.create_all_dates_apprentice(person_data, user_data, ficha)
+
+            # Envía correo de bienvenida
             email_sent = False
             email_error = None
             try:
@@ -74,10 +110,29 @@ class AprendizService(BaseService):
 
     def update_aprendiz(self, aprendiz_id, validated_data):
         """
-        Recibe los datos validados del serializer y ejecuta la lógica de actualización.
+        Actualiza los datos de aprendiz, usuario y persona. Valida datos y roles.
         """
+        
+        # Validar y obtener el ID del tipo de documento
+        type_identification = validated_data.get('type_identification')
+        if type_identification:
+            if isinstance(type_identification, int):
+                # Si viene como ID, verificar que exista
+                if not DocumentType.objects.filter(pk=type_identification, active=True).exists():
+                    raise ValueError('Tipo de identificación inválido')
+            else:
+                # Si viene como string (acronym o name), buscar el ID
+                doc_type = DocumentType.objects.filter(
+                    models.Q(acronyms=type_identification) | models.Q(name=type_identification),
+                    active=True
+                ).first()
+                if not doc_type:
+                    raise ValueError('Tipo de identificación inválido')
+                type_identification = doc_type.id
+        
+        # Construcción de datos de persona
         person_data = {
-            'type_identification': validated_data['type_identification'],
+            'type_identification_id': type_identification,  # Usar _id para el campo ForeignKey
             'number_identification': validated_data['number_identification'],
             'first_name': validated_data['first_name'],
             'second_name': validated_data.get('second_name', ''),
@@ -85,6 +140,7 @@ class AprendizService(BaseService):
             'second_last_name': validated_data.get('second_last_name', ''),
             'phone_number': validated_data.get('phone_number', ''),
         }
+        # Construcción de datos de usuario
         user_data = {
             'email': validated_data['email'],
         }
@@ -92,15 +148,21 @@ class AprendizService(BaseService):
         role_id = validated_data['role_id']
 
         aprendiz = Aprendiz.objects.get(pk=aprendiz_id)
-        # Validaciones reutilizables para update (excluyendo el aprendiz actual)
-        if not is_unique_email(user_data['email'], User, exclude_user_id=aprendiz.user.id):
+        # Validación de correo institucional
+        if not user_data['email'] or not is_soy_sena_email(user_data['email']):
+            raise ValueError('Solo se permiten correos institucionales (@soy.sena.edu.co) para aprendices.')
+        # Obtener el usuario usando la relación con la persona
+        user = User.objects.filter(person=aprendiz.person).first()
+        # Validaciones de unicidad y formato
+        if not is_unique_email(user_data['email'], User, exclude_user_id=user.id if user else None):
             raise ValueError('El correo ya está registrado.')
         if not is_unique_document_number(person_data['number_identification'], Person, exclude_person_id=aprendiz.person.id):
             raise ValueError('El número de documento ya está registrado.')
-        # Validación de número de documento numérico eliminada
         if person_data['phone_number'] and not is_valid_phone_number(person_data['phone_number']):
             raise ValueError('El número de teléfono debe tener exactamente 10 dígitos.')
+
         with transaction.atomic():
+            # Actualiza ficha y rol
             aprendiz = Aprendiz.objects.get(pk=aprendiz_id)
             ficha = Ficha.objects.get(pk=ficha_id)
             if not role_id:
@@ -110,32 +172,40 @@ class AprendizService(BaseService):
                 user_data['role_id'] = role.id
             except Role.DoesNotExist:
                 user_data['role_id'] = 2
-            self.repository.update_all_dates_aprendiz(aprendiz, person_data, user_data, ficha)
+            self.repository.update_all_dates_apprentice(aprendiz, person_data, user_data, ficha)
             return aprendiz
 
     def get_aprendiz(self, aprendiz_id):
         """
-        Devuelve el aprendiz por id o None si no existe.
+        Obtiene un aprendiz por id.
         """
         return Aprendiz.objects.filter(pk=aprendiz_id).first()
 
     def list_aprendices(self):
         """
-        Devuelve todos los aprendices.
+        Lista todos los aprendices.
         """
         return Aprendiz.objects.all()
 
     def delete_aprendiz(self, aprendiz_id):
+        """
+        Elimina completamente un aprendiz y sus datos relacionados.
+        """
         with transaction.atomic():
             aprendiz = Aprendiz.objects.get(pk=aprendiz_id)
-            self.repository.delete_all_dates_aprendiz(aprendiz)
+            self.repository.delete_all_dates_apprentice(aprendiz)
 
     def logical_delete_aprendiz(self, aprendiz_id):
+        """
+        Realiza borrado lógico o reactivación de aprendiz.
+        """
         with transaction.atomic():
             aprendiz = Aprendiz.objects.get(pk=aprendiz_id)
             if not aprendiz.active:
-                self.repository.set_active_state_dates_aprendiz(aprendiz, active=True)
+                self.repository.set_active_state_dates_apprentice(aprendiz, active=True)
                 return "Aprendiz reactivado correctamente."
             else:
-                self.repository.set_active_state_dates_aprendiz(aprendiz, active=False)
+                self.repository.set_active_state_dates_apprentice(aprendiz, active=False)
                 return "Eliminación lógica realizada correctamente."
+
+

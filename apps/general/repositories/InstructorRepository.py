@@ -2,7 +2,7 @@ from django.utils import timezone
 from apps.security.entity.models import Person, User
 from core.base.repositories.implements.baseRepository.BaseRepository import BaseRepository
 from apps.general.entity.models import Instructor, PersonSede, Sede
-
+from django.db import transaction
 
 class InstructorRepository(BaseRepository):
     def __init__(self):
@@ -17,7 +17,6 @@ class InstructorRepository(BaseRepository):
         Crea persona, usuario, instructor y person_sede en una sola transacción.
         Retorna instructor, user, person, person_sede.
         """
-        from django.db import transaction
         with transaction.atomic():
             person = Person.objects.create(**person_data)
             if User.objects.filter(email=user_data['email']).exists():
@@ -38,7 +37,6 @@ class InstructorRepository(BaseRepository):
         """
         Actualiza persona, usuario, instructor y person_sede en una sola transacción.
         """
-        from django.db import transaction
         with transaction.atomic():
             # Persona
             for attr, value in person_data.items():
@@ -67,7 +65,6 @@ class InstructorRepository(BaseRepository):
         """
         Elimina instructor, usuario, person_sede y persona en cascada.
         """
-        from django.db import transaction
         with transaction.atomic():
             person = instructor.person
             user = User.objects.filter(person=person).first()
@@ -82,7 +79,6 @@ class InstructorRepository(BaseRepository):
         """
         Activa o desactiva instructor, usuario, persona y person_sede en cascada.
         """
-        from django.db import transaction
         with transaction.atomic():
             instructor.active = active
             instructor.delete_at = None if active else timezone.now()
@@ -107,3 +103,5 @@ class InstructorRepository(BaseRepository):
                     ps.delete_at = None if active else timezone.now()
                 ps.save()
             return instructor
+
+    

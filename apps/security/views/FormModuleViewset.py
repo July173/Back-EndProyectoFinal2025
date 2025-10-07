@@ -3,16 +3,16 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-
 from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.security.services.FormModuleService import FormModuleService
-
 from apps.security.entity.serializers.FormModule.FormModuleSerializer import FormModuleSerializer
 from apps.security.entity.serializers.FormModule.CreateModuleWithFormsSerializer import CreateModuleWithFormsSerializer
 
 
 class FormModuleViewSet(BaseViewSet):
-
+    service_class = FormModuleService
+    serializer_class = FormModuleSerializer
+    
     @swagger_auto_schema(
         method='get',
         operation_description="Obtiene un módulo y sus formularios asociados por ID.",
@@ -50,7 +50,6 @@ class FormModuleViewSet(BaseViewSet):
         result = self.service_class().update_module_with_forms(pk, serializer.validated_data)
         return Response(result, status=status.HTTP_200_OK)
 
-    from apps.security.entity.serializers.FormModule.CreateModuleWithFormsSerializer import CreateModuleWithFormsSerializer
     @swagger_auto_schema(
         method='post',
         request_body=CreateModuleWithFormsSerializer,
@@ -64,8 +63,7 @@ class FormModuleViewSet(BaseViewSet):
         serializer.is_valid(raise_exception=True)
         result = self.service_class().create_module_with_forms(serializer.validated_data)
         return Response(result, status=status.HTTP_201_CREATED)
-    service_class = FormModuleService
-    serializer_class = FormModuleSerializer
+   
 
     # ----------- LIST -----------
     @swagger_auto_schema(

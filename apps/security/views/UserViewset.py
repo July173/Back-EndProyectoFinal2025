@@ -3,7 +3,6 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-
 from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.security.services.UserService import UserService
 from apps.security.entity.serializers.UserSerializer import UserSerializer
@@ -14,93 +13,6 @@ from rest_framework import status
 
 class UserViewSet(BaseViewSet):
 
-    @swagger_auto_schema(
-        operation_description=(
-            "Restablece la contraseña usando email y nueva contraseña."
-        ),
-        tags=["User"],
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'email': openapi.Schema(type=openapi.TYPE_STRING, description='Correo institucional'),
-                'new_password': openapi.Schema(type=openapi.TYPE_STRING, description='Nueva contraseña'),
-            },
-            required=['email', 'new_password']
-        ),
-        responses={
-            200: openapi.Response("Contraseña restablecida"),
-            400: openapi.Response("Datos inválidos")
-        }
-    )
-    @action(detail=False, methods=['post'], url_path='reset-password')
-    def reset_password(self, request):
-        """
-        Restablece la contraseña usando email, código y nueva contraseña.
-        """
-        email = request.data.get('email')
-        new_password = request.data.get('new_password')
-        result = self.service.reset_password(email, new_password)
-        return Response(result['data'], status=result['status'])
-    service_class = UserService
-    serializer_class = UserSerializer
-
-
-    @swagger_auto_schema(
-        operation_description=(
-            "Valida correo institucional y contraseña, retorna JWT si es válido."
-        ),
-        tags=["User"],
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'email': openapi.Schema(type=openapi.TYPE_STRING, description='Correo institucional'),
-                'password': openapi.Schema(type=openapi.TYPE_STRING, description='Contraseña'),
-            },
-            required=['email', 'password']
-        ),
-        responses={
-            200: openapi.Response("Login exitoso"),
-            400: openapi.Response("Datos inválidos")
-        }
-    )
-    @action(detail=False, methods=['post'], url_path='validate-institutional-login')
-    def validate_institutional_login(self, request):
-        """
-        Valida correo institucional y contraseña, retorna JWT si es válido.
-        """
-        email = request.data.get('email')
-        password = request.data.get('password')
-        result = self.service.validate_institutional_login(email, password)
-        print("usuario info: ", result['data'])
-        print("usuario 2 info: ", result)
-        return Response(result['data'], status=result['status'])
-
-    @swagger_auto_schema(
-        operation_description=(
-            "Solicita código de recuperación de contraseña, lo envía por email y lo retorna al frontend."
-        ),
-        tags=["User"],
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'email': openapi.Schema(type=openapi.TYPE_STRING, description='Correo institucional'),
-            },
-            required=['email']
-        ),
-        responses={
-            200: openapi.Response("Código enviado"),
-            400: openapi.Response("Datos inválidos")
-        }
-    )
-    @action(detail=False, methods=['post'], url_path='request-password-reset')
-    def request_password_reset(self, request):
-        """
-        Solicita código de recuperación de contraseña, lo envía por email y lo retorna al frontend.
-        """
-        email = request.data.get('email')
-        result = self.service.send_password_reset_code(email)
-        return Response(result['data'], status=result['status'])
-    # ...existing code...
 
     # ----------- LIST -----------
     @swagger_auto_schema(
@@ -186,3 +98,110 @@ class UserViewSet(BaseViewSet):
             {"detail": "No encontrado."},
             status=status.HTTP_404_NOT_FOUND
         )
+
+    @swagger_auto_schema(
+        operation_description=(
+            "Restablece la contraseña usando email y nueva contraseña."
+        ),
+        tags=["User"],
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'email': openapi.Schema(type=openapi.TYPE_STRING, description='Correo institucional'),
+                'new_password': openapi.Schema(type=openapi.TYPE_STRING, description='Nueva contraseña'),
+            },
+            required=['email', 'new_password']
+        ),
+        responses={
+            200: openapi.Response("Contraseña restablecida"),
+            400: openapi.Response("Datos inválidos")
+        }
+    )
+    @action(detail=False, methods=['post'], url_path='reset-password')
+    def reset_password(self, request):
+        """
+        Restablece la contraseña usando email, código y nueva contraseña.
+        """
+        email = request.data.get('email')
+        new_password = request.data.get('new_password')
+        result = self.service.reset_password(email, new_password)
+        return Response(result['data'], status=result['status'])
+    
+
+
+    @swagger_auto_schema(
+        operation_description=(
+            "Valida correo institucional y contraseña, retorna JWT si es válido."
+        ),
+        tags=["User"],
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'email': openapi.Schema(type=openapi.TYPE_STRING, description='Correo institucional'),
+                'password': openapi.Schema(type=openapi.TYPE_STRING, description='Contraseña'),
+            },
+            required=['email', 'password']
+        ),
+        responses={
+            200: openapi.Response("Login exitoso"),
+            400: openapi.Response("Datos inválidos")
+        }
+    )
+    @action(detail=False, methods=['post'], url_path='validate-institutional-login')
+    def validate_institutional_login(self, request):
+        """
+        Valida correo institucional y contraseña, retorna JWT si es válido.
+        """
+        email = request.data.get('email')
+        password = request.data.get('password')
+        result = self.service.validate_institutional_login(email, password)
+        print("usuario info: ", result['data'])
+        print("usuario 2 info: ", result)
+        return Response(result['data'], status=result['status'])
+
+    @swagger_auto_schema(
+        operation_description=(
+            "Solicita código de recuperación de contraseña, lo envía por email y lo retorna al frontend."
+        ),
+        tags=["User"],
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'email': openapi.Schema(type=openapi.TYPE_STRING, description='Correo institucional'),
+            },
+            required=['email']
+        ),
+        responses={
+            200: openapi.Response("Código enviado"),
+            400: openapi.Response("Datos inválidos")
+        }
+    )
+    @action(detail=False, methods=['post'], url_path='request-password-reset')
+    def request_password_reset(self, request):
+        """
+        Solicita código de recuperación de contraseña, lo envía por email y lo retorna al frontend.
+        """
+        email = request.data.get('email')
+        result = self.service.send_password_reset_code(email)
+        return Response(result['data'], status=result['status'])
+    
+
+    @swagger_auto_schema(
+        operation_description="Filtra usuarios por rol y búsqueda en nombre o documento.",
+        tags=["User"],
+        manual_parameters=[
+            openapi.Parameter('role', openapi.IN_QUERY, description="Nombre del rol", type=openapi.TYPE_STRING),
+            openapi.Parameter('search', openapi.IN_QUERY, description="Texto de búsqueda (nombre o documento)", type=openapi.TYPE_STRING)
+        ],
+        responses={200: openapi.Response("Lista de usuarios filtrados")}
+    )
+    @action(detail=False, methods=['get'], url_path='filter')
+    def filter_users(self, request):
+        role = request.query_params.get('role')
+        search = request.query_params.get('search')
+        service = self.service_class()
+        users = service.get_filtered_users(role, search)
+        serializer = self.get_serializer(users, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    service_class = UserService
+    serializer_class = UserSerializer

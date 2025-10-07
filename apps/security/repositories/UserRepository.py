@@ -7,6 +7,11 @@ class UserRepository(BaseRepository):
     def __init__(self):
         super().__init__(User)
 
+    def get_queryset(self):
+        # Incluye relaciones para optimizar las consultas
+        return User.objects.select_related('person', 'role')
+  
+
     def create_user(self, data):
         serializer = UserSerializer(data=data)
         if serializer.is_valid():

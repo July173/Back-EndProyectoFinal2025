@@ -8,7 +8,7 @@ from django.contrib.auth.hashers import make_password
 from io import BytesIO
 from apps.security.entity.models import Role, Person, User
 from apps.general.entity.models import KnowledgeArea, Instructor
-from apps.security.entity.enums.document_type_enum import DocumentType
+from apps.security.entity.models.DocumentType import DocumentType
 from apps.security.emails.SendEmailsActivate import enviar_activacion_usuario
 from datetime import datetime
 import string
@@ -53,10 +53,12 @@ class ExcelInstructorTemplateService:
         }
 
     def _get_document_types(self):
-        return [doc_type.name for doc_type in DocumentType]
+        """Obtiene las siglas de tipos de documento desde la BD"""
+        return list(DocumentType.objects.filter(active=True).values_list('acronyms', flat=True))
 
     def _get_document_type_display_values(self):
-        return [(doc_type.name, doc_type.value) for doc_type in DocumentType]
+        """Obtiene pares (acronyms, name) de tipos de documento desde la BD"""
+        return list(DocumentType.objects.filter(active=True).values_list('acronyms', 'name'))
 
     def _apply_style(self, cell, style_dict):
         for style_type, style_value in style_dict.items():
@@ -75,15 +77,30 @@ class ExcelInstructorTemplateService:
             adjusted_width = min(max_length + 2, 50)
             worksheet.column_dimensions[column_letter].width = adjusted_width
 
-    def _add_data_validation(self, worksheet, column_letter, values, start_row=2, end_row=1000):
+    def _add_data_validation(self, worksheet, column_letter, values, start_row=2, end_row=1000, sheet_name=None, col_aux=None):
+        # Siempre pasar los valores extraídos de la BD
         if not values:
             return
         values_str = ','.join([str(v) for v in values])
-        dv = DataValidation(
-            type="list",
-            formula1=f'"{values_str}"',
-            allow_blank=True
-        )
+        if len(values_str) < 250 and all(',' not in str(v) for v in values):
+            dv = DataValidation(
+                type="list",
+                formula1=f'"{values_str}"',
+                allow_blank=True
+            )
+        elif sheet_name and col_aux and len(values) > 0:
+            # Si el nombre de la hoja tiene espacios, poner comillas simples
+            if ' ' in sheet_name:
+                sheet_name_formula = f"'{sheet_name}'"
+            else:
+                sheet_name_formula = sheet_name
+            dv = DataValidation(
+                type="list",
+                formula1=f'={sheet_name_formula}!${col_aux}$2:${col_aux}${len(values)+1}',
+                allow_blank=True
+            )
+        else:
+            return
         dv.error = 'El valor debe ser seleccionado de la lista'
         dv.errorTitle = 'Valor Inválido'
         dv.prompt = 'Selecciona un valor de la lista desplegable'
@@ -104,13 +121,13 @@ class ExcelInstructorTemplateService:
             ('SEGUNDO APELLIDO', False),
             ('CORREO INSTITUCIONAL*', True),
             ('NÚMERO DE CELULAR*', True),
+            ('REGIONAL*', True),
+            ('CENTRO DE FORMACIÓN*', True),
+            ('SEDE DE FORMACIÓN*', True),
             ('ÁREA DE CONOCIMIENTO*', True),
             ('TIPO DE CONTRATO*', True),
             ('FECHA INICIO CONTRATO*', True),
-            ('FECHA DE TERMINACIÓN DE CONTRATO*', True),
-            ('REGIONAL*', True),
-            ('CENTRO DE FORMACIÓN*', True),
-            ('SEDE DE FORMACIÓN*', True)
+            ('FECHA DE TERMINACIÓN DE CONTRATO*', True)
         ]
         for col_idx, (header, is_required) in enumerate(headers, 1):
             cell = ws_main.cell(row=1, column=col_idx, value=header)
@@ -118,8 +135,8 @@ class ExcelInstructorTemplateService:
             self._apply_style(cell, style)
         example_data = [
             ['CC', '1023456789', 'Juan', 'Carlos', 'Pérez', 'Gómez', 'juan.perez@sena.edu.co', '3004567890',
-             'Tecnologías de la Información', 'Planta', '2024-01-15', '2024-12-31', 'Huila',
-             'Centro de la industria, la empresa y los servicios', 'Industria - Neiva']
+             'Huila', 'Centro de la Biotecnología Agropecuaria', 'Sede Principal Biotecnología',
+             'Diseño', 'Planta', '2024-01-15', '2024-12-31']
         ]
         for row_idx, data_row in enumerate(example_data, 2):
             for col_idx, value in enumerate(data_row, 1):
@@ -160,26 +177,32 @@ class ExcelInstructorTemplateService:
         self._auto_adjust_columns(ws)
 
     def _create_contract_types_sheet(self, workbook):
-        """Crea una hoja con los tipos de contrato disponibles"""
+        """Crea una hoja con los tipos de contrato disponibles desde la BD"""
+        from apps.general.entity.models.TypeContract import TypeContract
         ws = workbook.create_sheet("Tipos de Contrato")
-        cell = ws.cell(row=1, column=1, value='TIPOS DE CONTRATO DISPONIBLES')
-        self._apply_style(cell, self.header_style)
-        contract_types = ['Planta', 'Contratista', 'Temporal', 'Prestación de Servicios', 'Cátedra']
-        for row_idx, contract_type in enumerate(contract_types, 2):
-            ws.cell(row=row_idx, column=1, value=contract_type)
-        self._auto_adjust_columns(ws)
-
-    def _create_identification_types_sheet(self, workbook):
-        """Crea una hoja con los tipos de identificación desde el enum"""
-        ws = workbook.create_sheet("Tipos de Identificación")
-        headers = ['CÓDIGO', 'DESCRIPCIÓN']
+        headers = ['ID', 'NOMBRE', 'DESCRIPCIÓN']
         for col_idx, header in enumerate(headers, 1):
             cell = ws.cell(row=1, column=col_idx, value=header)
             self._apply_style(cell, self.header_style)
-        document_types = self._get_document_type_display_values()
-        for row_idx, (code, description) in enumerate(document_types, 2):
-            ws.cell(row=row_idx, column=1, value=code)
-            ws.cell(row=row_idx, column=2, value=description)
+        contract_types = TypeContract.objects.filter(active=True).order_by('name')
+        for row_idx, contract_type in enumerate(contract_types, 2):
+            ws.cell(row=row_idx, column=1, value=contract_type.id)
+            ws.cell(row=row_idx, column=2, value=contract_type.name)
+            ws.cell(row=row_idx, column=3, value=contract_type.description or '')
+        self._auto_adjust_columns(ws)
+
+    def _create_identification_types_sheet(self, workbook):
+        """Crea una hoja con los tipos de identificación desde la BD"""
+        ws = workbook.create_sheet("Tipos de Identificación")
+        headers = ['ID', 'SIGLAS', 'NOMBRE']
+        for col_idx, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col_idx, value=header)
+            self._apply_style(cell, self.header_style)
+        document_types = DocumentType.objects.filter(active=True).order_by('acronyms')
+        for row_idx, doc_type in enumerate(document_types, 2):
+            ws.cell(row=row_idx, column=1, value=doc_type.id)
+            ws.cell(row=row_idx, column=2, value=doc_type.acronyms)
+            ws.cell(row=row_idx, column=3, value=doc_type.name)
         self._auto_adjust_columns(ws)
 
     def _create_regionales_sheet(self, workbook):
@@ -269,48 +292,33 @@ class ExcelInstructorTemplateService:
 
     def _add_instructor_data_validations(self, worksheet):
         """Agrega validaciones de datos (listas desplegables) para la plantilla de instructores"""
-        # Validación para Tipo de Identificación (columna A)
+        # Tipo de Identificación (columna A)
         id_types = self._get_document_types()
-        self._add_data_validation(worksheet, 'A', id_types)
+        self._add_data_validation(worksheet, 'A', id_types, sheet_name="Tipos de Identificación", col_aux="A")
 
-        # Validación para Área de Conocimiento (columna I)
-        try:
-            knowledge_areas = list(KnowledgeArea.objects.filter(active=True).values_list('name', flat=True))
-            if knowledge_areas:
-                self._add_data_validation(worksheet, 'I', knowledge_areas)
-        except Exception as e:
-            print(f"Error obteniendo áreas de conocimiento: {e}")
+        # Regional (columna I)
+        from apps.general.entity.models import Regional
+        regionales = list(Regional.objects.filter(active=True).values_list('name', flat=True))
+        self._add_data_validation(worksheet, 'I', regionales, sheet_name="Regionales", col_aux="B")
 
-        # Validación para Tipo de Contrato (columna J)
-        contract_types = ['Planta', 'Contratista', 'Temporal', 'Prestación de Servicios', 'Cátedra']
-        self._add_data_validation(worksheet, 'J', contract_types)
+        # Centro de Formación (columna J)
+        from apps.general.entity.models import Center
+        centros = list(Center.objects.filter(active=True).values_list('name', flat=True))
+        self._add_data_validation(worksheet, 'J', centros, sheet_name="Centros de Formación", col_aux="B")
 
-        # Validación para Regional (columna M)
-        try:
-            from apps.general.entity.models import Regional
-            regionales = list(Regional.objects.filter(active=True).values_list('name', flat=True))
-            if regionales:
-                self._add_data_validation(worksheet, 'M', regionales)
-        except Exception as e:
-            print(f"Error obteniendo regionales: {e}")
+        # Sede de Formación (columna K)
+        from apps.general.entity.models import Sede
+        sedes = list(Sede.objects.filter(active=True).values_list('name', flat=True))
+        self._add_data_validation(worksheet, 'K', sedes, sheet_name="Sedes", col_aux="B")
 
-        # Validación para Centro de Formación (columna N)
-        try:
-            from apps.general.entity.models import Center
-            centros = list(Center.objects.filter(active=True).values_list('name', flat=True))
-            if centros:
-                self._add_data_validation(worksheet, 'N', centros)
-        except Exception as e:
-            print(f"Error obteniendo centros de formación: {e}")
+        # Área de Conocimiento (columna L)
+        knowledge_areas = list(KnowledgeArea.objects.filter(active=True).values_list('name', flat=True))
+        self._add_data_validation(worksheet, 'L', knowledge_areas, sheet_name="Áreas de Conocimiento", col_aux="B")
 
-        # Validación para Sede de Formación (columna O)
-        try:
-            from apps.general.entity.models import Sede
-            sedes = list(Sede.objects.filter(active=True).values_list('name', flat=True))
-            if sedes:
-                self._add_data_validation(worksheet, 'O', sedes)
-        except Exception as e:
-            print(f"Error obteniendo sedes: {e}")
+        # Tipo de Contrato (columna M)
+        from apps.general.entity.models.TypeContract import TypeContract
+        contract_types = list(TypeContract.objects.filter(active=True).values_list('name', flat=True))
+        self._add_data_validation(worksheet, 'M', contract_types, sheet_name="Tipos de Contrato", col_aux="B")
 
     def _save_workbook_to_response(self, workbook, filename):
         """Guarda el workbook en un HttpResponse para descarga"""
@@ -398,13 +406,13 @@ class ExcelInstructorTemplateService:
                         'segundo_apellido': self._get_cell_value(worksheet, row_num, 6),
                         'email': self._get_cell_value(worksheet, row_num, 7),
                         'telefono': self._get_cell_value(worksheet, row_num, 8),
-                        'area_conocimiento': self._get_cell_value(worksheet, row_num, 9),
-                        'tipo_contrato': self._get_cell_value(worksheet, row_num, 10),
-                        'fecha_inicio': self._get_cell_value(worksheet, row_num, 11),
-                        'fecha_fin': self._get_cell_value(worksheet, row_num, 12),
-                        'regional': self._get_cell_value(worksheet, row_num, 13),
-                        'centro_formacion': self._get_cell_value(worksheet, row_num, 14),
-                        'sede': self._get_cell_value(worksheet, row_num, 15),
+                        'regional': self._get_cell_value(worksheet, row_num, 9),
+                        'centro_formacion': self._get_cell_value(worksheet, row_num, 10),
+                        'sede': self._get_cell_value(worksheet, row_num, 11),
+                        'area_conocimiento': self._get_cell_value(worksheet, row_num, 12),
+                        'tipo_contrato': self._get_cell_value(worksheet, row_num, 13),
+                        'fecha_inicio': self._get_cell_value(worksheet, row_num, 14),
+                        'fecha_fin': self._get_cell_value(worksheet, row_num, 15),
                     }
                     
                     # Validar que los campos obligatorios estén presentes
@@ -519,40 +527,55 @@ class ExcelInstructorTemplateService:
         if area_nombre and not KnowledgeArea.objects.filter(name=area_nombre, active=True).exists():
             errors.append('El área de conocimiento no existe o no está activa')
         
+        # Validar que el tipo de contrato exista en la BD
+        from apps.general.entity.models.TypeContract import TypeContract
+        tipo_contrato = data.get('tipo_contrato', '')
+        if tipo_contrato and not TypeContract.objects.filter(name=tipo_contrato, active=True).exists():
+            errors.append('El tipo de contrato no existe o no está activo')
+        
         return errors
 
     def _create_instructor_record(self, data, final_password):
         """Crea un registro completo de instructor (Person + User + Instructor)"""
         try:
-            # 1. Crear Person
+            from apps.general.entity.models.TypeContract import TypeContract
+            
+            # 1. Obtener el ID del tipo de documento desde la BD
+            doc_type = DocumentType.objects.get(acronyms=data['tipo_identificacion'], active=True)
+            
+            # 2. Crear Person usando type_identification_id directamente
             person = Person.objects.create(
                 first_name=data['primer_nombre'],
                 second_name=data.get('segundo_nombre', ''),
                 first_last_name=data['primer_apellido'],
                 second_last_name=data.get('segundo_apellido', ''),
                 phone_number=data['telefono'],
-                type_identification=data['tipo_identificacion'],
+                type_identification_id=doc_type.id,  # Usar el ID directamente
                 number_identification=data['numero_identificacion'],
                 active=True
             )
             
-            # 2. Crear User (activo automáticamente)
+            # 3. Crear User (activo automáticamente)
             hashed_password = make_password(final_password)
             user = User.objects.create(
                 email=data['email'],
                 password=hashed_password,
                 person=person,
                 is_active=True,  # Activo automáticamente
-                role_id=3  # Rol de Instructor (ajustar según tu BD)
+                role_id=3,  # Rol de Instructor
+                registered=False  # No registrado
             )
             
-            # 3. Obtener área de conocimiento
+            # 4. Obtener área de conocimiento
             knowledge_area = KnowledgeArea.objects.get(name=data['area_conocimiento'], active=True)
             
-            # 4. Crear Instructor
+            # 5. Obtener tipo de contrato desde la BD
+            contract_type = TypeContract.objects.get(name=data['tipo_contrato'], active=True)
+            
+            # 6. Crear Instructor
             instructor = Instructor.objects.create(
                 person=person,
-                contractType=data['tipo_contrato'],
+                contractType_id=contract_type.id,  # Usar el ID directamente
                 contractStartDate=data['fecha_inicio'],
                 contractEndDate=data['fecha_fin'],
                 knowledgeArea=knowledge_area,

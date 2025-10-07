@@ -13,13 +13,11 @@ class GetInstructorSerializer(serializers.ModelSerializer):
     number_identification = serializers.SerializerMethodField()
     email = serializers.SerializerMethodField()
     role_id = serializers.SerializerMethodField()
-    contractType = serializers.CharField()
+    contractType = serializers.SerializerMethodField()  # Cambiado para devolver el ID
     contractStartDate = serializers.DateField()
     contractEndDate = serializers.DateField()
     knowledgeArea = serializers.SerializerMethodField()
-    center_id = serializers.SerializerMethodField()
     sede_id = serializers.SerializerMethodField()
-    regional_id = serializers.SerializerMethodField()
     active = serializers.SerializerMethodField()
 
     class Meta:
@@ -39,9 +37,7 @@ class GetInstructorSerializer(serializers.ModelSerializer):
             'contractStartDate',
             'contractEndDate',
             'knowledgeArea',
-            'center_id',
             'sede_id',
-            'regional_id',
             'active'
         ]
     def get_first_name(self, obj):
@@ -60,7 +56,8 @@ class GetInstructorSerializer(serializers.ModelSerializer):
         return obj.person.phone_number if obj.person else None
 
     def get_type_identification(self, obj):
-        return obj.person.type_identification if obj.person else None
+        # Devolver el ID del tipo de documento en lugar del objeto completo
+        return obj.person.type_identification_id if obj.person else None
 
     def get_number_identification(self, obj):
         return obj.person.number_identification if obj.person else None
@@ -72,26 +69,18 @@ class GetInstructorSerializer(serializers.ModelSerializer):
     def get_role_id(self, obj):
         user = User.objects.filter(person=obj.person).first()
         return user.role.id if user and user.role else None
+    
+    def get_contractType(self, obj):
+        # Devolver el ID del tipo de contrato en lugar del objeto completo
+        return obj.contractType_id if obj.contractType_id else None
 
     def get_knowledgeArea(self, obj):
         return obj.knowledgeArea.id if obj.knowledgeArea else None
-
-    def get_center_id(self, obj):
-        person_sede = PersonSede.objects.filter(PersonId=obj.person).first()
-        if person_sede and person_sede.SedeId and person_sede.SedeId.center:
-            return person_sede.SedeId.center.id
-        return None
 
     def get_sede_id(self, obj):
         person_sede = PersonSede.objects.filter(PersonId=obj.person).first()
         if person_sede and person_sede.SedeId:
             return person_sede.SedeId.id
-        return None
-
-    def get_regional_id(self, obj):
-        person_sede = PersonSede.objects.filter(PersonId=obj.person).first()
-        if person_sede and person_sede.SedeId and person_sede.SedeId.center and person_sede.SedeId.center.regional:
-            return person_sede.SedeId.center.regional.id
         return None
 
     def get_active(self, obj):

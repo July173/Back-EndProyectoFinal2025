@@ -12,10 +12,8 @@ from apps.security.views.ModuleViewset import ModuleViewSet
 from apps.security.views.FormModuleViewset import FormModuleViewSet
 from apps.security.views.RoleFormPermissionViewset import RolFormPermissionViewSet
 from apps.security.views.ExcelTemplateViewSet import ExcelTemplateViewSet
-from apps.security.views.EnumViewset import get_document_types
-
-# Importa login y refresh
 from apps.security.views.auth_viewset import LoginView, RefreshView
+from apps.security.views.DocumentTypeViewset import DocumentTypeViewset
 
 # Configura el router y registra todos los ViewSets
 router = DefaultRouter()
@@ -28,10 +26,10 @@ router.register(r'modules', ModuleViewSet, basename='modules')
 router.register(r'form-modules', FormModuleViewSet, basename='form-modules')
 router.register(r'rol-form-permissions', RolFormPermissionViewSet, basename='rol-form-permissions')
 router.register(r'excel-templates', ExcelTemplateViewSet, basename='excel-templates')
+router.register(r'document-types', DocumentTypeViewset, basename='document-types')
 
 urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
     path('refresh/', RefreshView.as_view(), name='token_refresh'),
-    path('enums/document-types/', get_document_types, name='document-types'),
     path('', include(router.urls)),  # Incluir las rutas del router
 ]
