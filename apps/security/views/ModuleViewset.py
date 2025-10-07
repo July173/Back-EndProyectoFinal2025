@@ -10,6 +10,25 @@ from apps.security.entity.serializers.ModuleSerializer import ModuleSerializer
 
 
 class ModuleViewSet(BaseViewSet):
+    @swagger_auto_schema(
+        operation_description="Filtra módulos por estado y búsqueda en nombre.",
+        tags=["Module"],
+        manual_parameters=[
+            openapi.Parameter('active', openapi.IN_QUERY, description="Estado del módulo (true/false)", type=openapi.TYPE_BOOLEAN),
+            openapi.Parameter('search', openapi.IN_QUERY, description="Texto de búsqueda (nombre de módulo)", type=openapi.TYPE_STRING)
+        ],
+        responses={200: openapi.Response("Lista de módulos filtrados")}
+    )
+    @action(detail=False, methods=['get'], url_path='filter')
+    def filter_modules(self, request):
+        active = request.query_params.get('active')
+        search = request.query_params.get('search')
+        if active is not None:
+            active = active.lower() in ['true', '1', 'yes']
+        service = self.service_class()
+        modules = service.get_filtered_modules(active, search)
+        serializer = self.get_serializer(modules, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     service_class = ModuleService
     serializer_class = ModuleSerializer
 

@@ -22,15 +22,6 @@ class RequestAsignationService(BaseService):
     def error_response(self, message, error_type="error"):
         return {"success": False, "error_type": error_type, "message": str(message), "data": None}
 
-    def filter_by_state(self, request_state):
-        try:
-            if request_state in ['ASIGNADO', 'SIN_ASIGNAR', 'RECHAZADO']:
-                solicitudes = RequestAsignation.objects.filter(request_state=request_state)
-            else:
-                solicitudes = RequestAsignation.objects.all()
-            return solicitudes
-        except Exception as e:
-            return self.error_response(f"Error al filtrar por estado: {e}", "filter_by_state")
 
     def get_pdf_url(self, request_id):
         try:

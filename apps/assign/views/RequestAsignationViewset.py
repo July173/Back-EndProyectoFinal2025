@@ -164,22 +164,6 @@ class RequestAsignationViewset(BaseViewSet):
 
 
     @swagger_auto_schema(
-        operation_description="Filtra solicitudes por estado (ASIGNADO, SIN_ASIGNAR, RECHAZADO)",
-        tags=["RequestAsignation"],
-        manual_parameters=[
-            openapi.Parameter('request_state', openapi.IN_QUERY, description="Estado de la solicitud", type=openapi.TYPE_STRING, enum=['ASIGNADO', 'SIN_ASIGNAR', 'RECHAZADO'])
-        ],
-        responses={200: openapi.Response("Lista de solicitudes filtradas")}
-    )
-    @action(detail=False, methods=['get'], url_path='filter-by-state')
-    def filter_by_state(self, request):
-        request_state = request.query_params.get('request_state')
-        solicitudes = self.service_class().filter_by_state(request_state)
-        serializer = self.serializer_class(solicitudes, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-    @swagger_auto_schema(
         operation_description="Obtiene la URL del PDF de la solicitud.",
         tags=["FormRequest PDF"],
         responses={
