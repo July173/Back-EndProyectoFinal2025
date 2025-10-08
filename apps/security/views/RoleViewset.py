@@ -10,6 +10,26 @@ from apps.security.entity.models import Role, User  # Asegúrate de importar Use
 
 
 class RoleViewSet(BaseViewSet):
+    @swagger_auto_schema(
+        operation_description="Filtra roles por estado y búsqueda en nombre de rol.",
+        tags=["Role"],
+        manual_parameters=[
+            openapi.Parameter('active', openapi.IN_QUERY, description="Estado del rol (true/false)", type=openapi.TYPE_BOOLEAN),
+            openapi.Parameter('search', openapi.IN_QUERY, description="Texto de búsqueda (nombre de rol)", type=openapi.TYPE_STRING)
+        ],
+        responses={200: openapi.Response("Lista de roles filtrados")}
+    )
+    @action(detail=False, methods=['get'], url_path='filter')
+    def filter_roles(self, request):
+        active = request.query_params.get('active')
+        search = request.query_params.get('search')
+        # Convertir active a boolean si viene como string
+        if active is not None:
+            active = active.lower() in ['true', '1', 'yes']
+        service = self.service_class()
+        roles = service.get_filtered_roles(active, search)
+        serializer = self.get_serializer(roles, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     service_class = RoleService
     serializer_class = RoleSerializer
    
@@ -119,22 +139,6 @@ class RoleViewSet(BaseViewSet):
         return Response(data, status=status.HTTP_200_OK)
 
 
-    @swagger_auto_schema(
-        operation_description="Filtra roles por tipo (ej: Administrador, Aprendiz, Instructor)",
-        tags=["Role"],
-        manual_parameters=[
-            openapi.Parameter('type_role', openapi.IN_QUERY, description="Tipo de rol a filtrar", type=openapi.TYPE_STRING, required=True)
-        ],
-        responses={200: openapi.Response("Lista de roles filtrados")}
-    )
-    @action(detail=False, methods=['get'], url_path='filter-by-type')
-    def filter_by_type(self, request):
-        type_role = request.query_params.get('type_role')
-        if not type_role:
-            return Response({"detail": "Debe proporcionar el parámetro 'type_role'"}, status=status.HTTP_400_BAD_REQUEST)
-        roles = self.service_class().filter_roles_by_type(type_role)
-        serializer = self.serializer_class(roles, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
     
     @swagger_auto_schema(
         method='delete',
@@ -156,23 +160,4 @@ class RoleViewSet(BaseViewSet):
         result = self.service_class().set_active_role_and_users(pk, nuevo_estado)
         return Response(result)
     
-    
-    
-    @swagger_auto_schema(
-        operation_description="Filtra roles por estado activo/inactivo.",
-        tags=["Role"],
-        manual_parameters=[
-            openapi.Parameter('active', openapi.IN_QUERY, description="Filtrar por estado activo (true) o inactivo (false)", type=openapi.TYPE_BOOLEAN)
-        ],
-        responses={200: openapi.Response("Lista de roles filtrados")}
-    )
-    @action(detail=False, methods=['get'], url_path='filter-by-active')
-    def filter_by_active(self, request):
-        active_param = request.query_params.get('active', None)
-        if active_param is None:
-            return Response({"detail": "Debe proporcionar el parámetro 'active' (true/false)."}, status=status.HTTP_400_BAD_REQUEST)
-        active = str(active_param).lower() == 'true'
-        roles = self.service_class().filter_rols_by_active(active)
-        serializer = self.serializer_class(roles, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
     

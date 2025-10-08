@@ -16,16 +16,6 @@ class RequestAsignationRepository(BaseRepository):
 
     def __init__(self):
         super().__init__(RequestAsignation)
-
-
-    def filter_by_state(self, request_state):
-        """
-        Filtra las solicitudes por el campo request_state.
-        """
-        if request_state in ['ASIGNADO', 'SIN_ASIGNAR', 'RECHAZADO']:
-            return RequestAsignation.objects.filter(request_state=request_state)
-        return RequestAsignation.objects.all()
-    
     
     def get_form_request_by_id(self, request_id):
         """
