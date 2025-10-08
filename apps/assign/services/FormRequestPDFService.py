@@ -1,5 +1,5 @@
 from core.base.services.implements.baseService.BaseService import BaseService
-from apps.assign.repositories.FormRequestRepository import FormRequestRepository
+from apps.assign.repositories.FormRequestPDFRepository import FormRequestRepository
 from django.db import transaction
 import logging
 
