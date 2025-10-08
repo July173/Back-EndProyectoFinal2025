@@ -97,6 +97,13 @@ class AsignationInstructorViewset(BaseViewSet):
         result = service.create_custom(instructor_id, request_asignation_id)
         if isinstance(result, dict) and result.get('status') == 'error':
             return Response(result, status=status.HTTP_400_BAD_REQUEST)
+        from apps.general.entity.models import Instructor
+        from apps.general.entity.serializers.CreateInstructor.InstructorSerializer import InstructorSerializer
+        instructor = Instructor.objects.get(pk=instructor_id)
+        instructor_data = InstructorSerializer(instructor).data
         serializer = self.serializer_class(result)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response({
+            'asignation': serializer.data,
+            'instructor': instructor_data
+        }, status=status.HTTP_201_CREATED)
     

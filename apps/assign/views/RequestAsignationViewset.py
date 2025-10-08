@@ -210,3 +210,35 @@ class RequestAsignationViewset(BaseViewSet):
         else:
             return Response(result, status=status.HTTP_404_NOT_FOUND)
     
+    @swagger_auto_schema(
+        operation_description="Obtiene información del dashboard del aprendiz autenticado (solicitud activa, instructor asignado, estado).",
+        tags=["RequestAsignation"],
+        manual_parameters=[
+            openapi.Parameter(
+                'aprendiz_id',
+                openapi.IN_QUERY,
+                description="ID del aprendiz",
+                type=openapi.TYPE_INTEGER,
+                required=True
+            )
+        ],
+        responses={
+            200: openapi.Response("Información del dashboard del aprendiz"),
+            404: openapi.Response("Aprendiz no encontrado")
+        }
+    )
+    @action(detail=False, methods=['get'], url_path='aprendiz-dashboard')
+    def aprendiz_dashboard(self, request):
+        aprendiz_id = request.query_params.get('aprendiz_id')
+        if not aprendiz_id:
+            return Response({
+                'success': False,
+                'message': 'Se requiere el ID del aprendiz'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        result = self.service_class().get_aprendiz_dashboard(aprendiz_id)
+        if result.get('success', True):
+            return Response(result, status=status.HTTP_200_OK)
+        else:
+            return Response(result, status=status.HTTP_404_NOT_FOUND)
+    

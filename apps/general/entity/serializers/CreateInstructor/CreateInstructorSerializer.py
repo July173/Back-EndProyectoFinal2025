@@ -22,6 +22,9 @@ class CreateInstructorSerializer(serializers.Serializer):
     knowledgeArea = serializers.IntegerField()
     # ID de relación
     sede_id = serializers.IntegerField()
+    assigned_learners = serializers.IntegerField(required=False, allow_null=True)
+    max_assigned_learners = serializers.IntegerField(required=False, allow_null=True, default=80)
+    is_followup_instructor = serializers.BooleanField(required=False, default=False)
 
     class Meta:
         ref_name = "CreateInstructorInputSerializer"

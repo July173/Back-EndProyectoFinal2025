@@ -41,6 +41,10 @@ class AsignationInstructorHistoryService:
             nombre_aprendiz = f"{aprendiz_person.first_name} {aprendiz_person.first_last_name}"
             if old_email:
                 send_unassignment_to_instructor_email(old_email, nombre_instructor, nombre_aprendiz)
+                # Decrementar aprendices asignados al instructor anterior
+                from apps.general.services.InstructorService import InstructorService
+                current_learners_old = old_instructor.assigned_learners or 0
+                InstructorService().update_learners_fields(old_instructor_id, assigned_learners=max(current_learners_old - 1, 0))
             # Enviar correo al instructor nuevo
             new_person = new_instructor.person
             new_user = User.objects.filter(person=new_person).first()
@@ -48,6 +52,9 @@ class AsignationInstructorHistoryService:
             new_instructor_name = f"{new_person.first_name} {new_person.first_last_name}"
             if new_email:
                 send_assignment_to_new_instructor_email(new_email, new_instructor_name, nombre_aprendiz)
+                # Incrementar aprendices asignados al nuevo instructor
+                current_learners_new = new_instructor.assigned_learners or 0
+                InstructorService().update_learners_fields(new_instructor_id, assigned_learners=current_learners_new + 1)
             # Enviar correo al aprendiz
             aprendiz_user = User.objects.filter(person=aprendiz_person).first()
             aprendiz_email = aprendiz_user.email if aprendiz_user else None

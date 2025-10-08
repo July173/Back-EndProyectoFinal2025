@@ -11,6 +11,28 @@ from core.utils.Validation import is_sena_email
 from django.core.exceptions import ObjectDoesNotExist
 
 class InstructorService(BaseService):
+    def update_learners_fields(self, instructor_id, assigned_learners=None, max_assigned_learners=None):
+        instructor = Instructor.objects.filter(pk=instructor_id).first()
+        if not instructor:
+            return None
+        # Validación: assigned_learners nunca menor que 0
+        if assigned_learners is not None:
+            if assigned_learners < 0:
+                raise ValueError('El número de aprendices asignados no puede ser menor que 0.')
+            # Validación: no superar el límite
+            max_limit = max_assigned_learners if max_assigned_learners is not None else instructor.max_assigned_learners or 80
+            if assigned_learners > max_limit:
+                raise ValueError('El número de aprendices asignados no puede superar el límite máximo.')
+            instructor.assigned_learners = assigned_learners
+        if max_assigned_learners is not None:
+            if max_assigned_learners < 0:
+                raise ValueError('El límite máximo no puede ser menor que 0.')
+            instructor.max_assigned_learners = max_assigned_learners
+            # Si el límite se reduce por debajo de los asignados, ajusta los asignados
+            if instructor.assigned_learners is not None and instructor.assigned_learners > max_assigned_learners:
+                instructor.assigned_learners = max_assigned_learners
+        instructor.save()
+        return instructor
 
     def __init__(self):
         self.repository = InstructorRepository()
@@ -40,8 +62,13 @@ class InstructorService(BaseService):
             knowledge_area_instance = KnowledgeArea.objects.get(pk=knowledge_area_id)
             instructor_data['knowledgeArea'] = knowledge_area_instance
 
+            # Manejar nuevos campos opcionales
+            assigned_learners = instructor_data.pop('assigned_learners', None)
+            max_assigned_learners = instructor_data.pop('max_assigned_learners', 80)
+            instructor_data['assigned_learners'] = assigned_learners
+            instructor_data['max_assigned_learners'] = max_assigned_learners
+
             # Preparar datos para user
-          
             numero_identificacion = str(person_data['number_identification'])
             caracteres_adicionales = get_random_string(length=2)
             password_temporal = numero_identificacion + caracteres_adicionales
@@ -95,6 +122,12 @@ class InstructorService(BaseService):
             if 'knowledgeArea' in instructor_data:
                 knowledge_area_id = instructor_data.pop('knowledgeArea')
                 instructor_data['knowledgeArea'] = KnowledgeArea.objects.get(pk=knowledge_area_id)
+
+            # Manejar nuevos campos opcionales
+            assigned_learners = instructor_data.pop('assigned_learners', None)
+            max_assigned_learners = instructor_data.pop('max_assigned_learners', 80)
+            instructor_data['assigned_learners'] = assigned_learners
+            instructor_data['max_assigned_learners'] = max_assigned_learners
 
             # Obtener el usuario usando el objeto Person vinculado al Instructor
             person = instructor.person
