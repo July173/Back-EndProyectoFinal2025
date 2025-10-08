@@ -6,9 +6,10 @@ from core.base.view.interfaces.IBaseViewset import IBaseViewSet
 from core.base.services.interfaces.IBaseService import IBaseService
 from rest_framework.serializers import Serializer
 from rest_framework.decorators import action
+from rest_framework.viewsets import ModelViewSet
 
 
-class BaseViewSet(viewsets.ViewSet, IBaseViewSet):
+class BaseViewSet(ModelViewSet, IBaseViewSet):
     """
     Implementación concreta del ViewSet que sigue nuestra arquitectura.
     """

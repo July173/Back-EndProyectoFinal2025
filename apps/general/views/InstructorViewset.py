@@ -12,18 +12,68 @@ from apps.general.entity.serializers.CreateInstructor.GetInstructorSerializer im
 
 
 class InstructorViewset(BaseViewSet):
+    
+    def get_queryset(self):
+        from apps.general.entity.models import Instructor
+        return Instructor.objects.all()
+    @swagger_auto_schema(
+        method='patch',
+        operation_description="Actualiza solo los campos assigned_learners y max_assigned_learners de un instructor.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'assigned_learners': openapi.Schema(type=openapi.TYPE_INTEGER, description='Aprendices actualmente asignados', nullable=True),
+                'max_assigned_learners': openapi.Schema(type=openapi.TYPE_INTEGER, description='Límite máximo permitido', nullable=True)
+            },
+            required=[]
+        ),
+        responses={200: InstructorSerializer},
+        tags=["Instructor"]
+    )
+    @action(detail=True, methods=['patch'], url_path='update-learners')
+    def update_learners(self, request, pk=None):
+        service = InstructorService()
+        assigned_learners = request.data.get('assigned_learners', None)
+        max_assigned_learners = request.data.get('max_assigned_learners', None)
+        try:
+            instructor = service.update_learners_fields(pk, assigned_learners, max_assigned_learners)
+        except ValueError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        if not instructor:
+            return Response({"detail": "Instructor no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = InstructorSerializer(instructor)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     service_class = InstructorService
-    serializer_class = InstructorSerializer
+    serializer_class = GetInstructorSerializer
 
     # ----------- LIST -----------
     @swagger_auto_schema(
-        operation_description=(
-            "Obtiene una lista de todos los instructores registrados."
-        ),
+        operation_description="Obtiene una lista de todos los instructores registrados.",
+        manual_parameters=[
+            openapi.Parameter(
+                'is_followup_instructor',
+                openapi.IN_QUERY,
+                description="Filtrar instructores: 'all' (todos), 'true' (solo seguimiento), 'false' (solo no seguimiento)",
+                type=openapi.TYPE_STRING,
+                enum=['all', 'true', 'false']
+            )
+        ],
         tags=["Instructor"]
     )
     def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
+        is_followup = request.query_params.get('is_followup_instructor', 'all')
+        queryset = self.get_queryset()
+        if is_followup == 'true':
+            queryset = queryset.filter(is_followup_instructor=True)
+        elif is_followup == 'false':
+            queryset = queryset.filter(is_followup_instructor=False)
+        # Si es 'all' no se filtra
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
     # ----------- CREATE -----------
     @swagger_auto_schema(

@@ -9,8 +9,12 @@ class Instructor(models.Model):
     contractStartDate = models.DateField()
     contractEndDate = models.DateField()
     knowledgeArea = models.ForeignKey(KnowledgeArea, on_delete=models.PROTECT, related_name='instructors')
+
     active = models.BooleanField(default=True)
     delete_at = models.DateTimeField(null=True, blank=True)
+    assigned_learners = models.IntegerField(null=True, blank=True)
+    max_assigned_learners = models.IntegerField(null=True, blank=True, default=80)
+    is_followup_instructor = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Instructor {self.id} - {self.knowledgeArea.name}"

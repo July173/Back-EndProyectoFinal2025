@@ -17,5 +17,8 @@ class InstructorSerializer(serializers.ModelSerializer):
             'contractStartDate',
             'contractEndDate',
             'knowledgeArea',
-            'active'
+            'active',
+            'assigned_learners',
+            'max_assigned_learners',
+            'is_followup_instructor'
         ]
