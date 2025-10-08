@@ -11,6 +11,7 @@ from apps.security.entity.models import User
 from apps.assign.entity.models import RequestAsignation
 from apps.general.entity.models import PersonSede
 from dateutil.relativedelta import relativedelta
+from apps.assign.entity.models import AsignationInstructor
 
 logger = logging.getLogger(__name__)
 
@@ -256,3 +257,89 @@ class RequestAsignationService(BaseService):
         except Exception as e:
             logger.error(f"Error al listar solicitudes: {str(e)}")
             return self.error_response(f"Error al obtener las solicitudes: {str(e)}", "list_form_requests")
+
+    def get_aprendiz_dashboard(self, aprendiz_id):
+        """
+        Obtiene la información del dashboard del aprendiz:
+        - Estado de la solicitud activa
+        - Instructor asignado (si existe)
+        - Detalles de la solicitud
+        """
+        try:
+            
+            
+            aprendiz = Aprendiz.objects.select_related('person', 'ficha').get(pk=aprendiz_id)
+            
+            # Buscar la solicitud más reciente del aprendiz
+            latest_request = RequestAsignation.objects.filter(
+                aprendiz=aprendiz
+            ).select_related(
+                'enterprise',
+                'enterprise__boss',
+                'modality_productive_stage'
+            ).order_by('-request_date').first()
+            
+            result = {
+                'has_request': latest_request is not None,
+                'request': None,
+                'instructor': None,
+                'request_state': None
+            }
+            
+            if latest_request:
+                # Obtener el nombre del boss si existe
+                boss_name = None
+                if hasattr(latest_request.enterprise, 'boss') and latest_request.enterprise.boss:
+                    boss_name = latest_request.enterprise.boss.name_boss
+                
+                # Información de la solicitud
+                result['request'] = {
+                    'id': latest_request.id,
+                    'enterprise_name': latest_request.enterprise.name_enterprise if latest_request.enterprise else None,
+                    'boss_name': boss_name,
+                    'modality': latest_request.modality_productive_stage.name_modality if latest_request.modality_productive_stage else None,
+                    'start_date': str(latest_request.date_start_production_stage),
+                    'end_date': str(latest_request.date_end_production_stage),
+                    'request_date': str(latest_request.request_date),
+                    'request_state': latest_request.request_state,
+                    'pdf_url': latest_request.pdf_request.url if latest_request.pdf_request else None,
+                }
+                result['request_state'] = latest_request.request_state
+                
+                # Buscar si tiene instructor asignado
+                asignacion = AsignationInstructor.objects.filter(
+                    request_asignation=latest_request
+                ).select_related('instructor__person', 'instructor__knowledgeArea').first()
+                
+                if asignacion:
+                    from apps.security.entity.models import User
+                    instructor = asignacion.instructor
+                    
+                    # Obtener el email del usuario relacionado con la persona del instructor
+                    email = None
+                    try:
+                        user = User.objects.filter(person=instructor.person).first()
+                        if user:
+                            email = user.email
+                    except:
+                        pass
+                    
+                    result['instructor'] = {
+                        'id': instructor.id,
+                        'first_name': instructor.person.first_name,
+                        'second_name': instructor.person.second_name,
+                        'first_last_name': instructor.person.first_last_name,
+                        'second_last_name': instructor.person.second_last_name,
+                        'email': email,
+                        'phone': instructor.person.phone_number,
+                        'knowledge_area': instructor.knowledgeArea.name if instructor.knowledgeArea else None,
+                        'assigned_at': str(latest_request.request_date),
+                    }
+            
+            return result
+            
+        except Aprendiz.DoesNotExist:
+            return self.error_response('Aprendiz no encontrado', 'not_found')
+        except Exception as e:
+            logger.error(f"Error al obtener dashboard del aprendiz: {str(e)}")
+            return self.error_response(f"Error al obtener información del dashboard: {str(e)}", "dashboard_error")
