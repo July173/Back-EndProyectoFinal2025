@@ -9,6 +9,7 @@ class LegalSection(models.Model):
     title = models.CharField(max_length=200)
     content = models.TextField(null=True, blank=True)
     active = models.BooleanField(default=True)
+    delete_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.code} - {self.title}"
