@@ -12,6 +12,28 @@ from apps.general.entity.serializers.CreateInstructor.GetInstructorSerializer im
 
 
 class InstructorViewset(BaseViewSet):
+
+    @swagger_auto_schema(
+        operation_description="Filtra instructores por nombre, número de documento y área de conocimiento.",
+        manual_parameters=[
+            openapi.Parameter('search', openapi.IN_QUERY, description="Buscar por nombre o número de documento", type=openapi.TYPE_STRING),
+            openapi.Parameter('knowledge_area_id', openapi.IN_QUERY, description="Filtrar por área de conocimiento (ID)", type=openapi.TYPE_INTEGER),
+        ],
+        responses={200: openapi.Response("Lista de instructores filtrados")},
+        tags=["Instructor"]
+    )
+    @action(detail=False, methods=['get'], url_path='filter')
+    def filter_instructors(self, request):
+        search = request.query_params.get('search')
+        knowledge_area_id = request.query_params.get('knowledge_area_id')
+        if knowledge_area_id:
+            try:
+                knowledge_area_id = int(knowledge_area_id)
+            except ValueError:
+                return Response({"detail": "El ID de área de conocimiento debe ser un número."}, status=status.HTTP_400_BAD_REQUEST)
+        instructors = self.service_class().repository.get_filtered_instructors(search, knowledge_area_id)
+        serializer = self.get_serializer(instructors, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
     def get_queryset(self):
         from apps.general.entity.models import Instructor
