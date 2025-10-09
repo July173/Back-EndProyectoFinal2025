@@ -1,6 +1,7 @@
 from core.base.repositories.implements.baseRepository.BaseRepository import BaseRepository
 from apps.security.entity.models import User
-from apps.security.entity.serializers.UserSerializer import UserSerializer
+from apps.security.entity.serializers.User.UserSerializer import UserSerializer
+from apps.security.entity.serializers.User.UserSimpleSerializer import UserSimpleSerializer
 
 
 class UserRepository(BaseRepository):
@@ -13,7 +14,7 @@ class UserRepository(BaseRepository):
   
 
     def create_user(self, data):
-        serializer = UserSerializer(data=data)
+        serializer = UserSimpleSerializer(data=data)
         if serializer.is_valid():
             user = serializer.save()
             return user, serializer.data, None
