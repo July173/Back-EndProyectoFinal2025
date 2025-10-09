@@ -354,15 +354,16 @@ class RequestAsignationService(BaseService):
             for req in requests:
                 person = req.aprendiz.person
                 ficha = req.aprendiz.ficha
-                program = ficha.program if ficha else None
-
+                programa = ficha.program.name if ficha and hasattr(ficha, 'program') and ficha.program else None
                 data.append({
                     "id": req.id,
+                    "aprendiz_id": req.aprendiz.id,
                     "nombre": f"{person.first_name} {person.first_last_name} {person.second_last_name}",
-                    "numero_identificacion": person.number_identification,
-                    "programa": program.name if program else None,
-                    "estado": req.request_state,
-                    "fecha_solicitud": req.request_date,
+                    "tipo_identificacion": getattr(person, 'type_identification_id', None),
+                    "numero_identificacion": str(person.number_identification),
+                    "fecha_solicitud": str(req.request_date),
+                    "request_state": req.request_state,
+                    "programa": programa
                 })
 
             return {

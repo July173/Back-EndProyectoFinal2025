@@ -1,7 +1,7 @@
 from core.base.repositories.implements.baseRepository.BaseRepository import BaseRepository
 from apps.assign.entity.models import RequestAsignation
 from apps.assign.entity.enums.request_state_enum import RequestState
-
+from django.db.models import Q
 from apps.general.entity.models import PersonSede
 from apps.general.entity.models import Aprendiz, Sede
 from apps.assign.entity.models import Enterprise, Boss, HumanTalent, ModalityProductiveStage, RequestAsignation
