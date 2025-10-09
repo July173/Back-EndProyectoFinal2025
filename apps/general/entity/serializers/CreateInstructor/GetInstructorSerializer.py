@@ -38,13 +38,13 @@ class GetInstructorSerializer(serializers.ModelSerializer):
             'contractEndDate',
             'knowledgeArea',
             'sede_id',
-            'assigned_learners',
-            'max_assigned_learners',
             'is_followup_instructor',
             'active',
-            'assigned_learners',
-            'max_assigned_learners'
         ]
+        extra_kwargs = {
+            'assigned_learners': {'write_only': True},
+            'max_assigned_learners': {'write_only': True},
+        }
     def get_first_name(self, obj):
         return obj.person.first_name if obj.person else None
 

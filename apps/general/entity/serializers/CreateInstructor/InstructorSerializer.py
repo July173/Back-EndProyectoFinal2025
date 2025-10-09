@@ -22,3 +22,7 @@ class InstructorSerializer(serializers.ModelSerializer):
             'max_assigned_learners',
             'is_followup_instructor'
         ]
+        extra_kwargs = {
+            'assigned_learners': {'write_only': True},
+            'max_assigned_learners': {'write_only': True},
+        }
