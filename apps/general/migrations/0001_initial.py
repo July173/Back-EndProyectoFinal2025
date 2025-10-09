@@ -82,6 +82,7 @@ class Migration(migrations.Migration):
                 ('effective_date', models.DateField()),
                 ('last_update', models.DateField(blank=True, null=True)),
                 ('active', models.BooleanField(default=True)),
+                ('delete_at', models.DateTimeField(blank=True, null=True)),
             ],
         ),
         migrations.CreateModel(
@@ -93,6 +94,7 @@ class Migration(migrations.Migration):
                 ('title', models.CharField(max_length=200)),
                 ('content', models.TextField(blank=True, null=True)),
                 ('active', models.BooleanField(default=True)),
+                ('delete_at', models.DateTimeField(blank=True, null=True)),
             ],
         ),
         migrations.CreateModel(
@@ -138,8 +140,9 @@ class Migration(migrations.Migration):
                 ('type', models.CharField(max_length=50)),
                 ('label', models.CharField(max_length=100)),
                 ('value', models.CharField(max_length=255)),
-                ('extra_info', models.TextField(blank=True, null=True)),
+                ('extra_info', models.TextField(blank=True, default=None, null=True)),
                 ('active', models.BooleanField(default=True)),
+                ('delete_at', models.DateTimeField(blank=True, null=True)),
             ],
         ),
         migrations.CreateModel(
@@ -150,6 +153,8 @@ class Migration(migrations.Migration):
                 ('hours', models.CharField(max_length=100)),
                 ('is_closed', models.BooleanField(default=False)),
                 ('notes', models.TextField(blank=True, null=True)),
+                ('active', models.BooleanField(default=True)),
+                ('delete_at', models.DateTimeField(blank=True, null=True)),
             ],
         ),
         migrations.CreateModel(
