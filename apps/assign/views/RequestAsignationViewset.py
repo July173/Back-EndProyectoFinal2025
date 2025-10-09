@@ -242,3 +242,20 @@ class RequestAsignationViewset(BaseViewSet):
         else:
             return Response(result, status=status.HTTP_404_NOT_FOUND)
     
+    @swagger_auto_schema(
+        operation_description="Filtra solicitudes de formulario por búsqueda, estado o programa",
+        manual_parameters=[
+            openapi.Parameter('search', openapi.IN_QUERY, description="Buscar por nombre o número de documento", type=openapi.TYPE_STRING),
+            openapi.Parameter('request_state', openapi.IN_QUERY, description="Filtrar por estado de solicitud", type=openapi.TYPE_STRING),
+            openapi.Parameter('program_id', openapi.IN_QUERY, description="Filtrar por ID de programa", type=openapi.TYPE_INTEGER),
+        ],
+        tags=["FormRequest"],
+    )
+    @action(detail=False, methods=['get'], url_path='form-request-filtered')
+    def filter_form_requests(self, request):
+        search = request.query_params.get('search')
+        request_state = request.query_params.get('request_state')
+        program_id = request.query_params.get('program_id')
+
+        result = self.service_class().filter_form_requests(search, request_state, program_id)
+        return Response(result, status=status.HTTP_200_OK if result['success'] else status.HTTP_400_BAD_REQUEST)

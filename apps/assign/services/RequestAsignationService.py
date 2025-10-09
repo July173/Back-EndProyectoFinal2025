@@ -244,7 +244,8 @@ class RequestAsignationService(BaseService):
                     'nombre': f"{getattr(person, 'first_name', '')} {getattr(person, 'first_last_name', '')} {getattr(person, 'second_last_name', '')}",
                     'tipo_identificacion': getattr(person, 'type_identification_id', None),
                     'numero_identificacion': getattr(person, 'number_identification', None),
-                    'fecha_solicitud': request_asignation.request_date
+                    'fecha_solicitud': request_asignation.request_date,
+                    'request_state': request_asignation.request_state
                 }
                 requests_data.append(request_item)
             logger.info(f"Se encontraron {len(requests_data)} solicitudes")
@@ -343,3 +344,32 @@ class RequestAsignationService(BaseService):
         except Exception as e:
             logger.error(f"Error al obtener dashboard del aprendiz: {str(e)}")
             return self.error_response(f"Error al obtener información del dashboard: {str(e)}", "dashboard_error")
+
+
+    def filter_form_requests(self, search=None, request_state=None, program_id=None):
+        try:
+            requests = self.repository.filter_form_requests(search, request_state, program_id)
+            data = []
+
+            for req in requests:
+                person = req.aprendiz.person
+                ficha = req.aprendiz.ficha
+                program = ficha.program if ficha else None
+
+                data.append({
+                    "id": req.id,
+                    "nombre": f"{person.first_name} {person.first_last_name} {person.second_last_name}",
+                    "numero_identificacion": person.number_identification,
+                    "programa": program.name if program else None,
+                    "estado": req.request_state,
+                    "fecha_solicitud": req.request_date,
+                })
+
+            return {
+                "success": True,
+                "count": len(data),
+                "data": data
+            }
+
+        except Exception as e:
+            return self.error_response(f"Error al filtrar solicitudes: {e}", "filter_form_requests")
