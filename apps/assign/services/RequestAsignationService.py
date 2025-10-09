@@ -11,6 +11,7 @@ from apps.security.entity.models import User
 from apps.assign.entity.models import RequestAsignation
 from apps.general.entity.models import PersonSede
 from dateutil.relativedelta import relativedelta
+from apps.assign.entity.models import AsignationInstructor
 
 logger = logging.getLogger(__name__)
 
@@ -22,15 +23,6 @@ class RequestAsignationService(BaseService):
     def error_response(self, message, error_type="error"):
         return {"success": False, "error_type": error_type, "message": str(message), "data": None}
 
-    def filter_by_state(self, request_state):
-        try:
-            if request_state in ['ASIGNADO', 'SIN_ASIGNAR', 'RECHAZADO']:
-                solicitudes = RequestAsignation.objects.filter(request_state=request_state)
-            else:
-                solicitudes = RequestAsignation.objects.all()
-            return solicitudes
-        except Exception as e:
-            return self.error_response(f"Error al filtrar por estado: {e}", "filter_by_state")
 
     def get_pdf_url(self, request_id):
         try:
@@ -252,7 +244,8 @@ class RequestAsignationService(BaseService):
                     'nombre': f"{getattr(person, 'first_name', '')} {getattr(person, 'first_last_name', '')} {getattr(person, 'second_last_name', '')}",
                     'tipo_identificacion': getattr(person, 'type_identification_id', None),
                     'numero_identificacion': getattr(person, 'number_identification', None),
-                    'fecha_solicitud': request_asignation.request_date
+                    'fecha_solicitud': request_asignation.request_date,
+                    'request_state': request_asignation.request_state
                 }
                 requests_data.append(request_item)
             logger.info(f"Se encontraron {len(requests_data)} solicitudes")
@@ -265,3 +258,119 @@ class RequestAsignationService(BaseService):
         except Exception as e:
             logger.error(f"Error al listar solicitudes: {str(e)}")
             return self.error_response(f"Error al obtener las solicitudes: {str(e)}", "list_form_requests")
+
+    def get_aprendiz_dashboard(self, aprendiz_id):
+        """
+        Obtiene la información del dashboard del aprendiz:
+        - Estado de la solicitud activa
+        - Instructor asignado (si existe)
+        - Detalles de la solicitud
+        """
+        try:
+            
+            
+            aprendiz = Aprendiz.objects.select_related('person', 'ficha').get(pk=aprendiz_id)
+            
+            # Buscar la solicitud más reciente del aprendiz
+            latest_request = RequestAsignation.objects.filter(
+                aprendiz=aprendiz
+            ).select_related(
+                'enterprise',
+                'enterprise__boss',
+                'modality_productive_stage'
+            ).order_by('-request_date').first()
+            
+            result = {
+                'has_request': latest_request is not None,
+                'request': None,
+                'instructor': None,
+                'request_state': None
+            }
+            
+            if latest_request:
+                # Obtener el nombre del boss si existe
+                boss_name = None
+                if hasattr(latest_request.enterprise, 'boss') and latest_request.enterprise.boss:
+                    boss_name = latest_request.enterprise.boss.name_boss
+                
+                # Información de la solicitud
+                result['request'] = {
+                    'id': latest_request.id,
+                    'enterprise_name': latest_request.enterprise.name_enterprise if latest_request.enterprise else None,
+                    'boss_name': boss_name,
+                    'modality': latest_request.modality_productive_stage.name_modality if latest_request.modality_productive_stage else None,
+                    'start_date': str(latest_request.date_start_production_stage),
+                    'end_date': str(latest_request.date_end_production_stage),
+                    'request_date': str(latest_request.request_date),
+                    'request_state': latest_request.request_state,
+                    'pdf_url': latest_request.pdf_request.url if latest_request.pdf_request else None,
+                }
+                result['request_state'] = latest_request.request_state
+                
+                # Buscar si tiene instructor asignado
+                asignacion = AsignationInstructor.objects.filter(
+                    request_asignation=latest_request
+                ).select_related('instructor__person', 'instructor__knowledgeArea').first()
+                
+                if asignacion:
+                    from apps.security.entity.models import User
+                    instructor = asignacion.instructor
+                    
+                    # Obtener el email del usuario relacionado con la persona del instructor
+                    email = None
+                    try:
+                        user = User.objects.filter(person=instructor.person).first()
+                        if user:
+                            email = user.email
+                    except:
+                        pass
+                    
+                    result['instructor'] = {
+                        'id': instructor.id,
+                        'first_name': instructor.person.first_name,
+                        'second_name': instructor.person.second_name,
+                        'first_last_name': instructor.person.first_last_name,
+                        'second_last_name': instructor.person.second_last_name,
+                        'email': email,
+                        'phone': instructor.person.phone_number,
+                        'knowledge_area': instructor.knowledgeArea.name if instructor.knowledgeArea else None,
+                        'assigned_at': str(latest_request.request_date),
+                    }
+            
+            return result
+            
+        except Aprendiz.DoesNotExist:
+            return self.error_response('Aprendiz no encontrado', 'not_found')
+        except Exception as e:
+            logger.error(f"Error al obtener dashboard del aprendiz: {str(e)}")
+            return self.error_response(f"Error al obtener información del dashboard: {str(e)}", "dashboard_error")
+
+
+    def filter_form_requests(self, search=None, request_state=None, program_id=None):
+        try:
+            requests = self.repository.filter_form_requests(search, request_state, program_id)
+            data = []
+
+            for req in requests:
+                person = req.aprendiz.person
+                ficha = req.aprendiz.ficha
+                programa = ficha.program.name if ficha and hasattr(ficha, 'program') and ficha.program else None
+                data.append({
+                    "id": req.id,
+                    "aprendiz_id": req.aprendiz.id,
+                    "nombre": f"{person.first_name} {person.first_last_name} {person.second_last_name}",
+                    "tipo_identificacion": getattr(person, 'type_identification_id', None),
+                    "numero_identificacion": str(person.number_identification),
+                    "fecha_solicitud": str(req.request_date),
+                    "request_state": req.request_state,
+                    "programa": programa
+                })
+
+            return {
+                "success": True,
+                "count": len(data),
+                "data": data
+            }
+
+        except Exception as e:
+            return self.error_response(f"Error al filtrar solicitudes: {e}", "filter_form_requests")

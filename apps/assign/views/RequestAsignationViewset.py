@@ -164,22 +164,6 @@ class RequestAsignationViewset(BaseViewSet):
 
 
     @swagger_auto_schema(
-        operation_description="Filtra solicitudes por estado (ASIGNADO, SIN_ASIGNAR, RECHAZADO)",
-        tags=["RequestAsignation"],
-        manual_parameters=[
-            openapi.Parameter('request_state', openapi.IN_QUERY, description="Estado de la solicitud", type=openapi.TYPE_STRING, enum=['ASIGNADO', 'SIN_ASIGNAR', 'RECHAZADO'])
-        ],
-        responses={200: openapi.Response("Lista de solicitudes filtradas")}
-    )
-    @action(detail=False, methods=['get'], url_path='filter-by-state')
-    def filter_by_state(self, request):
-        request_state = request.query_params.get('request_state')
-        solicitudes = self.service_class().filter_by_state(request_state)
-        serializer = self.serializer_class(solicitudes, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-    @swagger_auto_schema(
         operation_description="Obtiene la URL del PDF de la solicitud.",
         tags=["FormRequest PDF"],
         responses={
@@ -226,3 +210,52 @@ class RequestAsignationViewset(BaseViewSet):
         else:
             return Response(result, status=status.HTTP_404_NOT_FOUND)
     
+    @swagger_auto_schema(
+        operation_description="Obtiene información del dashboard del aprendiz autenticado (solicitud activa, instructor asignado, estado).",
+        tags=["RequestAsignation"],
+        manual_parameters=[
+            openapi.Parameter(
+                'aprendiz_id',
+                openapi.IN_QUERY,
+                description="ID del aprendiz",
+                type=openapi.TYPE_INTEGER,
+                required=True
+            )
+        ],
+        responses={
+            200: openapi.Response("Información del dashboard del aprendiz"),
+            404: openapi.Response("Aprendiz no encontrado")
+        }
+    )
+    @action(detail=False, methods=['get'], url_path='aprendiz-dashboard')
+    def aprendiz_dashboard(self, request):
+        aprendiz_id = request.query_params.get('aprendiz_id')
+        if not aprendiz_id:
+            return Response({
+                'success': False,
+                'message': 'Se requiere el ID del aprendiz'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        result = self.service_class().get_aprendiz_dashboard(aprendiz_id)
+        if result.get('success', True):
+            return Response(result, status=status.HTTP_200_OK)
+        else:
+            return Response(result, status=status.HTTP_404_NOT_FOUND)
+    
+    @swagger_auto_schema(
+        operation_description="Filtra solicitudes de formulario por búsqueda, estado o programa",
+        manual_parameters=[
+            openapi.Parameter('search', openapi.IN_QUERY, description="Buscar por nombre o número de documento", type=openapi.TYPE_STRING),
+            openapi.Parameter('request_state', openapi.IN_QUERY, description="Filtrar por estado de solicitud", type=openapi.TYPE_STRING),
+            openapi.Parameter('program_id', openapi.IN_QUERY, description="Filtrar por ID de programa", type=openapi.TYPE_INTEGER),
+        ],
+        tags=["FormRequest"],
+    )
+    @action(detail=False, methods=['get'], url_path='form-request-filtered')
+    def filter_form_requests(self, request):
+        search = request.query_params.get('search')
+        request_state = request.query_params.get('request_state')
+        program_id = request.query_params.get('program_id')
+
+        result = self.service_class().filter_form_requests(search, request_state, program_id)
+        return Response(result, status=status.HTTP_200_OK if result['success'] else status.HTTP_400_BAD_REQUEST)

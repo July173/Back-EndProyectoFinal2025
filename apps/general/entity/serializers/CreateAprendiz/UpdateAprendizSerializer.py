@@ -12,4 +12,4 @@ class UpdateAprendizSerializer(serializers.Serializer):
     email = serializers.EmailField()
     program_id = serializers.IntegerField()
     ficha_id = serializers.IntegerField()
-    role_id = serializers.IntegerField()
+    role_id = serializers.IntegerField(required=False)
