@@ -4,3 +4,8 @@ from apps.general.repositories.LegalDocumentRepository import LegalDocumentRepos
 class LegalDocumentService(BaseService):
     def __init__(self):
         self.repository = LegalDocumentRepository()
+
+    def update(self, id, data):
+        from django.utils import timezone
+        data['last_update'] = timezone.now().date()
+        return super().update(id, data)
