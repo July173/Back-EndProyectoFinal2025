@@ -203,7 +203,7 @@ class InstructorViewset(BaseViewSet):
         result = self.service.create_instructor(
             {k: data[k] for k in ['first_name', 'second_name', 'first_last_name', 'second_last_name', 'phone_number', 'type_identification', 'number_identification']},
             {k: data[k] for k in ['email', 'role_id', 'password'] if k in data},
-            {k: data[k] for k in ['contractType', 'contractStartDate', 'contractEndDate', 'knowledgeArea']},
+            {k: data[k] for k in ['contractType', 'contractStartDate', 'contractEndDate', 'knowledgeArea', 'is_followup_instructor'] if k in data},
             data['sede_id']
         )
         return Response({"detail": "Instructor creado correctamente.", "ids": result}, status=status.HTTP_201_CREATED)
@@ -235,7 +235,7 @@ class InstructorViewset(BaseViewSet):
                 pk,
                 {k: data[k] for k in ['first_name', 'second_name', 'first_last_name', 'second_last_name', 'phone_number', 'type_identification', 'number_identification']},
                 {k: data[k] for k in ['email', 'role_id'] if k in data},
-                {k: data[k] for k in ['contractType', 'contractStartDate', 'contractEndDate', 'knowledgeArea'] if k in data},
+                {k: data[k] for k in ['contractType', 'contractStartDate', 'contractEndDate', 'knowledgeArea', 'is_followup_instructor'] if k in data},
                 data.get('sede_id')
             )
             return Response({"detail": "Instructor actualizado correctamente.", "ids": result}, status=status.HTTP_200_OK)
