@@ -74,6 +74,7 @@ TEMPLATES = [
     },
 ]
 
+
 WSGI_APPLICATION = 'core.wsgi.application'
 
 # ============================
@@ -143,7 +144,7 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
-
+X_FRAME_OPTIONS = 'SAMEORIGIN'
 # ============================
 # SWAGGER / REDOC
 # ============================

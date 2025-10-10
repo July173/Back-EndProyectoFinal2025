@@ -23,7 +23,6 @@ class RequestAsignationService(BaseService):
     def error_response(self, message, error_type="error"):
         return {"success": False, "error_type": error_type, "message": str(message), "data": None}
 
-
     def get_pdf_url(self, request_id):
         try:
             solicitud = RequestAsignation.objects.get(pk=request_id)
