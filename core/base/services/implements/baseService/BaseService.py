@@ -38,7 +38,8 @@ class BaseService:
             if instance is None or (isinstance(instance, dict) and instance.get('status') == 'error'):
                 return self.error_response(f"Instancia con id {id} no encontrada", "not_found")
             for key, value in data.items():
-                if value in [None, ""]:
+                # Permitir None o "" solo para parentId
+                if value in [None, ""] and key != "parentId":
                     return self.error_response(f"El campo '{key}' no puede estar vacío", "invalid_field")
                 setattr(instance, key, value)
             return self.repository.update(instance)

@@ -56,6 +56,10 @@ class LegalSectionViewset(BaseViewSet):
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)
 
+    @swagger_auto_schema(
+        operation_description="Realiza un borrado lógico de la sección legal especificada.",
+        tags=["LegalSection"]
+    )
     @action(detail=True, methods=['delete'], url_path='soft-delete')
     def soft_destroy(self, request, pk=None):
         """
