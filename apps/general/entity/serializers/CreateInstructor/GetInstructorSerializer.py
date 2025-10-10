@@ -19,6 +19,9 @@ class GetInstructorSerializer(serializers.ModelSerializer):
     knowledgeArea = serializers.SerializerMethodField()
     sede_id = serializers.SerializerMethodField()
     active = serializers.SerializerMethodField()
+    # Exponer counts / límites de asignación
+    assigned_learners = serializers.SerializerMethodField()
+    max_assigned_learners = serializers.SerializerMethodField()
 
     class Meta:
         model = Instructor
@@ -38,13 +41,16 @@ class GetInstructorSerializer(serializers.ModelSerializer):
             'contractEndDate',
             'knowledgeArea',
             'sede_id',
+            'assigned_learners',
+            'max_assigned_learners',
             'is_followup_instructor',
             'active',
         ]
         extra_kwargs = {
-            'assigned_learners': {'write_only': True},
-            'max_assigned_learners': {'write_only': True},
+            'assigned_learners': {'read_only': True},
+            'max_assigned_learners': {'read_only': True},
         }
+
     def get_first_name(self, obj):
         return obj.person.first_name if obj.person else None
 
@@ -91,3 +97,10 @@ class GetInstructorSerializer(serializers.ModelSerializer):
     def get_active(self, obj):
         user = User.objects.filter(person=obj.person).first()
         return user.is_active if user else False
+
+    def get_assigned_learners(self, obj):
+        # Ajustar según el nombre real del campo en el modelo
+        return getattr(obj, 'assigned_learners', getattr(obj, 'assigned_learners_count', 0))
+
+    def get_max_assigned_learners(self, obj):
+        return getattr(obj, 'max_assigned_learners', getattr(obj, 'max_assignados', None))
