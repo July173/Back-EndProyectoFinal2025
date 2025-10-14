@@ -143,13 +143,10 @@ class ApprenticeViewset(BaseViewSet):
         """
         serializer = CreateApprenticeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        aprendiz, user, person = self.service.create_aprendiz(serializer.validated_data)
+        aprendiz, user, person = self.service.create_apprentice(serializer.validated_data)
         return Response({
             "detail": "Aprendiz creado correctamente.",
-            "id": aprendiz.id,
-            "user_id": user.id,
-            "person_id": person.id,
-            "email": user.email
+            "id": aprendiz.id
         }, status=status.HTTP_201_CREATED)
 
     # ----------- LIST (custom) -----------

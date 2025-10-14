@@ -30,7 +30,7 @@ class ApprenticeRepository(BaseRepository):
             user = User.objects.create_user(email=email, password=password, person=person, **user_data)
             user.registered = False
             user.save()
-            apprentice = Apprentice.objects.create(person=person, ficha=file)
+            apprentice = Apprentice.objects.create(person_id=person, ficha_id=file)
             return apprentice, user, person
 
     def update_all_dates_apprentice(self, apprentice, person_data, user_data, file):

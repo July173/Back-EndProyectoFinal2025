@@ -193,7 +193,7 @@ class InstructorViewset(BaseViewSet):
         }
     )
     @action(detail=True, methods=['delete'], url_path='soft-delete')
-    def soft_destroy(self, request, pk=None):
+    def soft_destroy(self, pk=None):
         """
         Perform a logical (soft) delete for the specified instructor.
         """
@@ -216,7 +216,7 @@ class InstructorViewset(BaseViewSet):
         tags=["Instructor"]
     )
     @action(detail=True, methods=['get'], url_path='Create-Instructor/Retrieve')
-    def custom_retrieve(self, request, pk=None):
+    def custom_retrieve(self, pk=None):
         """
         Retrieve an instructor by ID (advanced endpoint).
         """
@@ -248,10 +248,7 @@ class InstructorViewset(BaseViewSet):
             {k: data[k] for k in ['contract_type', 'contract_start_date', 'contract_end_date', 'knowledge_area', 'is_followup_instructor'] if k in data},
             data['sede_id']
         )
-        return Response({
-            "detail": "Instructor creado correctamente.",
-            "instructor_id": result["instructor_id"]
-        }, status=status.HTTP_201_CREATED)
+        return Response({"detail": "Instructor creado correctamente.", "instructor_id": result["instructor_id"]}, status=status.HTTP_201_CREATED)
 
     @swagger_auto_schema(
         operation_description="Lista todos los instructores (nuevo endpoint avanzado).",
@@ -259,7 +256,7 @@ class InstructorViewset(BaseViewSet):
         tags=["Instructor"]
     )
     @action(detail=False, methods=['get'], url_path='custom-list')
-    def custom_list(self, request, *args, **kwargs):
+    def custom_list(self):
         """
         List all instructors (advanced endpoint).
         """
@@ -300,7 +297,7 @@ class InstructorViewset(BaseViewSet):
         tags=["Instructor"]
     )
     @action(detail=True, methods=['delete'], url_path='Create-Instructor/destroy')
-    def custom_destroy(self, request, pk=None):
+    def custom_destroy(self, pk=None):
         """
         Delete an instructor (persistent delete, advanced endpoint).
         """
