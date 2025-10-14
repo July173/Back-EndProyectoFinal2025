@@ -4,15 +4,15 @@ from rest_framework.decorators import action
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from core.base.view.implements.BaseViewset import BaseViewSet
-from apps.security.services.RoleFormPermissionService import RolFormPermissionService
-from apps.security.entity.serializers.RolFormPermission.RoleFormPermissionSerializer import RolFormPermissionSerializer
+from apps.security.services.RoleFormPermissionService import RoleFormPermissionService
+from apps.security.entity.serializers.RolFormPermission.RoleFormPermissionSerializer import RoleFormPermissionSerializer
 from apps.security.entity.serializers.RolFormPermission.CreateRoleWithPermissionsSerializer import CreateRoleWithPermissionsSerializer
 
 
 
 class RoleFormPermissionViewSet(BaseViewSet):
-    service_class = RolFormPermissionService
-    serializer_class = RolFormPermissionSerializer
+    service_class = RoleFormPermissionService
+    serializer_class = RoleFormPermissionSerializer
 
     @swagger_auto_schema(
         operation_description="Gets the permission matrix by role, form, and permission type.",
@@ -94,7 +94,7 @@ class RoleFormPermissionViewSet(BaseViewSet):
 
     # ----------- CREATE -----------
     @swagger_auto_schema(
-        request_body=RolFormPermissionSerializer,
+        request_body=RoleFormPermissionSerializer,
         operation_description="Creates a new form permission for a role.",
         tags=["RoleFormPermission"]
     )

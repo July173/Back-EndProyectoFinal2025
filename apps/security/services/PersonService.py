@@ -10,7 +10,7 @@ from django.contrib.auth.hashers import make_password
 from apps.security.entity.models import Person, User
 from django.db import transaction
 from apps.security.entity.models.DocumentType import DocumentType
-from apps.general.entity.models import Aprendiz
+from apps.general.entity.models import Apprentice
 
 
 
@@ -111,7 +111,7 @@ class PersonService(BaseService):
                 user = user_serializer.save()
 
                 # Create Apprentice linked to the person (ficha will be assigned later by admin)
-                apprentice = Aprendiz.objects.create(person=person, ficha=None)
+                apprentice = Apprentice.objects.create(person=person, ficha=None)
 
                 # If everything is successful, send pending registration email
                 registration_date = datetime.now().strftime('%d/%m/%Y')

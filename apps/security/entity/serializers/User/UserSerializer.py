@@ -1,31 +1,27 @@
-from apps.security.entity.serializers.User.UserSimpleSerializer import UserSimpleSerializer
 from apps.security.entity.models import User
 from rest_framework import serializers
 from apps.security.entity.serializers.person.PersonSerializer import PersonSerializer
 from apps.security.entity.serializers.RoleSerializer import RoleSerializer
-# Importar los serializers de Aprendiz e Instructor
-from apps.general.entity.serializers.CreateAprendiz.ApprenticeSerializer import AprendizSerializer
+from apps.general.entity.serializers.CreateAprendiz.ApprenticeSerializer import ApprenticeSerializer
 from apps.general.entity.serializers.CreateInstructor.InstructorSerializer import InstructorSerializer
+from apps.general.entity.models import Apprentice, Instructor
+
 
 class UserSerializer(serializers.ModelSerializer):
     person = PersonSerializer(read_only=True)
     role = RoleSerializer(read_only=True)
 
-    # Campos dinámicos para aprendiz e instructor
+    # Dynamic fields for apprentice and instructor
     aprendiz = serializers.SerializerMethodField()
     instructor = serializers.SerializerMethodField()
 
     def get_aprendiz(self, obj):
-        # Buscar si la persona está vinculada como Aprendiz
-        from apps.general.entity.models import Aprendiz
-        aprendiz = Aprendiz.objects.filter(person=obj.person).first()
+        aprendiz = Apprentice.objects.filter(person=obj.person).first()
         if aprendiz:
-            return AprendizSerializer(aprendiz).data
+            return ApprenticeSerializer(aprendiz).data
         return None
 
     def get_instructor(self, obj):
-        # Buscar si la persona está vinculada como Instructor
-        from apps.general.entity.models import Instructor
         instructor = Instructor.objects.filter(person=obj.person).first()
         if instructor:
             return InstructorSerializer(instructor).data

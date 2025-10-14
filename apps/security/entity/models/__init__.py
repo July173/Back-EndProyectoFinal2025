@@ -4,7 +4,7 @@ from .Module import Module
 from .Permission import Permission
 from .Person import Person
 from .Role import Role
-from .RoleFormPermission import RolFormPermission
+from .RoleFormPermission import RoleFormPermission
 from .User import User
 
 

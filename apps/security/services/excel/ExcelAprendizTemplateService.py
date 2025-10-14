@@ -6,14 +6,13 @@ from django.http import HttpResponse
 from django.db import transaction
 from django.contrib.auth.hashers import make_password
 from io import BytesIO
-from apps.security.entity.models import Role, Person, User
-from apps.general.entity.models import Program, Ficha, Aprendiz
+from apps.security.entity.models import Person, User
+from apps.general.entity.models import Program, Ficha, Apprentice
 from apps.security.entity.models.DocumentType import DocumentType
 from apps.security.emails.SendEmailsActivate import enviar_activacion_usuario
-from datetime import datetime
 import string
 import random
-import os
+
 
 class ExcelAprendizTemplateService:
     """
@@ -483,7 +482,7 @@ class ExcelAprendizTemplateService:
             )
             
             # 4. Crear Aprendiz (sin ficha específica por ahora)
-            aprendiz = Aprendiz.objects.create(
+            aprendiz = Apprentice.objects.create(
                 person=person,
                 ficha=None,  # Se asignará posteriormente
                 active=True
