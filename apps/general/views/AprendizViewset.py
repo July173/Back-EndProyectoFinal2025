@@ -13,6 +13,10 @@ from apps.general.entity.serializers.CreateAprendiz.ApprenticeSerializer import 
 
 
 class ApprenticeViewset(BaseViewSet):
+    """
+    ViewSet for managing Apprentice CRUD operations and custom endpoints.
+    All internal comments and docstrings are in English. User-facing messages and API documentation remain in Spanish.
+    """
 
     service_class = ApprenticeService
     serializer_class = ApprenticeSerializer
@@ -23,6 +27,9 @@ class ApprenticeViewset(BaseViewSet):
         tags=["Aprendiz"]
     )
     def list(self, request, *args, **kwargs):
+        """
+        List all apprentices.
+        """
         return super().list(request, *args, **kwargs)
 
     # ----------- CREATE -----------
@@ -31,6 +38,9 @@ class ApprenticeViewset(BaseViewSet):
         tags=["Aprendiz"]
     )
     def create(self, request, *args, **kwargs):
+        """
+        Create a new apprentice with the provided information.
+        """
         return super().create(request, *args, **kwargs)
 
     # ----------- RETRIEVE -----------
@@ -39,6 +49,9 @@ class ApprenticeViewset(BaseViewSet):
         tags=["Aprendiz"]
     )
     def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieve information for a specific apprentice.
+        """
         return super().retrieve(request, *args, **kwargs)
 
     # ----------- UPDATE -----------
@@ -47,6 +60,9 @@ class ApprenticeViewset(BaseViewSet):
         tags=["Aprendiz"]
     )
     def update(self, request, *args, **kwargs):
+        """
+        Update all information for an apprentice.
+        """
         return super().update(request, *args, **kwargs)
 
     # ----------- PARTIAL UPDATE -----------
@@ -55,6 +71,9 @@ class ApprenticeViewset(BaseViewSet):
         tags=["Aprendiz"]
     )
     def partial_update(self, request, *args, **kwargs):
+        """
+        Partially update fields for an apprentice.
+        """
         return super().partial_update(request, *args, **kwargs)
 
     # ----------- DELETE -----------
@@ -63,6 +82,9 @@ class ApprenticeViewset(BaseViewSet):
         tags=["Aprendiz"]
     )
     def destroy(self, request, *args, **kwargs):
+        """
+        Physically delete an apprentice from the database.
+        """
         return super().destroy(request, *args, **kwargs)
 
     # ----------- SOFT DELETE (custom) -----------
@@ -77,6 +99,9 @@ class ApprenticeViewset(BaseViewSet):
     )
     @action(detail=True, methods=['delete'], url_path='soft-delete')
     def soft_destroy(self, request, pk=None):
+        """
+        Perform a logical (soft) delete for the specified apprentice.
+        """
         deleted = self.service_class().soft_delete(pk)
         if deleted:
             return Response(
@@ -87,7 +112,6 @@ class ApprenticeViewset(BaseViewSet):
             {"detail": "No encontrado."},
             status=status.HTTP_404_NOT_FOUND
         )
-#--------------------------------------------------------------------------------------------
 
     # ----------- RETRIEVE (custom) -----------
     @swagger_auto_schema(
@@ -97,6 +121,9 @@ class ApprenticeViewset(BaseViewSet):
     )
     @action(detail=True, methods=['get'], url_path='Create-Aprendiz/GetById')
     def custom_retrieve(self, request, pk=None):
+        """
+        Retrieve an apprentice by ID (advanced endpoint).
+        """
         aprendiz = self.service.get_aprendiz(pk)
         if aprendiz:
             serializer = GetApprenticeSerializer(aprendiz)
@@ -111,6 +138,9 @@ class ApprenticeViewset(BaseViewSet):
     )
     @action(detail=False, methods=['post'], url_path='Create-Aprendiz/create')
     def custom_create(self, request, *args, **kwargs):
+        """
+        Create a new apprentice (advanced endpoint).
+        """
         serializer = CreateApprenticeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         aprendiz, user, person = self.service.create_aprendiz(serializer.validated_data)
@@ -130,6 +160,9 @@ class ApprenticeViewset(BaseViewSet):
     )
     @action(detail=False, methods=['get'], url_path='Create-Aprendiz/list')
     def custom_list(self, request, *args, **kwargs):
+        """
+        List all apprentices (advanced endpoint).
+        """
         aprendices = self.service.list_aprendices()
         serializer = GetApprenticeSerializer(aprendices, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -142,6 +175,9 @@ class ApprenticeViewset(BaseViewSet):
     )
     @action(detail=True, methods=['put'], url_path='Create-Aprendiz/update')
     def custom_update(self, request, pk=None):
+        """
+        Update apprentice data (advanced endpoint).
+        """
         serializer = UpdateApprenticeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         try:
@@ -159,6 +195,9 @@ class ApprenticeViewset(BaseViewSet):
     )
     @action(detail=True, methods=['delete'], url_path='Create-Aprendiz/delete')
     def custom_destroy(self, request, pk=None):
+        """
+        Delete an apprentice (persistent delete, advanced endpoint).
+        """
         try:
             self.service.delete_apprentice(pk)
             return Response({"detail": "Aprendiz eliminado correctamente."}, status=status.HTTP_204_NO_CONTENT)
@@ -167,7 +206,6 @@ class ApprenticeViewset(BaseViewSet):
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    
     # ----------- LOGICAL DELETE OR REACTIVATE -----------
     @swagger_auto_schema(
         operation_description="Elimina lógicamente o reactiva un aprendiz (nuevo endpoint avanzado).",
@@ -175,6 +213,9 @@ class ApprenticeViewset(BaseViewSet):
     )
     @action(detail=True, methods=['delete'], url_path='Create-Aprendiz/logical-delete')
     def custom_logical_delete(self, request, pk=None):
+        """
+        Logically delete or reactivate an apprentice (advanced endpoint).
+        """
         try:
             result = self.service.logical_delete_apprentice(pk)
             return Response({"detail": result}, status=status.HTTP_200_OK)

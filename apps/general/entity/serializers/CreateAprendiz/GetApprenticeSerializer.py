@@ -3,7 +3,11 @@ from apps.general.entity.models import Apprentice
 from apps.security.entity.models import User
 
 class GetApprenticeSerializer(serializers.ModelSerializer):
-    # Usar type_identification_id para obtener el ID en lugar del objeto completo
+    """
+    Serializer for retrieving apprentice data.
+    All comments and docstrings are in English. User-facing messages remain in Spanish if any.
+    """
+    # Use type_identification_id to get the ID instead of the full object
     type_identification = serializers.IntegerField(source='person.type_identification_id')
     number_identification = serializers.CharField(source='person.number_identification')
     first_name = serializers.CharField(source='person.first_name')
@@ -34,9 +38,11 @@ class GetApprenticeSerializer(serializers.ModelSerializer):
         ]
 
     def get_email(self, obj):
+        """Get the apprentice's email from the related User object."""
         user = User.objects.filter(person=obj.person).first()
         return user.email if user else None
 
     def get_role_id(self, obj):
+        """Get the role ID from the related User object."""
         user = User.objects.filter(person=obj.person).first()
         return user.role.id if user and user.role else None

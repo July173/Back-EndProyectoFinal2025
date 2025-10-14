@@ -10,6 +10,11 @@ from apps.general.entity.serializers.KnowledgeAreaSerializer import KnowledgeAre
 
 
 class KnowledgeAreaViewset(BaseViewSet):
+    """
+    ViewSet for managing KnowledgeArea CRUD operations and custom endpoints.
+    All internal comments and docstrings are in English. User-facing messages and API documentation remain in Spanish.
+    """
+
     service_class = KnowledgeAreaService
     serializer_class = KnowledgeAreaSerializer
 
@@ -18,6 +23,9 @@ class KnowledgeAreaViewset(BaseViewSet):
         tags=["KnowledgeArea"]
     )
     def list(self, request, *args, **kwargs):
+        """
+        List all knowledge areas.
+        """
         return super().list(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -25,6 +33,9 @@ class KnowledgeAreaViewset(BaseViewSet):
         tags=["KnowledgeArea"]
     )
     def create(self, request, *args, **kwargs):
+        """
+        Create a new knowledge area.
+        """
         return super().create(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -32,6 +43,9 @@ class KnowledgeAreaViewset(BaseViewSet):
         tags=["KnowledgeArea"]
     )
     def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieve information for a specific knowledge area.
+        """
         return super().retrieve(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -39,6 +53,9 @@ class KnowledgeAreaViewset(BaseViewSet):
         tags=["KnowledgeArea"]
     )
     def update(self, request, *args, **kwargs):
+        """
+        Update all information for a knowledge area.
+        """
         return super().update(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -46,6 +63,9 @@ class KnowledgeAreaViewset(BaseViewSet):
         tags=["KnowledgeArea"]
     )
     def partial_update(self, request, *args, **kwargs):
+        """
+        Partially update fields for a knowledge area.
+        """
         return super().partial_update(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -53,6 +73,9 @@ class KnowledgeAreaViewset(BaseViewSet):
         tags=["KnowledgeArea"]
     )
     def destroy(self, request, *args, **kwargs):
+        """
+        Physically delete a knowledge area from the database.
+        """
         return super().destroy(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -66,6 +89,9 @@ class KnowledgeAreaViewset(BaseViewSet):
     )
     @action(detail=True, methods=['delete'], url_path='soft-delete')
     def soft_destroy(self, request, pk=None):
+        """
+        Perform a logical (soft) delete for the specified knowledge area.
+        """
         deleted = self.service_class().soft_delete(pk)
         if deleted:
             return Response(

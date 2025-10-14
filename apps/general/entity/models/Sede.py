@@ -2,6 +2,10 @@ from django.db import models
 
 
 class Sede(models.Model):
+
+    class Meta:
+        db_table = 'sede'
+
     center_id = models.ForeignKey('Center', on_delete=models.CASCADE, related_name='sedes')  # <-- Relación agregada
     name = models.CharField(max_length=100)
     code_sede = models.BigIntegerField(unique=True)

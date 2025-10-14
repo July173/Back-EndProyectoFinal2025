@@ -7,13 +7,14 @@ from apps.general.entity.serializers.ColorsSerializer import ColorsSerializer
 
 class ColorsViewset(BaseViewSet):
     """
-    ViewSet for Colors entity.
+    ViewSet for managing Colors CRUD operations and custom endpoints.
+    All internal comments and docstrings are in English. User-facing messages and API documentation remain in Spanish.
     """
     service_class = ColorsService
     serializer_class = ColorsSerializer
 
     @swagger_auto_schema(
-        operation_description="Obtiene una lista de todos los colores registrados.",  # User-facing description in Spanish
+        operation_description="Obtiene una lista de todos los colores registrados.",
         tags=["Colors"]
     )
     def list(self, request, *args, **kwargs):
@@ -24,7 +25,7 @@ class ColorsViewset(BaseViewSet):
 
     # ----------- CREATE -----------
     @swagger_auto_schema(
-        operation_description="Crea un nuevo color.",  # User-facing description in Spanish
+        operation_description="Crea un nuevo color.",
         tags=["Colors"]
     )
     def create(self, request, *args, **kwargs):
@@ -35,7 +36,7 @@ class ColorsViewset(BaseViewSet):
 
     # ----------- RETRIEVE -----------
     @swagger_auto_schema(
-        operation_description="Obtiene la información de un color específico.",  # User-facing description in Spanish
+        operation_description="Obtiene la información de un color específico.",
         tags=["Colors"]
     )
     def retrieve(self, request, *args, **kwargs):
@@ -46,7 +47,7 @@ class ColorsViewset(BaseViewSet):
 
     # ----------- UPDATE -----------
     @swagger_auto_schema(
-        operation_description="Actualiza la información completa de un color.",  # User-facing description in Spanish
+        operation_description="Actualiza la información completa de un color.",
         tags=["Colors"]
     )
     def update(self, request, *args, **kwargs):
@@ -57,7 +58,7 @@ class ColorsViewset(BaseViewSet):
 
     # ----------- PARTIAL UPDATE -----------
     @swagger_auto_schema(
-        operation_description="Actualiza solo algunos campos de un color.",  # User-facing description in Spanish
+        operation_description="Actualiza solo algunos campos de un color.",
         tags=["Colors"]
     )
     def partial_update(self, request, *args, **kwargs):
@@ -68,7 +69,7 @@ class ColorsViewset(BaseViewSet):
 
     # ----------- DELETE -----------
     @swagger_auto_schema(
-        operation_description="Elimina físicamente un color de la base de datos.",  # User-facing description in Spanish
+        operation_description="Elimina físicamente un color de la base de datos.",
         tags=["Colors"]
     )
     def destroy(self, request, *args, **kwargs):
@@ -80,11 +81,11 @@ class ColorsViewset(BaseViewSet):
     # ----------- SOFT DELETE (custom) -----------
     @swagger_auto_schema(
         method='delete',
-        operation_description="Realiza un borrado lógico (soft delete) del color especificado.",  # User-facing description in Spanish
+        operation_description="Realiza un borrado lógico (soft delete) del color especificado.",
         tags=["Colors"],
         responses={
-            204: openapi.Response("Eliminado lógicamente correctamente."),  # User-facing message in Spanish
-            404: openapi.Response("No encontrado.")  # User-facing message in Spanish
+            204: openapi.Response("Eliminado lógicamente correctamente."),
+            404: openapi.Response("No encontrado.")
         }
     )
     @action(detail=True, methods=['delete'], url_path='soft-delete')

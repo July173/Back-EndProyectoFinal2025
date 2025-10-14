@@ -1,6 +1,10 @@
 from django.db import models
 
 class SupportContact(models.Model):
+
+    class Meta:
+        db_table = 'support_contact'
+
     type = models.CharField(max_length=50)
     label = models.CharField(max_length=100)
     value = models.CharField(max_length=255)

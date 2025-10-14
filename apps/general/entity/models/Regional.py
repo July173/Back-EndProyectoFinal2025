@@ -2,6 +2,10 @@ from django.db import models
 
 
 class Regional(models.Model):
+
+    class Meta:
+        db_table = 'regional'
+
     name = models.CharField(max_length=100)
     code_regional = models.BigIntegerField(unique=True)
     description = models.TextField(max_length=255)

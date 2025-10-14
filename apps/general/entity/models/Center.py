@@ -1,6 +1,10 @@
 from django.db import models
 
 class Center(models.Model):
+    
+    class Meta:
+        db_table = 'center'
+    
     regional_id = models.ForeignKey('Regional', on_delete=models.CASCADE, related_name='centers')
     name = models.CharField(max_length=100)
     code_center = models.BigIntegerField(unique=True)

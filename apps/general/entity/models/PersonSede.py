@@ -2,6 +2,10 @@ from django.db import models
 
 
 class PersonSede(models.Model):
+
+    class Meta:
+        db_table = 'person_sede'
+    
     sede_id = models.ForeignKey('Sede', on_delete=models.CASCADE)
     person_id = models.ForeignKey('security.Person', on_delete=models.CASCADE)
     delete_at = models.DateTimeField(null=True, blank=True)

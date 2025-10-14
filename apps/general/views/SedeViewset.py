@@ -9,6 +9,11 @@ from apps.general.entity.serializers.SedeSerializer import SedeSerializer
 
 
 class SedeViewset(BaseViewSet):
+    """
+    ViewSet for managing Sede CRUD operations and custom endpoints.
+    All internal comments and docstrings are in English. User-facing messages and API documentation remain in Spanish.
+    """
+
     service_class = SedeService
     serializer_class = SedeSerializer
 
@@ -20,6 +25,9 @@ class SedeViewset(BaseViewSet):
         tags=["Sede"]
     )
     def list(self, request, *args, **kwargs):
+        """
+        List all sites (sedes).
+        """
         return super().list(request, *args, **kwargs)
 
     # ----------- CREATE -----------
@@ -30,6 +38,9 @@ class SedeViewset(BaseViewSet):
         tags=["Sede"]
     )
     def create(self, request, *args, **kwargs):
+        """
+        Create a new site (sede) with the provided information.
+        """
         return super().create(request, *args, **kwargs)
 
     # ----------- RETRIEVE -----------
@@ -40,6 +51,9 @@ class SedeViewset(BaseViewSet):
         tags=["Sede"]
     )
     def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieve information for a specific site (sede).
+        """
         return super().retrieve(request, *args, **kwargs)
 
     # ----------- UPDATE -----------
@@ -50,6 +64,9 @@ class SedeViewset(BaseViewSet):
         tags=["Sede"]
     )
     def update(self, request, *args, **kwargs):
+        """
+        Update all information for a site (sede).
+        """
         return super().update(request, *args, **kwargs)
 
     # ----------- PARTIAL UPDATE -----------
@@ -60,6 +77,9 @@ class SedeViewset(BaseViewSet):
         tags=["Sede"]
     )
     def partial_update(self, request, *args, **kwargs):
+        """
+        Partially update fields for a site (sede).
+        """
         return super().partial_update(request, *args, **kwargs)
 
     # ----------- DELETE -----------
@@ -70,6 +90,9 @@ class SedeViewset(BaseViewSet):
         tags=["Sede"]
     )
     def destroy(self, request, *args, **kwargs):
+        """
+        Physically delete a site (sede) from the database.
+        """
         return super().destroy(request, *args, **kwargs)
 
     # ----------- SOFT DELETE (custom) -----------
@@ -86,6 +109,9 @@ class SedeViewset(BaseViewSet):
     )
     @action(detail=True, methods=['delete'], url_path='soft-delete')
     def soft_destroy(self, request, pk=None):
+        """
+        Perform a logical (soft) delete for the specified site (sede).
+        """
         deleted = self.service_class().soft_delete(pk)
         if deleted:
             return Response(

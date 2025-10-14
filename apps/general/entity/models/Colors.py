@@ -3,6 +3,7 @@ from django.db import models
 class Colors(models.Model):
     
     class Meta:
+        
         db_table = 'base_colors'
 
     name = models.CharField(max_length=100)

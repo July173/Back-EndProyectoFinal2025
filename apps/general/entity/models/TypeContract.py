@@ -1,6 +1,10 @@
 from django.db import models
 
 class TypeContract(models.Model):
+
+    class Meta:
+        db_table = 'type_contract'
+
     name = models.CharField(max_length=100)
     description = models.TextField(max_length=200)
     active = models.BooleanField(default=True)

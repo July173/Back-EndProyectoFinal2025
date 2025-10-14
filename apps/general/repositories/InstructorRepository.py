@@ -7,7 +7,15 @@ from apps.general.entity.models import Instructor, PersonSede, Sede
 from django.db import transaction
 
 class InstructorRepository(BaseRepository):
+    """
+    Optimized repository for CRUD and state operations on Instructor, Person, User, and PersonSede.
+    All comments and docstrings are in English. User-facing messages remain in Spanish if any.
+    """
+
     def get_filtered_instructors(self, search=None, knowledge_area_id=None):
+        """
+        Get instructors filtered by search text and/or knowledge area ID.
+        """
         queryset = self.model.objects.select_related('person', 'knowledgeArea').all()
         if search:
             queryset = queryset.filter(
@@ -20,20 +28,19 @@ class InstructorRepository(BaseRepository):
         if knowledge_area_id:
             queryset = queryset.filter(knowledgeArea__id=knowledge_area_id)
         return list(queryset)
+
     def __init__(self):
         super().__init__(Instructor)
 
-    """
-    Repositorio optimizado para operaciones CRUD y de estado sobre Instructor, Persona, Usuario y PersonSede.
-    """
     def create_all_dates_instructor(self, person_data, user_data, instructor_data, sede_id=None):
         """
-        Crea persona, usuario, instructor y person_sede en una sola transacción.
-        Retorna instructor, user, person, person_sede.
+        Create person, user, instructor, and person_sede in a single transaction.
+        Returns instructor, user, person, person_sede.
         """
         with transaction.atomic():
             person = Person.objects.create(**person_data)
             if User.objects.filter(email=user_data['email']).exists():
+                # User-facing error message remains in Spanish
                 raise ValueError("El correo ya está registrado.")
             email = user_data.pop('email')
             password = user_data.pop('password')
@@ -49,24 +56,24 @@ class InstructorRepository(BaseRepository):
 
     def update_all_dates_instructor(self, instructor, person_data, user_data, instructor_data, sede_id=None):
         """
-        Actualiza persona, usuario, instructor y person_sede en una sola transacción.
+        Update person, user, instructor, and person_sede in a single transaction.
         """
         with transaction.atomic():
-            # Persona
+            # Update person
             for attr, value in person_data.items():
                 setattr(instructor.person, attr, value)
             instructor.person.save()
-            # Usuario
+            # Update user
             user = User.objects.filter(person=instructor.person).first()
             if user:
                 for attr, value in user_data.items():
                     setattr(user, attr, value)
                 user.save()
-            # Instructor
+            # Update instructor
             for attr, value in instructor_data.items():
                 setattr(instructor, attr, value)
             instructor.save()
-            # PersonSede
+            # Update person_sede
             if sede_id:
                 sede_instance = Sede.objects.get(pk=sede_id)
                 person_sede = PersonSede.objects.filter(PersonId=instructor.person).first()
@@ -77,7 +84,7 @@ class InstructorRepository(BaseRepository):
 
     def delete_all_dates_instructor(self, instructor):
         """
-        Elimina instructor, usuario, person_sede y persona en cascada.
+        Delete instructor, user, person_sede, and person in cascade.
         """
         with transaction.atomic():
             person = instructor.person
@@ -91,7 +98,7 @@ class InstructorRepository(BaseRepository):
 
     def set_active_state_dates_instructor(self, instructor, active=True):
         """
-        Activa o desactiva instructor, usuario, persona y person_sede en cascada.
+        Activate or deactivate instructor, user, person, and person_sede in cascade.
         """
         with transaction.atomic():
             instructor.active = active
@@ -110,7 +117,7 @@ class InstructorRepository(BaseRepository):
             for ps in person_sede:
                 if hasattr(ps, 'active'):
                     ps.active = active
-                # Respeta la mayúscula/minúscula según el modelo
+                # Respect uppercase/lowercase according to the model
                 if hasattr(ps, 'DeleteAt'):
                     ps.DeleteAt = None if active else timezone.now()
                 elif hasattr(ps, 'delete_at'):

@@ -4,6 +4,10 @@ from apps.general.entity.models.KnowledgeArea import KnowledgeArea
 
 
 class Instructor(models.Model):
+    
+    class Meta:
+        db_table = 'instructor'
+    
     person = models.OneToOneField(Person, on_delete=models.CASCADE, related_name='instructor')  # Relación 1:1
     contract_type = models.OneToOneField('TypeContract', on_delete=models.PROTECT, related_name='instructors')
     knowledge_area = models.ForeignKey(KnowledgeArea, on_delete=models.PROTECT, related_name='instructors')

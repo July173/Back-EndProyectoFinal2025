@@ -8,12 +8,18 @@ class RegionalService(BaseService):
         self.repository = RegionalRepository()
     
     def get_regional_with_centers_by_id(self, pk):
-        """Obtiene una regional por ID con sus centros anidados"""
+        """
+        Get a regional by ID with its nested centers.
+        Returns the Regional object or None if not found.
+        """
         try:
             return Regional.objects.prefetch_related('centers').get(pk=pk)
         except Regional.DoesNotExist:
             return None
-    
+
     def get_all_regionals_with_centers(self):
-        """Obtiene todas las regionales con sus centros anidados"""
+        """
+        Get all regionals with their nested centers.
+        Returns a queryset of all Regional objects with centers prefetched.
+        """
         return Regional.objects.prefetch_related('centers').all()

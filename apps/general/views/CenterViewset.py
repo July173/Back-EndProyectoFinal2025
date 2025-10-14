@@ -9,6 +9,11 @@ from apps.general.entity.serializers.CenterSerializer import CenterSerializer
 
 
 class CenterViewset(BaseViewSet):
+    """
+    ViewSet for managing Center CRUD operations and custom endpoints.
+    All internal comments and docstrings are in English. User-facing messages and API documentation remain in Spanish.
+    """
+
     service_class = CenterService
     serializer_class = CenterSerializer
 
@@ -18,6 +23,9 @@ class CenterViewset(BaseViewSet):
         tags=["Center"]
     )
     def list(self, request, *args, **kwargs):
+        """
+        List all centers.
+        """
         return super().list(request, *args, **kwargs)
 
     # ----------- CREATE -----------
@@ -26,6 +34,9 @@ class CenterViewset(BaseViewSet):
         tags=["Center"]
     )
     def create(self, request, *args, **kwargs):
+        """
+        Create a new center with the provided information.
+        """
         return super().create(request, *args, **kwargs)
 
     # ----------- RETRIEVE -----------
@@ -34,6 +45,9 @@ class CenterViewset(BaseViewSet):
         tags=["Center"]
     )
     def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieve information for a specific center.
+        """
         return super().retrieve(request, *args, **kwargs)
 
     # ----------- UPDATE -----------
@@ -42,6 +56,9 @@ class CenterViewset(BaseViewSet):
         tags=["Center"]
     )
     def update(self, request, *args, **kwargs):
+        """
+        Update all information for a center.
+        """
         return super().update(request, *args, **kwargs)
 
     # ----------- PARTIAL UPDATE -----------
@@ -50,6 +67,9 @@ class CenterViewset(BaseViewSet):
         tags=["Center"]
     )
     def partial_update(self, request, *args, **kwargs):
+        """
+        Partially update fields for a center.
+        """
         return super().partial_update(request, *args, **kwargs)
 
     # ----------- DELETE -----------
@@ -58,6 +78,9 @@ class CenterViewset(BaseViewSet):
         tags=["Center"]
     )
     def destroy(self, request, *args, **kwargs):
+        """
+        Physically delete a center from the database.
+        """
         return super().destroy(request, *args, **kwargs)
 
     # ----------- SOFT DELETE (custom) -----------
@@ -72,6 +95,9 @@ class CenterViewset(BaseViewSet):
     )
     @action(detail=True, methods=['delete'], url_path='soft-delete')
     def soft_destroy(self, request, pk=None):
+        """
+        Perform a logical (soft) delete for the specified center.
+        """
         deleted = self.service_class().soft_delete(pk)
         if deleted:
             return Response(

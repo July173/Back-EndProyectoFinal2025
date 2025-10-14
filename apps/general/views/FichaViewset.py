@@ -10,6 +10,11 @@ from apps.general.entity.serializers.FichaSerializer import FichaSerializer
 
 
 class FichaViewset(BaseViewSet):
+    """
+    ViewSet for managing Ficha CRUD operations and custom endpoints.
+    All internal comments and docstrings are in English. User-facing messages and API documentation remain in Spanish.
+    """
+
     service_class = FichaService
     serializer_class = FichaSerializer
 
@@ -19,6 +24,9 @@ class FichaViewset(BaseViewSet):
         tags=["Ficha"]
     )
     def list(self, request, *args, **kwargs):
+        """
+        List all fichas.
+        """
         return super().list(request, *args, **kwargs)
 
     # ----------- CREATE -----------
@@ -27,6 +35,9 @@ class FichaViewset(BaseViewSet):
         tags=["Ficha"]
     )
     def create(self, request, *args, **kwargs):
+        """
+        Create a new ficha with the provided information.
+        """
         return super().create(request, *args, **kwargs)
 
     # ----------- RETRIEVE -----------
@@ -35,6 +46,9 @@ class FichaViewset(BaseViewSet):
         tags=["Ficha"]
     )
     def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieve information for a specific ficha.
+        """
         return super().retrieve(request, *args, **kwargs)
 
     # ----------- UPDATE -----------
@@ -43,6 +57,9 @@ class FichaViewset(BaseViewSet):
         tags=["Ficha"]
     )
     def update(self, request, *args, **kwargs):
+        """
+        Update all information for a ficha.
+        """
         return super().update(request, *args, **kwargs)
 
     # ----------- PARTIAL UPDATE -----------
@@ -51,6 +68,9 @@ class FichaViewset(BaseViewSet):
         tags=["Ficha"]
     )
     def partial_update(self, request, *args, **kwargs):
+        """
+        Partially update fields for a ficha.
+        """
         return super().partial_update(request, *args, **kwargs)
 
     # ----------- DELETE -----------
@@ -59,6 +79,9 @@ class FichaViewset(BaseViewSet):
         tags=["Ficha"]
     )
     def destroy(self, request, *args, **kwargs):
+        """
+        Physically delete a ficha from the database.
+        """
         return super().destroy(request, *args, **kwargs)
 
     # ----------- SOFT DELETE (custom) -----------
@@ -73,6 +96,9 @@ class FichaViewset(BaseViewSet):
     )
     @action(detail=True, methods=['delete'], url_path='soft-delete')
     def soft_destroy(self, request, pk=None):
+        """
+        Perform a logical (soft) delete for the specified ficha.
+        """
         deleted = self.service_class().soft_delete(pk)
         if deleted:
             return Response(
