@@ -12,17 +12,17 @@ class UserSerializer(serializers.ModelSerializer):
     role = RoleSerializer(read_only=True)
 
     # Dynamic fields for apprentice and instructor
-    aprendiz = serializers.SerializerMethodField()
+    apprentice = serializers.SerializerMethodField()
     instructor = serializers.SerializerMethodField()
 
-    def get_aprendiz(self, obj):
+    def get_apprentice(self, obj):
         # Buscar si la persona está vinculada como Apprentice
         from apps.general.entity.models import Apprentice, Ficha, Program
-        aprendiz = Apprentice.objects.filter(person=obj.person).select_related('ficha__program').first()
-        if aprendiz:
-            data = ApprenticeSerializer(aprendiz).data
-            ficha = aprendiz.ficha
-            if ficha and ficha.program:
+        apprentice = Apprentice.objects.filter(person=obj.person).select_related('ficha__program').first()
+        if apprentice:
+            data = ApprenticeSerializer(apprentice).data
+            ficha = apprentice.ficha_id
+            if ficha and ficha.program_id:
                 data['programa'] = {
                     'id': ficha.program.id,
                     'name': ficha.program.name

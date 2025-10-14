@@ -10,7 +10,7 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ============================
-# CONFIGURACIÓN BÁSICA
+# BASIC CONFIGURATION
 # ============================
 SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1')
@@ -18,7 +18,7 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
 EMAILS_FROM_EMAIL = os.getenv('EMAILS_FROM_EMAIL')
 
 # ============================
-# APPS INSTALADAS
+# INSTALLED APPS
 # ============================
 INSTALLED_APPS = [
     # Django
@@ -78,7 +78,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'core.wsgi.application'
 
 # ============================
-# BASE DE DATOS (MySQL)
+# DATABASE (MySQL)
 # ============================
 DATABASES = {
     'default': {
@@ -111,12 +111,12 @@ CELERY_BEAT_SCHEDULE = {
 }
 
 # ============================
-# MODELO DE USUARIO PERSONALIZADO
+# USER MODEL PERSONALIZED
 # ============================
 AUTH_USER_MODEL = 'security.User'
 
 # ============================
-# VALIDACIÓN DE CONTRASEÑAS
+# PASSWORD VALIDATORS
 # ============================
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -126,7 +126,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # ============================
-# DRF y JWT
+# DRF AND JWT
 # ============================
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
@@ -159,7 +159,7 @@ SWAGGER_SETTINGS = {
 REDOC_SETTINGS = {'LAZY_RENDERING': False}
 
 # ============================
-# INTERNACIONALIZACIÓN
+# INTERNATIONALIZATION
 # ============================
 LANGUAGE_CODE = 'es-es'
 TIME_ZONE = 'America/Bogota'
@@ -167,7 +167,7 @@ USE_I18N = True
 USE_TZ = True
 
 # ============================
-# ARCHIVOS ESTÁTICOS / MEDIA
+# STATIC / MEDIA FILES
 # ============================
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
