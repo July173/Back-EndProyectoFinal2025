@@ -4,4 +4,4 @@ from apps.general.entity.models.LegalDocument import LegalDocument
 class LegalDocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = LegalDocument
-        fields = '__all__'
+        fields = ['id', 'type', 'title', 'effective_date', 'active']

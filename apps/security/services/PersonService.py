@@ -1,16 +1,15 @@
 from core.base.services.implements.baseService.BaseService import BaseService
 from apps.security.repositories.PersonRepository import PersonRepository
-from apps.security.entity.serializers.person.PersonSerializer import PersonSerializer
-from apps.security.entity.serializers.UserSerializer import UserSerializer
-from apps.security.services.UserService import UserService
+from apps.security.entity.serializers.User.UserSerializer import UserSerializer
 from apps.security.emails.SendEmails import enviar_registro_pendiente
 from rest_framework import status
 from datetime import datetime
 from django.contrib.auth.hashers import make_password
 from apps.security.entity.models import Person, User
 from django.db import transaction
-from apps.security.entity.models.DocumentType import DocumentType
 from apps.general.entity.models import Aprendiz
+from apps.security.entity.models import Role
+from apps.security.entity.serializers.User.UserSerializer import UserSerializer
 
 
 class PersonService(BaseService):
@@ -96,18 +95,17 @@ class PersonService(BaseService):
                 if not person:
                     raise Exception({'error': 'Datos inválidos', 'detalle': person_errors})
 
-                # Crear usuario inactivo sin contraseña (se establecerá cuando se active)
-                user_data = {
-                    'email': email,
-                    'password': make_password('temporal_placeholder'),  # Contraseña temporal que será reemplazada
-                    'person': person.id,
-                    'is_active': False,
-                    'role': 2,  # Rol de Aprendiz
-                }
-                user_serializer = UserSerializer(data=user_data)
-                if not user_serializer.is_valid():
-                    raise Exception({'error': 'No se pudo crear el usuario', 'detalle': user_serializer.errors})
-                user = user_serializer.save()
+                # Obtener instancia de rol Aprendiz
+                rol_aprendiz = Role.objects.get(id=2)  # O usa type_role="Aprendiz" si prefieres
+
+                # Crear usuario correctamente vinculado
+                user = User.objects.create(
+                    email=email,
+                    password=make_password('temporal_placeholder'),
+                    person=person,
+                    is_active=False,
+                    role=rol_aprendiz,
+                )
 
                 # Crear Aprendiz vinculado a la persona (ficha se asignará después por el administrador)
                 aprendiz = Aprendiz.objects.create(person=person, ficha=None)
@@ -115,6 +113,9 @@ class PersonService(BaseService):
                 # Si todo es exitoso, enviar correo de registro pendiente
                 fecha_registro = datetime.now().strftime('%d/%m/%Y')
                 enviar_registro_pendiente(email, person.first_name + ' ' + person.first_last_name, fecha_registro)
+
+                # Serializar usuario para la respuesta
+                user_serializer = UserSerializer(user)
 
                 return {
                     'data': {

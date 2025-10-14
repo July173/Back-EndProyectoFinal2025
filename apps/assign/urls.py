@@ -8,7 +8,7 @@ from apps.assign.views.RequestAsignationViewset import RequestAsignationViewset
 from apps.assign.views.AsignationInstructorViewset import AsignationInstructorViewset
 from apps.assign.views.AsignationInstructorHistoryViewset import AsignationInstructorHistoryViewset
 from apps.assign.views.VisitFollowingViewset import VisitFollowingViewset
-from apps.assign.views.FormRequestViewset import FormRequestPDFAPIView
+from apps.assign.views.FormRequestPDFViewset import FormRequestPDFAPIView
 
 router = DefaultRouter()
 router.register(r'enterprise', EnterpriseViewset, basename='assign_enterprise')

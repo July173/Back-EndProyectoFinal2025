@@ -4,6 +4,13 @@ from django.db import transaction
 
 
 class RoleRepository(BaseRepository):    
+    def get_filtered_roles(self, active=None, search=None):
+        queryset = self.model.objects.all()
+        if active is not None:
+            queryset = queryset.filter(active=active)
+        if search:
+            queryset = queryset.filter(type_role__icontains=search)
+        return list(queryset)
     
     def __init__(self):
         super().__init__(Role)
@@ -13,12 +20,6 @@ class RoleRepository(BaseRepository):
         Devuelve todos los roles.
         """
         return self.model.objects.all()
-
-    def filter_roles_by_type(self, type_role):
-        """
-        Filtra roles por el campo type_role (ej: 'Administrador', 'Aprendiz', 'Instructor').
-        """
-        return self.model.objects.filter(type_role__iexact=type_role)
 
     def set_active_role_and_users(self, role_id, active):
         """
@@ -51,8 +52,3 @@ class RoleRepository(BaseRepository):
             })
         return data
     
-    def filter_rols_by_active(self, active=True):
-        """
-        Filtra roles por estado activo/inactivo.
-        """
-        return self.model.objects.filter(active=active)

@@ -5,13 +5,19 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.security.services.UserService import UserService
-from apps.security.entity.serializers.UserSerializer import UserSerializer
+from apps.security.entity.serializers.User.UserSerializer import UserSerializer
+from apps.security.entity.serializers.User.UserSimpleSerializer import UserSimpleSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 
 
 class UserViewSet(BaseViewSet):
+
+    def get_serializer_class(self):
+        if self.action in ['create', 'update', 'partial_update']:
+            return UserSimpleSerializer
+        return UserSerializer
 
 
     # ----------- LIST -----------

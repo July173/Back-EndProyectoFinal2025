@@ -57,19 +57,12 @@ class LegalSectionViewset(BaseViewSet):
         return super().destroy(request, *args, **kwargs)
 
     @swagger_auto_schema(
-        method='delete',
-        operation_description="Realiza un borrado lógico (soft delete) de la sección legal especificada.",
-        tags=["LegalSection"],
-        responses={
-            204: "Eliminado lógicamente correctamente.",
-            404: "No encontrado."
-        }
+        operation_description="Realiza un borrado lógico de la sección legal especificada.",
+        tags=["LegalSection"]
     )
     @action(detail=True, methods=['delete'], url_path='soft-delete')
     def soft_destroy(self, request, pk=None):
-        section = self.get_object()
-        if section:
-            section.active = False
-            section.save()
-            return Response({"detail": "Eliminado lógicamente correctamente."}, status=status.HTTP_204_NO_CONTENT)
-        return Response({"detail": "No encontrado."}, status=status.HTTP_404_NOT_FOUND)
+        """
+        Realiza un borrado lógico de la sección legal especificada.
+        """
+        return super().soft_destroy(request, pk)

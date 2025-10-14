@@ -4,10 +4,10 @@ INSERT INTO `general_supportcontact` (`id`, `type`, `label`, `value`, `extra_inf
 	(2, 'Teléfono', 'Linea gratuita nacional', '01 8000 910 270', 'Lunes a viernes: 7:00 AM - 7:00 PM', 1),
 	(3, 'Enlaces útiles', 'Sofia Plus - Oferta Educativa', 'https://betowa.sena.edu.co/', 'enlace', 1);
 
-INSERT INTO `general_supportschedule` (`id`, `day_range`, `hours`, `is_closed`, `notes`) VALUES
-	(1, 'Lunes a Viernes', '7:00 AM - 7:00 PM', 0, ''),
-	(2, 'Sábados', '8:00 AM - 4:00 PM', 0, ''),
-	(3, 'Domingos y festivos', 'ninguna', 1, '');
+INSERT INTO `general_supportschedule` (`id`, `day_range`, `hours`, `is_closed`, `notes`, `active`) VALUES
+	(1, 'Lunes a Viernes', '7:00 AM - 7:00 PM', 0, '', 1),
+	(2, 'Sábados', '8:00 AM - 4:00 PM', 0, '', 1),
+	(3, 'Domingos y festivos', 'ninguna', 1, '', 1);
 
 INSERT INTO `general_typecontract` (`id`, `name`, `description`, `active`, `delete_at`) VALUES
 	(1, 'Planta', 'Es un contrato estable y permanente, con todos los beneficios laborales de ley.', 1, NULL),

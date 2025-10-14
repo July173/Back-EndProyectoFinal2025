@@ -1,7 +1,7 @@
 from core.base.repositories.implements.baseRepository.BaseRepository import BaseRepository
 from apps.assign.entity.models import RequestAsignation
 from apps.assign.entity.enums.request_state_enum import RequestState
-
+from django.db.models import Q
 from apps.general.entity.models import PersonSede
 from apps.general.entity.models import Aprendiz, Sede
 from apps.assign.entity.models import Enterprise, Boss, HumanTalent, ModalityProductiveStage, RequestAsignation
@@ -17,15 +17,33 @@ class RequestAsignationRepository(BaseRepository):
     def __init__(self):
         super().__init__(RequestAsignation)
 
+    def filter_form_requests(self, search=None, request_state=None, program_id=None):
+        queryset = RequestAsignation.objects.select_related(
+            'aprendiz__person',
+            'aprendiz__ficha__program',
+            'enterprise',
+            'modality_productive_stage'
+        ).all()
 
-    def filter_by_state(self, request_state):
-        """
-        Filtra las solicitudes por el campo request_state.
-        """
-        if request_state in ['ASIGNADO', 'SIN_ASIGNAR', 'RECHAZADO']:
-            return RequestAsignation.objects.filter(request_state=request_state)
-        return RequestAsignation.objects.all()
-    
+        #  Filtro por texto (nombre o número de documento)
+        if search:
+            queryset = queryset.filter(
+                Q(aprendiz__person__first_name__icontains=search) |
+                Q(aprendiz__person__first_last_name__icontains=search) |
+                Q(aprendiz__person__second_last_name__icontains=search) |
+                Q(aprendiz__person__number_identification__icontains=search)
+            )
+
+        #  Filtro por estado
+        if request_state:
+            queryset = queryset.filter(request_state=request_state)
+
+        #  Filtro por programa
+        if program_id:
+            queryset = queryset.filter(aprendiz__ficha__program_id=program_id)
+
+        return queryset
+
     
     def get_form_request_by_id(self, request_id):
         """
@@ -183,4 +201,7 @@ class RequestAsignationRepository(BaseRepository):
 
         logger.info(f"Se encontraron {len(form_requests)} solicitudes")
         return form_requests
+    
+
+    
 
