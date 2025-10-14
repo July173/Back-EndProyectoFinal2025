@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 
 class CenterSerializer(serializers.ModelSerializer):
-    regional = serializers.PrimaryKeyRelatedField(queryset=Regional.objects.all())
+    regional_id = serializers.PrimaryKeyRelatedField(queryset=Regional.objects.all())
 
     class Meta:
         model = Center
@@ -13,5 +13,5 @@ class CenterSerializer(serializers.ModelSerializer):
             'code_center',
             'address',
             'active',
-            'regional'
+            'regional_id'
         ]

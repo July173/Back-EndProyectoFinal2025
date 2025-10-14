@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 
 class SedeSerializer(serializers.ModelSerializer):
-    center = serializers.PrimaryKeyRelatedField(queryset=Center.objects.all())
+    center_id = serializers.PrimaryKeyRelatedField(queryset=Center.objects.all())
 
     class Meta:
         model = Sede
@@ -14,6 +14,6 @@ class SedeSerializer(serializers.ModelSerializer):
             'address',
             'phone_sede',
             'email_contact',
-            'center',
+            'center_id',
             'active',
         ]

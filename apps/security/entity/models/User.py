@@ -39,7 +39,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         on_delete=models.CASCADE,
         blank=True
     )
-    role = models.OneToOneField(
+    role = models.ForeignKey(
         Role,
         on_delete=models.CASCADE,
         blank=True
