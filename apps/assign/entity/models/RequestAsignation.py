@@ -1,16 +1,21 @@
 from django.db import models
-from apps.general.entity.models import Aprendiz
+from apps.general.entity.models import Apprentice
 from apps.assign.entity.enums.request_state_enum import RequestState
 
 
 class RequestAsignation(models.Model):
-    aprendiz = models.ForeignKey(
-        Aprendiz, on_delete=models.CASCADE, related_name='requests'
+
+    class Meta:
+        db_table = 'request_asignation'
+
+
+    apprentice_id = models.ForeignKey(
+        Apprentice, on_delete=models.CASCADE, related_name='requests'
     )
-    enterprise = models.ForeignKey(
+    enterprise_id = models.ForeignKey(
         'assign.Enterprise', on_delete=models.CASCADE, related_name='requests'
     )
-    modality_productive_stage = models.ForeignKey(
+    modality_productive_stage_id = models.ForeignKey(
         'assign.ModalityProductiveStage', on_delete=models.CASCADE, related_name='requests'
     )
     request_date = models.DateField()
@@ -22,7 +27,8 @@ class RequestAsignation(models.Model):
         choices=RequestState.choices,
         default=RequestState.SIN_ASIGNAR
     )
-    rejectionMessage= models.TextField(null=True, blank=True)
+    rejection_message= models.TextField(max_length=500, null=True, blank=True)
+    active = models.BooleanField(default=True)
     delete_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):

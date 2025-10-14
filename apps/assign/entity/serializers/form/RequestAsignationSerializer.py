@@ -1,10 +1,9 @@
 from rest_framework import serializers
 from apps.assign.entity.models import RequestAsignation, Enterprise, ModalityProductiveStage
-from apps.general.entity.models import Aprendiz
-
+from apps.general.entity.models import Apprentice
 
 class RequestAsignationSerializer(serializers.ModelSerializer):
-    aprendiz = serializers.PrimaryKeyRelatedField(queryset=Aprendiz.objects.all())
+    aprendiz = serializers.PrimaryKeyRelatedField(queryset=Apprentice.objects.all())
     enterprise = serializers.PrimaryKeyRelatedField(queryset=Enterprise.objects.all())
     modality_productive_stage = serializers.PrimaryKeyRelatedField(queryset=ModalityProductiveStage.objects.all())
 

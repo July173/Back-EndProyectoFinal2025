@@ -9,14 +9,21 @@ from apps.assign.entity.serializers.AsignationInstructor.AsignationInstructorHis
 from apps.assign.entity.serializers.AsignationInstructor.ReasignationInstructorSerializer import ReasignationInstructorSerializer
 
 
+
 class AsignationInstructorHistoryViewset(ViewSet):
-    
+    """
+    ViewSet for managing instructor reassignment history.
+    All internal code and comments are in English. User-facing messages and API documentation remain in Spanish.
+    """
+
     def get_service(self):
+        """Return the service instance for instructor history operations."""
         return AsignationInstructorHistoryService()
 
     def get_serializer(self, *args, **kwargs):
+        """Return the serializer for instructor history objects."""
         return AsignationInstructorHistorySerializer(*args, **kwargs)
-    
+
     @swagger_auto_schema(
         operation_description="Reasigna un instructor y guarda el historial automáticamente.",
         request_body=ReasignationInstructorSerializer,
@@ -28,6 +35,10 @@ class AsignationInstructorHistoryViewset(ViewSet):
     )
     @action(detail=False, methods=['post'], url_path='reasignar-instructor')
     def reasignar_instructor(self, request):
+        """
+        Reassign an instructor and automatically save the history.
+        API documentation and user-facing messages remain in Spanish.
+        """
         serializer = ReasignationInstructorSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         asignation_instructor_id = serializer.validated_data['asignation_instructor_id']
@@ -40,9 +51,10 @@ class AsignationInstructorHistoryViewset(ViewSet):
             message
         )
         if isinstance(result, dict) and result.get('status') == 'error':
+            # Return error response in Spanish as required
             return Response(result, status=status.HTTP_400_BAD_REQUEST)
+        # Success message in Spanish for user-facing response
         return Response({"detail": "Reasignación realizada y guardada en historial."}, status=status.HTTP_200_OK)
-    
 
     @swagger_auto_schema(
         operation_description="Obtiene el historial de reasignaciones para una asignación.",
@@ -57,10 +69,15 @@ class AsignationInstructorHistoryViewset(ViewSet):
     )
     @action(detail=False, methods=['get'], url_path='list-history')
     def list_history(self, request):
+        """
+        Get the reassignment history for a given instructor assignment.
+        API documentation and user-facing messages remain in Spanish.
+        """
         asignation_instructor_id = request.query_params.get('asignation_instructor_id')
         service = self.get_service()
         history = service.list_by_asignation(asignation_instructor_id)
         if isinstance(history, dict) and history.get('status') == 'error':
+            # Return error response in Spanish as required
             return Response(history, status=status.HTTP_400_BAD_REQUEST)
         serializer = self.get_serializer(history, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

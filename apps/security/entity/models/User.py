@@ -23,6 +23,10 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
+    
+    class Meta:
+        db_table = 'user'
+    
     registered = models.BooleanField(default=True, help_text="True si el usuario está registrado pero no activado. False si ya fue activado.")
     email = models.EmailField(max_length=100, unique=True)
     is_active = models.BooleanField(default=True)
@@ -30,16 +34,14 @@ class User(AbstractBaseUser, PermissionsMixin):
     deleted_at = models.DateTimeField(null=True, blank=True)
 
     # Hacer estos campos opcionales temporalmente
-    person = models.ForeignKey(
+    person = models.OneToOneField(
         Person,
         on_delete=models.CASCADE,
-        null=True,
         blank=True
     )
-    role = models.ForeignKey(
+    role = models.OneToOneField(
         Role,
         on_delete=models.CASCADE,
-        null=True,
         blank=True
     )
 

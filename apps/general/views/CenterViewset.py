@@ -6,10 +6,14 @@ from drf_yasg import openapi
 from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.general.services.CenterService import CenterService
 from apps.general.entity.serializers.CenterSerializer import CenterSerializer
-from apps.general.entity.serializers.Center.CenterNestedSerializer import CenterNestedSerializer
 
 
 class CenterViewset(BaseViewSet):
+    """
+    ViewSet for managing Center CRUD operations and custom endpoints.
+    All internal comments and docstrings are in English. User-facing messages and API documentation remain in Spanish.
+    """
+
     service_class = CenterService
     serializer_class = CenterSerializer
 
@@ -19,6 +23,9 @@ class CenterViewset(BaseViewSet):
         tags=["Center"]
     )
     def list(self, request, *args, **kwargs):
+        """
+        List all centers.
+        """
         return super().list(request, *args, **kwargs)
 
     # ----------- CREATE -----------
@@ -27,6 +34,9 @@ class CenterViewset(BaseViewSet):
         tags=["Center"]
     )
     def create(self, request, *args, **kwargs):
+        """
+        Create a new center with the provided information.
+        """
         return super().create(request, *args, **kwargs)
 
     # ----------- RETRIEVE -----------
@@ -35,6 +45,9 @@ class CenterViewset(BaseViewSet):
         tags=["Center"]
     )
     def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieve information for a specific center.
+        """
         return super().retrieve(request, *args, **kwargs)
 
     # ----------- UPDATE -----------
@@ -43,6 +56,9 @@ class CenterViewset(BaseViewSet):
         tags=["Center"]
     )
     def update(self, request, *args, **kwargs):
+        """
+        Update all information for a center.
+        """
         return super().update(request, *args, **kwargs)
 
     # ----------- PARTIAL UPDATE -----------
@@ -51,6 +67,9 @@ class CenterViewset(BaseViewSet):
         tags=["Center"]
     )
     def partial_update(self, request, *args, **kwargs):
+        """
+        Partially update fields for a center.
+        """
         return super().partial_update(request, *args, **kwargs)
 
     # ----------- DELETE -----------
@@ -59,6 +78,9 @@ class CenterViewset(BaseViewSet):
         tags=["Center"]
     )
     def destroy(self, request, *args, **kwargs):
+        """
+        Physically delete a center from the database.
+        """
         return super().destroy(request, *args, **kwargs)
 
     # ----------- SOFT DELETE (custom) -----------
@@ -73,6 +95,9 @@ class CenterViewset(BaseViewSet):
     )
     @action(detail=True, methods=['delete'], url_path='soft-delete')
     def soft_destroy(self, request, pk=None):
+        """
+        Perform a logical (soft) delete for the specified center.
+        """
         deleted = self.service_class().soft_delete(pk)
         if deleted:
             return Response(
@@ -84,31 +109,3 @@ class CenterViewset(BaseViewSet):
             status=status.HTTP_404_NOT_FOUND
         )
         
-        
-
-    # ----------- GET CENTER WITH SEDES BY ID-----------
-    @swagger_auto_schema(
-        operation_description="Obtiene un centro por id con sus sedes anidadas.",
-        tags=["Center"],
-        responses={200: CenterNestedSerializer()}
-    )
-    @action(detail=True, methods=['get'], url_path='with-sedes')
-    def with_sedes_by_id(self, request, pk=None):
-        center = self.service_class().get_center_with_sedes_by_id(pk)
-        if not center:
-            return Response({"detail": "No encontrado."}, status=status.HTTP_404_NOT_FOUND)
-        serializer = CenterNestedSerializer(center)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    
-    
-    # ----------- GET CENTER WITH SEDES -----------
-    @swagger_auto_schema(
-        operation_description="Obtiene todos los centros con sus sedes anidadas.",
-        tags=["Center"],
-        responses={200: CenterNestedSerializer(many=True)}
-    )
-    @action(detail=False, methods=['get'], url_path='with-sedes')
-    def with_sedes(self, request):
-        queryset = self.service_class().get_all_centers_with_sedes()
-        serializer = CenterNestedSerializer(queryset, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)

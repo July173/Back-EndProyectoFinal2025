@@ -9,6 +9,11 @@ from apps.general.entity.serializers.ProgramSerializer import ProgramSerializer
 from apps.general.entity.serializers.FichaSerializer import FichaSerializer
 
 class ProgramViewset(BaseViewSet):
+    """
+    ViewSet for managing Program CRUD operations and custom endpoints.
+    All internal comments and docstrings are in English. User-facing messages and API documentation remain in Spanish.
+    """
+
     service_class = ProgramService
     serializer_class = ProgramSerializer
 
@@ -20,6 +25,9 @@ class ProgramViewset(BaseViewSet):
         tags=["Program"]
     )
     def list(self, request, *args, **kwargs):
+        """
+        List all programs.
+        """
         return super().list(request, *args, **kwargs)
 
     # ----------- CREATE -----------
@@ -30,6 +38,9 @@ class ProgramViewset(BaseViewSet):
         tags=["Program"]
     )
     def create(self, request, *args, **kwargs):
+        """
+        Create a new program with the provided information.
+        """
         return super().create(request, *args, **kwargs)
 
     # ----------- RETRIEVE -----------
@@ -40,6 +51,9 @@ class ProgramViewset(BaseViewSet):
         tags=["Program"]
     )
     def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieve information for a specific program.
+        """
         return super().retrieve(request, *args, **kwargs)
 
     # ----------- UPDATE -----------
@@ -50,6 +64,9 @@ class ProgramViewset(BaseViewSet):
         tags=["Program"]
     )
     def update(self, request, *args, **kwargs):
+        """
+        Update all information for a program.
+        """
         return super().update(request, *args, **kwargs)
 
     # ----------- PARTIAL UPDATE -----------
@@ -60,6 +77,9 @@ class ProgramViewset(BaseViewSet):
         tags=["Program"]
     )
     def partial_update(self, request, *args, **kwargs):
+        """
+        Partially update fields for a program.
+        """
         return super().partial_update(request, *args, **kwargs)
 
     # ----------- DELETE -----------
@@ -70,8 +90,11 @@ class ProgramViewset(BaseViewSet):
         tags=["Program"]
     )
     def destroy(self, request, *args, **kwargs):
+        """
+        Physically delete a program from the database.
+        """
         return super().destroy(request, *args, **kwargs)
-    
+
     # ----------- SOFT DELETE (custom) -----------
     @swagger_auto_schema(
         method='delete',
@@ -86,6 +109,9 @@ class ProgramViewset(BaseViewSet):
     )
     @action(detail=True, methods=['delete'], url_path='soft-delete')
     def soft_destroy(self, request, pk=None):
+        """
+        Perform a logical (soft) delete for the specified program.
+        """
         deleted = self.service_class().soft_delete(pk)
         if deleted:
             return Response(
@@ -105,6 +131,9 @@ class ProgramViewset(BaseViewSet):
     )
     @action(detail=True, methods=['get'], url_path='fichas')
     def get_fichas_by_program(self, request, pk=None):
+        """
+        Get all records (fichas) linked to a specific program.
+        """
         fichas = self.service_class().get_fichas_by_program(pk)
         serializer = FichaSerializer(fichas, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -122,6 +151,9 @@ class ProgramViewset(BaseViewSet):
     )
     @action(detail=True, methods=['delete'], url_path='disable-with-fichas')
     def disable_program_with_fichas(self, request, pk=None):
+        """
+        Disable or reactivate a program and all its linked records (fichas).
+        """
         try:
             mensaje = self.service_class().logical_delete_program(pk)
             return Response(

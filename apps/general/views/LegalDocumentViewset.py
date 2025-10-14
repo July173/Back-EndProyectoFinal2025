@@ -9,6 +9,11 @@ from apps.general.entity.serializers.LegalDocumentSerializer import LegalDocumen
 from apps.general.entity.models.LegalDocument import LegalDocument
 
 class LegalDocumentViewset(BaseViewSet):
+    """
+    ViewSet for managing LegalDocument CRUD operations and custom endpoints.
+    All internal comments and docstrings are in English. User-facing messages and API documentation remain in Spanish.
+    """
+
     service_class = LegalDocumentService
     serializer_class = LegalDocumentSerializer
 
@@ -18,6 +23,9 @@ class LegalDocumentViewset(BaseViewSet):
         tags=["LegalDocument"]
     )
     def list(self, request, *args, **kwargs):
+        """
+        List all legal documents.
+        """
         return super().list(request, *args, **kwargs)
 
     # ----------- CREATE -----------
@@ -26,6 +34,9 @@ class LegalDocumentViewset(BaseViewSet):
         tags=["LegalDocument"]
     )
     def create(self, request, *args, **kwargs):
+        """
+        Create a new legal document.
+        """
         return super().create(request, *args, **kwargs)
 
     # ----------- RETRIEVE -----------
@@ -34,6 +45,9 @@ class LegalDocumentViewset(BaseViewSet):
         tags=["LegalDocument"]
     )
     def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieve information for a specific legal document.
+        """
         return super().retrieve(request, *args, **kwargs)
 
     # ----------- UPDATE -----------
@@ -42,6 +56,9 @@ class LegalDocumentViewset(BaseViewSet):
         tags=["LegalDocument"]
     )
     def update(self, request, *args, **kwargs):
+        """
+        Update all information for a legal document.
+        """
         return super().update(request, *args, **kwargs)
 
     # ----------- PARTIAL UPDATE -----------
@@ -50,6 +67,9 @@ class LegalDocumentViewset(BaseViewSet):
         tags=["LegalDocument"]
     )
     def partial_update(self, request, *args, **kwargs):
+        """
+        Partially update fields for a legal document.
+        """
         return super().partial_update(request, *args, **kwargs)
 
     # ----------- DELETE -----------
@@ -58,6 +78,9 @@ class LegalDocumentViewset(BaseViewSet):
         tags=["LegalDocument"]
     )
     def destroy(self, request, *args, **kwargs):
+        """
+        Physically delete a legal document from the database.
+        """
         return super().destroy(request, *args, **kwargs)
 
     # ----------- SOFT DELETE (custom) -----------
@@ -67,6 +90,9 @@ class LegalDocumentViewset(BaseViewSet):
     )
     @action(detail=True, methods=["delete"], url_path="soft-delete")
     def soft_delete(self, request, pk=None):
+        """
+        Perform a logical (soft) delete for the specified legal document, marking it as inactive.
+        """
         instance = self.service.get(pk)
         if not instance:
             return Response({"detail": "No encontrado."}, status=status.HTTP_404_NOT_FOUND)

@@ -14,12 +14,16 @@ from drf_yasg import openapi
 from apps.assign.entity.serializers.form.FormRequestSerializer import FormRequestSerializer
 
 class RequestAsignationViewset(BaseViewSet):
+    """
+    ViewSet for managing request assignments and form requests.
+    All internal code, comments, and docstrings are in English. User-facing messages and API documentation remain in Spanish.
+    """
     service_class = RequestAsignationService
     serializer_class = RequestAsignationSerializer
     parser_classes = [JSONParser, MultiPartParser, FormParser]
 
     def get_serializer(self, *args, **kwargs):
-        # Usa FormRequestSerializer solo en acciones específicas
+        # Use FormRequestSerializer only for specific actions
         if hasattr(self, 'action') and self.action in [
             'create_form_request', 'list_form_requests', 'form_request_detail', 'reject_form_request', 'get_pdf_url'
         ]:
@@ -36,6 +40,10 @@ class RequestAsignationViewset(BaseViewSet):
     )
     @action(detail=True, methods=['get'], url_path='form-request-detail')
     def form_request_detail(self, request, pk=None):
+        """
+        Get detailed information for a form request by its ID.
+        API documentation and user-facing messages remain in Spanish.
+        """
         result = self.service_class().get_form_request_by_id(pk)
         if result['success']:
             return Response(result, status=status.HTTP_200_OK)
@@ -48,6 +56,7 @@ class RequestAsignationViewset(BaseViewSet):
         tags=["RequestAsignation"]
     )
     def list(self, request, *args, **kwargs):
+        """Return a list of all request assignments."""
         return super().list(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -55,6 +64,7 @@ class RequestAsignationViewset(BaseViewSet):
         tags=["RequestAsignation"]
     )
     def create(self, request, *args, **kwargs):
+        """Create a new request assignment."""
         return super().create(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -62,6 +72,7 @@ class RequestAsignationViewset(BaseViewSet):
         tags=["RequestAsignation"]
     )
     def retrieve(self, request, *args, **kwargs):
+        """Retrieve information for a specific request assignment."""
         return super().retrieve(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -69,6 +80,7 @@ class RequestAsignationViewset(BaseViewSet):
         tags=["RequestAsignation"]
     )
     def update(self, request, *args, **kwargs):
+        """Update all information for a request assignment."""
         return super().update(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -76,6 +88,7 @@ class RequestAsignationViewset(BaseViewSet):
         tags=["RequestAsignation"]
     )
     def partial_update(self, request, *args, **kwargs):
+        """Partially update fields of a request assignment."""
         return super().partial_update(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -83,6 +96,7 @@ class RequestAsignationViewset(BaseViewSet):
         tags=["RequestAsignation"]
     )
     def destroy(self, request, *args, **kwargs):
+        """Physically delete a request assignment from the database."""
         return super().destroy(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -96,12 +110,18 @@ class RequestAsignationViewset(BaseViewSet):
     )
     @action(detail=True, methods=['delete'], url_path='soft-delete')
     def soft_destroy(self, request, pk=None):
+        """
+        Perform a logical (soft) delete of the specified request assignment.
+        User-facing messages remain in Spanish.
+        """
         deleted = self.service_class().soft_delete(pk)
         if deleted:
+            # Success message in Spanish for user-facing response
             return Response(
                 {"detail": "Eliminado lógicamente correctamente."},
                 status=status.HTTP_204_NO_CONTENT
             )
+        # Error message in Spanish for user-facing response
         return Response(
             {"detail": "No encontrado."},
             status=status.HTTP_404_NOT_FOUND
@@ -122,6 +142,10 @@ class RequestAsignationViewset(BaseViewSet):
     )
     @action(detail=False, methods=['post'], url_path='form-request')
     def create_form_request(self, request):
+        """
+        Create a new form request (without PDF).
+        API documentation and user-facing messages remain in Spanish.
+        """
         serializer = FormRequestSerializer(data=request.data)
         if not serializer.is_valid():
             return Response({
@@ -156,6 +180,10 @@ class RequestAsignationViewset(BaseViewSet):
     )
     @action(detail=False, methods=['get'], url_path='form-request-list')
     def list_form_requests(self, request):
+        """
+        Get a list of all form requests.
+        API documentation and user-facing messages remain in Spanish.
+        """
         result = self.service_class().list_form_requests()
         if result['success']:
             return Response(result, status=status.HTTP_200_OK)
@@ -173,6 +201,10 @@ class RequestAsignationViewset(BaseViewSet):
     )
     @action(detail=True, methods=['get'], url_path='form-request-pdf-url')
     def get_pdf_url(self, request, pk=None):
+        """
+        Get the PDF URL for a form request.
+        API documentation and user-facing messages remain in Spanish.
+        """
         result = self.service_class().get_pdf_url(pk)
         if result['success']:
             return Response(result, status=status.HTTP_200_OK)
@@ -198,6 +230,10 @@ class RequestAsignationViewset(BaseViewSet):
     )
     @action(detail=True, methods=['patch'], url_path='form-request-reject')
     def reject_form_request(self, request, pk=None):
+        """
+        Reject a form request, changing its state and saving the rejection message.
+        API documentation and user-facing messages remain in Spanish.
+        """
         rejection_message = request.data.get('rejectionMessage')
         if not rejection_message:
             return Response({
@@ -229,13 +265,17 @@ class RequestAsignationViewset(BaseViewSet):
     )
     @action(detail=False, methods=['get'], url_path='aprendiz-dashboard')
     def aprendiz_dashboard(self, request):
+        """
+        Get dashboard information for the authenticated apprentice (active request, assigned instructor, state).
+        API documentation and user-facing messages remain in Spanish.
+        """
         aprendiz_id = request.query_params.get('aprendiz_id')
         if not aprendiz_id:
             return Response({
                 'success': False,
                 'message': 'Se requiere el ID del aprendiz'
             }, status=status.HTTP_400_BAD_REQUEST)
-        
+
         result = self.service_class().get_aprendiz_dashboard(aprendiz_id)
         if result.get('success', True):
             return Response(result, status=status.HTTP_200_OK)
@@ -253,6 +293,10 @@ class RequestAsignationViewset(BaseViewSet):
     )
     @action(detail=False, methods=['get'], url_path='form-request-filtered')
     def filter_form_requests(self, request):
+        """
+        Filter form requests by search, state, or program.
+        API documentation and user-facing messages remain in Spanish.
+        """
         search = request.query_params.get('search')
         request_state = request.query_params.get('request_state')
         program_id = request.query_params.get('program_id')

@@ -9,13 +9,14 @@ from apps.security.services.ModuleService import ModuleService
 from apps.security.entity.serializers.ModuleSerializer import ModuleSerializer
 
 
+
 class ModuleViewSet(BaseViewSet):
     @swagger_auto_schema(
-        operation_description="Filtra módulos por estado y búsqueda en nombre.",
+        operation_description="Filters modules by status and name search.",
         tags=["Module"],
         manual_parameters=[
-            openapi.Parameter('active', openapi.IN_QUERY, description="Estado del módulo (true/false)", type=openapi.TYPE_BOOLEAN),
-            openapi.Parameter('search', openapi.IN_QUERY, description="Texto de búsqueda (nombre de módulo)", type=openapi.TYPE_STRING)
+            openapi.Parameter('active', openapi.IN_QUERY, description="Module status (true/false)", type=openapi.TYPE_BOOLEAN),
+            openapi.Parameter('search', openapi.IN_QUERY, description="Search text (module name)", type=openapi.TYPE_STRING)
         ],
         responses={200: openapi.Response("Lista de módulos filtrados")}
     )
@@ -35,7 +36,7 @@ class ModuleViewSet(BaseViewSet):
     # ----------- LIST -----------
     @swagger_auto_schema(
         operation_description=(
-            "Obtiene una lista de todos los módulos registrados."
+            "Gets a list of all registered modules."
         ),
         tags=["Module"]
     )
@@ -45,7 +46,7 @@ class ModuleViewSet(BaseViewSet):
     # ----------- CREATE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Crea un nuevo módulo con la información proporcionada."
+            "Creates a new module with the provided information."
         ),
         tags=["Module"]
     )
@@ -55,7 +56,7 @@ class ModuleViewSet(BaseViewSet):
     # ----------- RETRIEVE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Obtiene la información de un módulo específico."
+            "Gets the information of a specific module."
         ),
         tags=["Module"]
     )
@@ -65,7 +66,7 @@ class ModuleViewSet(BaseViewSet):
     # ----------- UPDATE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Actualiza la información completa de un módulo."
+            "Updates the complete information of a module."
         ),
         tags=["Module"]
     )
@@ -75,7 +76,7 @@ class ModuleViewSet(BaseViewSet):
     # ----------- PARTIAL UPDATE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Actualiza solo algunos campos de un módulo."
+            "Updates only some fields of a module."
         ),
         tags=["Module"]
     )
@@ -85,7 +86,7 @@ class ModuleViewSet(BaseViewSet):
     # ----------- DELETE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Elimina físicamente un módulo de la base de datos."
+            "Physically deletes a module from the database."
         ),
         tags=["Module"]
     )
@@ -96,7 +97,7 @@ class ModuleViewSet(BaseViewSet):
     @swagger_auto_schema(
         method='delete',
         operation_description=(
-            "Realiza un borrado lógico (soft delete) del módulo especificado."
+            "Performs a logical (soft) delete of the specified module."
         ),
         tags=["Module"],
         responses={

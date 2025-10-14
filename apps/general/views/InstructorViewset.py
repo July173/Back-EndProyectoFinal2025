@@ -12,6 +12,13 @@ from apps.general.entity.serializers.CreateInstructor.GetInstructorSerializer im
 
 
 class InstructorViewset(BaseViewSet):
+    """
+    ViewSet for managing Instructor CRUD operations and custom endpoints.
+    All internal comments and docstrings are in English. User-facing messages and API documentation remain in Spanish.
+    """
+
+    service_class = InstructorService
+    serializer_class = GetInstructorSerializer
 
     @swagger_auto_schema(
         operation_description="Filtra instructores por nombre, número de documento y área de conocimiento.",
@@ -24,6 +31,9 @@ class InstructorViewset(BaseViewSet):
     )
     @action(detail=False, methods=['get'], url_path='filter')
     def filter_instructors(self, request):
+        """
+        Filter instructors by name, document number, and knowledge area.
+        """
         search = request.query_params.get('search')
         knowledge_area_id = request.query_params.get('knowledge_area_id')
         if knowledge_area_id:
@@ -34,10 +44,14 @@ class InstructorViewset(BaseViewSet):
         instructors = self.service_class().repository.get_filtered_instructors(search, knowledge_area_id)
         serializer = self.get_serializer(instructors, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
     def get_queryset(self):
+        """
+        Return all Instructor objects.
+        """
         from apps.general.entity.models import Instructor
         return Instructor.objects.all()
+
     @swagger_auto_schema(
         method='patch',
         operation_description="Actualiza solo los campos assigned_learners y max_assigned_learners de un instructor.",
@@ -54,6 +68,9 @@ class InstructorViewset(BaseViewSet):
     )
     @action(detail=True, methods=['patch'], url_path='update-learners')
     def update_learners(self, request, pk=None):
+        """
+        Update only the assigned_learners and max_assigned_learners fields of an instructor.
+        """
         service = InstructorService()
         assigned_learners = request.data.get('assigned_learners', None)
         max_assigned_learners = request.data.get('max_assigned_learners', None)
@@ -65,8 +82,6 @@ class InstructorViewset(BaseViewSet):
             return Response({"detail": "Instructor no encontrado."}, status=status.HTTP_404_NOT_FOUND)
         serializer = InstructorSerializer(instructor)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    service_class = InstructorService
-    serializer_class = GetInstructorSerializer
 
     # ----------- LIST -----------
     @swagger_auto_schema(
@@ -83,13 +98,16 @@ class InstructorViewset(BaseViewSet):
         tags=["Instructor"]
     )
     def list(self, request, *args, **kwargs):
+        """
+        List all instructors, with optional filtering by follow-up status.
+        """
         is_followup = request.query_params.get('is_followup_instructor', 'all')
         queryset = self.get_queryset()
         if is_followup == 'true':
             queryset = queryset.filter(is_followup_instructor=True)
         elif is_followup == 'false':
             queryset = queryset.filter(is_followup_instructor=False)
-        # Si es 'all' no se filtra
+        # If 'all', do not filter
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -105,6 +123,9 @@ class InstructorViewset(BaseViewSet):
         tags=["Instructor"]
     )
     def create(self, request, *args, **kwargs):
+        """
+        Create a new instructor with the provided information.
+        """
         return super().create(request, *args, **kwargs)
 
     # ----------- RETRIEVE -----------
@@ -115,6 +136,9 @@ class InstructorViewset(BaseViewSet):
         tags=["Instructor"]
     )
     def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieve information for a specific instructor.
+        """
         return super().retrieve(request, *args, **kwargs)
 
     # ----------- UPDATE -----------
@@ -125,6 +149,9 @@ class InstructorViewset(BaseViewSet):
         tags=["Instructor"]
     )
     def update(self, request, *args, **kwargs):
+        """
+        Update all information for an instructor.
+        """
         return super().update(request, *args, **kwargs)
 
     # ----------- PARTIAL UPDATE -----------
@@ -135,6 +162,9 @@ class InstructorViewset(BaseViewSet):
         tags=["Instructor"]
     )
     def partial_update(self, request, *args, **kwargs):
+        """
+        Partially update fields for an instructor.
+        """
         return super().partial_update(request, *args, **kwargs)
 
     # ----------- DELETE -----------
@@ -145,6 +175,9 @@ class InstructorViewset(BaseViewSet):
         tags=["Instructor"]
     )
     def destroy(self, request, *args, **kwargs):
+        """
+        Physically delete an instructor from the database.
+        """
         return super().destroy(request, *args, **kwargs)
 
     # ----------- SOFT DELETE (custom) -----------
@@ -161,6 +194,9 @@ class InstructorViewset(BaseViewSet):
     )
     @action(detail=True, methods=['delete'], url_path='soft-delete')
     def soft_destroy(self, request, pk=None):
+        """
+        Perform a logical (soft) delete for the specified instructor.
+        """
         deleted = self.service_class().soft_delete(pk)
         if deleted:
             return Response(
@@ -172,8 +208,7 @@ class InstructorViewset(BaseViewSet):
             status=status.HTTP_404_NOT_FOUND
         )
 
-#-----------------------------------------------------------------------------------
-
+    # ----------- CUSTOM ENDPOINTS -----------
 
     @swagger_auto_schema(
         operation_description="Obtiene un instructor por su ID (nuevo endpoint avanzado).",
@@ -182,11 +217,15 @@ class InstructorViewset(BaseViewSet):
     )
     @action(detail=True, methods=['get'], url_path='Create-Instructor/Retrieve')
     def custom_retrieve(self, request, pk=None):
+        """
+        Retrieve an instructor by ID (advanced endpoint).
+        """
         instructor = self.service.get_instructor(pk)
         if instructor:
             serializer = GetInstructorSerializer(instructor)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response({"detail": "Instructor no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
     service = InstructorService()
 
     @swagger_auto_schema(
@@ -196,6 +235,9 @@ class InstructorViewset(BaseViewSet):
     )
     @action(detail=False, methods=['post'], url_path='Create-Instructor/create')
     def custom_create(self, request, *args, **kwargs):
+        """
+        Create a new instructor (advanced endpoint).
+        """
         serializer = CreateInstructorSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
@@ -215,6 +257,9 @@ class InstructorViewset(BaseViewSet):
     )
     @action(detail=False, methods=['get'], url_path='custom-list')
     def custom_list(self, request, *args, **kwargs):
+        """
+        List all instructors (advanced endpoint).
+        """
         instructors = self.service.list_instructors()
         serializer = GetInstructorSerializer(instructors, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -226,6 +271,9 @@ class InstructorViewset(BaseViewSet):
     )
     @action(detail=True, methods=['put'], url_path='Create-Instructor/update')
     def custom_update(self, request, pk=None):
+        """
+        Update an existing instructor (advanced endpoint).
+        """
         serializer = CreateInstructorSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
@@ -250,6 +298,9 @@ class InstructorViewset(BaseViewSet):
     )
     @action(detail=True, methods=['delete'], url_path='Create-Instructor/destroy')
     def custom_destroy(self, request, pk=None):
+        """
+        Delete an instructor (persistent delete, advanced endpoint).
+        """
         try:
             self.service.delete_instructor(pk)
             return Response({"detail": "Instructor eliminado correctamente."}, status=status.HTTP_204_NO_CONTENT)
@@ -258,13 +309,15 @@ class InstructorViewset(BaseViewSet):
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-
     @swagger_auto_schema(
         operation_description="Elimina lógicamente o reactiva un instructor y sus relaciones (nuevo endpoint avanzado).",
         tags=["Instructor"]
     )
     @action(detail=True, methods=['delete'], url_path='Create-Instructor/logical-delete')
     def custom_logical_delete(self, request, pk=None):
+        """
+        Logically delete or reactivate an instructor and its relations (advanced endpoint).
+        """
         try:
             result = self.service.logical_delete_instructor(pk)
             return Response({"detail": result}, status=status.HTTP_200_OK)

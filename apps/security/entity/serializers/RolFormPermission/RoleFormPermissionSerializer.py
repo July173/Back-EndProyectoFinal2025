@@ -1,8 +1,8 @@
-from apps.security.entity.models import RolFormPermission
+from apps.security.entity.models import RoleFormPermission
 from rest_framework import serializers
 
 
-class RolFormPermissionSerializer(serializers.ModelSerializer):
+class RoleFormPermissionSerializer(serializers.ModelSerializer):
     class Meta:
-        model = RolFormPermission
+        model = RoleFormPermission
         fields = ['id', 'role', 'form', 'permission']

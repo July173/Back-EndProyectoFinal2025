@@ -3,7 +3,7 @@ from apps.general.entity.models.Colors import Colors
 
 class ColorsRepository(BaseRepository):
     """
-    Repositorio para operaciones CRUD sobre Colors.
+    Repository for CRUD operations on Colors.
     """
     def __init__(self):
         super().__init__(Colors)

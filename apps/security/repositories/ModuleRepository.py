@@ -3,6 +3,10 @@ from apps.security.entity.models import Module
 
 
 class ModuleRepository(BaseRepository):
+    def __init__(self):
+        super().__init__(Module)
+    
+    # method to get modules with optional filters
     def get_filtered_modules(self, active=None, search=None):
         queryset = self.model.objects.all()
         if active is not None:
@@ -10,5 +14,5 @@ class ModuleRepository(BaseRepository):
         if search:
             queryset = queryset.filter(name__icontains=search)
         return list(queryset)
-    def __init__(self):
-        super().__init__(Module)
+    
+    

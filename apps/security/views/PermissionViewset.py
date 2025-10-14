@@ -8,6 +8,7 @@ from apps.security.services.PermissionService import PermissionService
 from apps.security.entity.serializers.PermissionSerializer import PermissionSerializer
 
 
+
 class PermissionViewSet(BaseViewSet):
     service_class = PermissionService
     serializer_class = PermissionSerializer
@@ -15,7 +16,7 @@ class PermissionViewSet(BaseViewSet):
     # ----------- LIST -----------
     @swagger_auto_schema(
         operation_description=(
-            "Obtiene una lista de todos los permisos registrados."
+            "Gets a list of all registered permissions."
         ),
         tags=["Permission"]
     )
@@ -25,7 +26,7 @@ class PermissionViewSet(BaseViewSet):
     # ----------- CREATE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Crea un nuevo permiso con la información proporcionada."
+            "Creates a new permission with the provided information."
         ),
         tags=["Permission"]
     )
@@ -35,7 +36,7 @@ class PermissionViewSet(BaseViewSet):
     # ----------- RETRIEVE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Obtiene la información de un permiso específico."
+            "Gets the information of a specific permission."
         ),
         tags=["Permission"]
     )
@@ -45,7 +46,7 @@ class PermissionViewSet(BaseViewSet):
     # ----------- UPDATE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Actualiza la información completa de un permiso."
+            "Updates the complete information of a permission."
         ),
         tags=["Permission"]
     )
@@ -55,7 +56,7 @@ class PermissionViewSet(BaseViewSet):
     # ----------- PARTIAL UPDATE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Actualiza solo algunos campos de un permiso."
+            "Updates only some fields of a permission."
         ),
         tags=["Permission"]
     )
@@ -65,7 +66,7 @@ class PermissionViewSet(BaseViewSet):
     # ----------- DELETE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Elimina físicamente un permiso de la base de datos."
+            "Physically deletes a permission from the database."
         ),
         tags=["Permission"]
     )
@@ -76,7 +77,7 @@ class PermissionViewSet(BaseViewSet):
     @swagger_auto_schema(
         method='delete',
         operation_description=(
-            "Realiza un borrado lógico (soft delete) del permiso especificado."
+            "Performs a logical (soft) delete of the specified permission."
         ),
         tags=["Permission"],
         responses={

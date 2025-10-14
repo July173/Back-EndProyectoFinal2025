@@ -13,6 +13,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 
+
 class PersonViewSet(BaseViewSet):
     parser_classes = (MultiPartParser, FormParser, JSONParser)
     service_class = PersonService
@@ -22,19 +23,18 @@ class PersonViewSet(BaseViewSet):
         if self.action == 'partial_update':
             return PatchPersonSerializer
         elif self.action == 'register_aprendiz':
-            print(f"DEBUG: Usando RegisterAprendizSerializer para action: {self.action}")
             return RegisterAprendizSerializer
         return PersonSerializer
 
-    #--- REGISTRO APRENDIZ ---
+    #--- REGISTER APPRENTICE ---
     @swagger_auto_schema(
         operation_description=(
-            "Registra un nuevo aprendiz en el sistema.\n\n"
-            "• **Correo**: Debe ser proporcionado por el usuario (formato: usuario@soy.sena.edu.co)\n"
-            "• **Contraseña**: Se establecerá cuando un administrador active la cuenta\n\n"
-            "El aprendiz queda registrado pero inactivo hasta que un administrador active su cuenta."
+            "Registers a new apprentice in the system.\n\n"
+            "• **Email**: Must be provided by the user (format: usuario@soy.sena.edu.co)\n"
+            "• **Password**: Will be set when an administrator activates the account\n\n"
+            "The apprentice is registered but inactive until an administrator activates the account."
         ),
-        operation_summary="Registro de Aprendiz con activación pendiente",
+        operation_summary="Apprentice registration with pending activation",
         tags=["Person - Registro"],
         request_body=RegisterAprendizSerializer,
         responses={
@@ -122,17 +122,16 @@ class PersonViewSet(BaseViewSet):
     @action(detail=False, methods=['post'], url_path='register-aprendiz')
     def register_aprendiz(self, request):
         """
-        Controller: Solo orquesta la llamada al servicio.
-        No contiene validaciones ni lógica de negocio.
+        Controller: Only orchestrates the call to the service.
+        Does not contain validations or business logic.
         """
-        # Pasar los datos directamente al service sin validar en la vista
-        # El service y repository se encargan de la validación
         result = self.service.register_aprendiz(request.data)
         return Response(result['data'], status=result['status'])
+
     # ----------- LIST -----------
     @swagger_auto_schema(
         operation_description=(
-            "Obtiene una lista de todas las personas registradas."
+            "Gets a list of all registered people."
         ),
         tags=["Person"]
     )
@@ -142,7 +141,7 @@ class PersonViewSet(BaseViewSet):
     # ----------- CREATE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Crea una nueva persona con la información proporcionada."
+            "Creates a new person with the provided information."
         ),
         tags=["Person"]
     )
@@ -152,7 +151,7 @@ class PersonViewSet(BaseViewSet):
     # ----------- RETRIEVE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Obtiene la información de una persona específica."
+            "Gets the information of a specific person."
         ),
         tags=["Person"]
     )
@@ -162,7 +161,7 @@ class PersonViewSet(BaseViewSet):
     # ----------- UPDATE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Actualiza la información completa de una persona."
+            "Updates the complete information of a person."
         ),
         tags=["Person"]
     )
@@ -172,7 +171,7 @@ class PersonViewSet(BaseViewSet):
     # ----------- PARTIAL UPDATE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Actualiza solo algunos campos de una persona."
+            "Updates only some fields of a person."
         ),
         tags=["Person"]
     )
@@ -182,7 +181,7 @@ class PersonViewSet(BaseViewSet):
     # ----------- DELETE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Elimina físicamente una persona de la base de datos."
+            "Physically deletes a person from the database."
         ),
         tags=["Person"]
     )
@@ -193,7 +192,7 @@ class PersonViewSet(BaseViewSet):
     @swagger_auto_schema(
         method='delete',
         operation_description=(
-            "Realiza un borrado lógico (soft delete) de la persona especificada."
+            "Performs a logical (soft) delete of the specified person."
         ),
         tags=["Person"],
         responses={

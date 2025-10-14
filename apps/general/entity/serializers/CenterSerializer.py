@@ -10,7 +10,7 @@ class CenterSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'name',
-            'codeCenter',
+            'code_center',
             'address',
             'active',
             'regional'

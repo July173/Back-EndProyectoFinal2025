@@ -9,13 +9,14 @@ from apps.security.entity.serializers.RoleSerializer import RoleSerializer
 from apps.security.entity.models import Role, User  # Asegúrate de importar User y Role
 
 
+
 class RoleViewSet(BaseViewSet):
     @swagger_auto_schema(
-        operation_description="Filtra roles por estado y búsqueda en nombre de rol.",
+        operation_description="Filters roles by status and role name search.",
         tags=["Role"],
         manual_parameters=[
-            openapi.Parameter('active', openapi.IN_QUERY, description="Estado del rol (true/false)", type=openapi.TYPE_BOOLEAN),
-            openapi.Parameter('search', openapi.IN_QUERY, description="Texto de búsqueda (nombre de rol)", type=openapi.TYPE_STRING)
+            openapi.Parameter('active', openapi.IN_QUERY, description="Role status (true/false)", type=openapi.TYPE_BOOLEAN),
+            openapi.Parameter('search', openapi.IN_QUERY, description="Search text (role name)", type=openapi.TYPE_STRING)
         ],
         responses={200: openapi.Response("Lista de roles filtrados")}
     )
@@ -23,7 +24,6 @@ class RoleViewSet(BaseViewSet):
     def filter_roles(self, request):
         active = request.query_params.get('active')
         search = request.query_params.get('search')
-        # Convertir active a boolean si viene como string
         if active is not None:
             active = active.lower() in ['true', '1', 'yes']
         service = self.service_class()
@@ -32,11 +32,11 @@ class RoleViewSet(BaseViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
     service_class = RoleService
     serializer_class = RoleSerializer
-   
+
     # ----------- LIST -----------
     @swagger_auto_schema(
         operation_description=(
-            "Obtiene una lista de todos los roles registrados."
+            "Gets a list of all registered roles."
         ),
         tags=["Role"]
     )
@@ -46,7 +46,7 @@ class RoleViewSet(BaseViewSet):
     # ----------- CREATE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Crea un nuevo rol con la información proporcionada."
+            "Creates a new role with the provided information."
         ),
         tags=["Role"]
     )
@@ -56,7 +56,7 @@ class RoleViewSet(BaseViewSet):
     # ----------- RETRIEVE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Obtiene la información de un rol específico."
+            "Gets the information of a specific role."
         ),
         tags=["Role"]
     )
@@ -66,7 +66,7 @@ class RoleViewSet(BaseViewSet):
     # ----------- UPDATE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Actualiza la información completa de un rol."
+            "Updates the complete information of a role."
         ),
         tags=["Role"]
     )
@@ -76,7 +76,7 @@ class RoleViewSet(BaseViewSet):
     # ----------- PARTIAL UPDATE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Actualiza solo algunos campos de un rol."
+            "Updates only some fields of a role."
         ),
         tags=["Role"]
     )
@@ -86,7 +86,7 @@ class RoleViewSet(BaseViewSet):
     # ----------- DELETE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Elimina físicamente un rol de la base de datos."
+            "Physically deletes a role from the database."
         ),
         tags=["Role"]
     )
@@ -97,7 +97,7 @@ class RoleViewSet(BaseViewSet):
     @swagger_auto_schema(
         method='delete',
         operation_description=(
-            "Realiza un borrado lógico (soft delete) del rol especificado."
+            "Performs a logical (soft) delete of the specified role."
         ),
         tags=["Role"],
         responses={
@@ -119,7 +119,7 @@ class RoleViewSet(BaseViewSet):
         )
 
     @swagger_auto_schema(
-        operation_description="Lista roles con cantidad de usuarios asignados.",
+        operation_description="Lists roles with assigned user count.",
         tags=["Role"],
         responses={200: openapi.Response("Lista de roles con cantidad de usuarios")}
     )
@@ -131,33 +131,30 @@ class RoleViewSet(BaseViewSet):
             user_count = User.objects.filter(role=role, is_active=True).count()
             data.append({
                 "id": role.id,
-                "nombre": role.type_role,
-                "descripcion": role.description,
+                "name": role.type_role,
+                "description": role.description,
                 "active": role.active,
-                "cantidad_usuarios": user_count
+                "user_count": user_count
             })
         return Response(data, status=status.HTTP_200_OK)
 
-
-    
     @swagger_auto_schema(
         method='delete',
-        operation_description="Activa si está desactivado y desactiva si está activo el rol y todos los usuarios vinculados. Solo se requiere el id en la URL.",
+        operation_description="Activates if deactivated and deactivates if active the role and all linked users. Only the id is required in the URL.",
         responses={200: openapi.Response('Resultado de la operación')},
         tags=["Role"]
     )
     @action(detail=True, methods=['delete'], url_path='logical-delete-with-users')
     def logical_delete_with_users(self, request, pk=None):
         """
-        Activa si está desactivado y desactiva si está activo el rol y todos los usuarios vinculados. Solo se requiere el id en la URL.
+        Activates if deactivated and deactivates if active the role and all linked users. Only the id is required in the URL.
         """
-        # Obtener el estado actual del rol
         try:
             role = Role.objects.get(pk=pk)
         except Role.DoesNotExist:
             return Response({'detail': 'Rol no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
-        nuevo_estado = not role.active
-        result = self.service_class().set_active_role_and_users(pk, nuevo_estado)
+        new_state = not role.active
+        result = self.service_class().set_active_role_and_users(pk, new_state)
         return Response(result)
     
     

@@ -5,7 +5,7 @@ T = TypeVar("T")
 
 
 class IBaseRepository(ABC, Generic[T]):
-    """Interfaz base para repositorios."""
+    """Base interface for repositories."""
 
     @abstractmethod
     def get_all(self) -> List[T]:
@@ -29,10 +29,10 @@ class IBaseRepository(ABC, Generic[T]):
 
     @abstractmethod
     def delete(self, id: int) -> bool:
-        """Elimina completamente el registro por id."""
+        """Physically deletes the record by id."""
         pass
 
     @abstractmethod
     def soft_delete(self, id: int) -> bool:
-        """Elimina lógicamente el registro por id (cambia active y delete_at)."""
+        """Logically deletes the record by id (changes active and delete_at)."""
         pass

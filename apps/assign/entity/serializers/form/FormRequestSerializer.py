@@ -1,11 +1,14 @@
 from rest_framework import serializers
 
 class FormRequestSerializer(serializers.Serializer):
-    # IDs para vincular entidades ya existentes
+    """
+    Serializer for form requests. All help texts remain in Spanish for user-facing documentation.
+    """
+    # IDs to link existing entities
     aprendiz_id = serializers.IntegerField(help_text="ID del aprendiz")
     ficha_id = serializers.IntegerField(help_text="ID de la ficha")
 
-    # Datos que sí se crean en la solicitud
+    # Data created in the request
     fecha_inicio_contrato = serializers.DateField(help_text="Fecha de inicio de contrato de aprendizaje")
     fecha_fin_contrato = serializers.DateField(help_text="Fecha de fin de contrato de aprendizaje")
     enterprise_name = serializers.CharField(max_length=100, help_text="Nombre de la empresa")

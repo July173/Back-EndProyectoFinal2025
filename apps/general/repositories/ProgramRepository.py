@@ -5,19 +5,24 @@ from django.db import transaction
 
 
 class ProgramRepository(BaseRepository):
+    """
+    Repository for managing program and related ficha logic.
+    All comments and docstrings are in English. User-facing messages remain in Spanish if any.
+    """
+
     def __init__(self):
         super().__init__(Program)
 
     def get_fichas_by_program(self, program_id):
         """
-        Retorna todas las fichas vinculadas a un programa específico, sin filtrar por estado.
+        Return all fichas linked to a specific program, without filtering by state.
         """
         return Ficha.objects.filter(program_id=program_id)
-    
+
     def set_active_state_program_with_fichas(self, program_id, active=True):
         """
-        Activa o desactiva un programa y todas sus fichas vinculadas.
-        Si active=True, activa; si active=False, desactiva.
+        Activate or deactivate a program and all its linked fichas.
+        If active=True, activate; if active=False, deactivate.
         """
         try:
             with transaction.atomic():
@@ -29,7 +34,7 @@ class ProgramRepository(BaseRepository):
                 program.delete_at = None if active else timezone.now()
                 program.save()
 
-                # Actualiza todas las fichas vinculadas
+                # Update all linked fichas
                 fichas = Ficha.objects.filter(program_id=program_id)
                 for ficha in fichas:
                     ficha.active = active
@@ -38,5 +43,5 @@ class ProgramRepository(BaseRepository):
 
                 return True
         except Exception as e:
-            print(f"Error en set_active_state_program_with_fichas: {e}")
+            print(f"Error in set_active_state_program_with_fichas: {e}")
             return False

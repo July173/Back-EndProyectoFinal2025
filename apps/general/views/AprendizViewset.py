@@ -3,19 +3,23 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from apps.general.entity.models import Aprendiz
-from apps.general.entity.serializers.CreateAprendiz.CreateAprendizSerializer import CreateAprendizSerializer
-from apps.general.entity.serializers.CreateAprendiz.GetAprendizSerializer import GetAprendizSerializer
-from apps.general.entity.serializers.CreateAprendiz.UpdateAprendizSerializer import UpdateAprendizSerializer
+from apps.general.entity.models import Apprentice
+from apps.general.entity.serializers.CreateAprendiz.CreateApprenticeSerializer import CreateApprenticeSerializer
+from apps.general.entity.serializers.CreateAprendiz.GetApprenticeSerializer import GetApprenticeSerializer
+from apps.general.entity.serializers.CreateAprendiz.UpdateApprenticeSerializer import UpdateApprenticeSerializer
 from core.base.view.implements.BaseViewset import BaseViewSet
-from apps.general.services.AprendizService import AprendizService
-from apps.general.entity.serializers.CreateAprendiz.AprendizSerializer import AprendizSerializer
+from apps.general.services.AprendizService import ApprenticeService
+from apps.general.entity.serializers.CreateAprendiz.ApprenticeSerializer import ApprenticeSerializer
 
 
-class AprendizViewset(BaseViewSet):
+class ApprenticeViewset(BaseViewSet):
+    """
+    ViewSet for managing Apprentice CRUD operations and custom endpoints.
+    All internal comments and docstrings are in English. User-facing messages and API documentation remain in Spanish.
+    """
 
-    service_class = AprendizService
-    serializer_class = AprendizSerializer
+    service_class = ApprenticeService
+    serializer_class = ApprenticeSerializer
 
     # ----------- LIST -----------
     @swagger_auto_schema(
@@ -23,6 +27,9 @@ class AprendizViewset(BaseViewSet):
         tags=["Aprendiz"]
     )
     def list(self, request, *args, **kwargs):
+        """
+        List all apprentices.
+        """
         return super().list(request, *args, **kwargs)
 
     # ----------- CREATE -----------
@@ -31,6 +38,9 @@ class AprendizViewset(BaseViewSet):
         tags=["Aprendiz"]
     )
     def create(self, request, *args, **kwargs):
+        """
+        Create a new apprentice with the provided information.
+        """
         return super().create(request, *args, **kwargs)
 
     # ----------- RETRIEVE -----------
@@ -39,6 +49,9 @@ class AprendizViewset(BaseViewSet):
         tags=["Aprendiz"]
     )
     def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieve information for a specific apprentice.
+        """
         return super().retrieve(request, *args, **kwargs)
 
     # ----------- UPDATE -----------
@@ -47,6 +60,9 @@ class AprendizViewset(BaseViewSet):
         tags=["Aprendiz"]
     )
     def update(self, request, *args, **kwargs):
+        """
+        Update all information for an apprentice.
+        """
         return super().update(request, *args, **kwargs)
 
     # ----------- PARTIAL UPDATE -----------
@@ -55,6 +71,9 @@ class AprendizViewset(BaseViewSet):
         tags=["Aprendiz"]
     )
     def partial_update(self, request, *args, **kwargs):
+        """
+        Partially update fields for an apprentice.
+        """
         return super().partial_update(request, *args, **kwargs)
 
     # ----------- DELETE -----------
@@ -63,6 +82,9 @@ class AprendizViewset(BaseViewSet):
         tags=["Aprendiz"]
     )
     def destroy(self, request, *args, **kwargs):
+        """
+        Physically delete an apprentice from the database.
+        """
         return super().destroy(request, *args, **kwargs)
 
     # ----------- SOFT DELETE (custom) -----------
@@ -77,6 +99,9 @@ class AprendizViewset(BaseViewSet):
     )
     @action(detail=True, methods=['delete'], url_path='soft-delete')
     def soft_destroy(self, request, pk=None):
+        """
+        Perform a logical (soft) delete for the specified apprentice.
+        """
         deleted = self.service_class().soft_delete(pk)
         if deleted:
             return Response(
@@ -87,31 +112,36 @@ class AprendizViewset(BaseViewSet):
             {"detail": "No encontrado."},
             status=status.HTTP_404_NOT_FOUND
         )
-#--------------------------------------------------------------------------------------------
 
     # ----------- RETRIEVE (custom) -----------
     @swagger_auto_schema(
         operation_description="Obtiene un aprendiz por su ID (nuevo endpoint avanzado).",
-        responses={200: GetAprendizSerializer},
+        responses={200: GetApprenticeSerializer},
         tags=["Aprendiz"]
     )
     @action(detail=True, methods=['get'], url_path='Create-Aprendiz/GetById')
     def custom_retrieve(self, request, pk=None):
+        """
+        Retrieve an apprentice by ID (advanced endpoint).
+        """
         aprendiz = self.service.get_aprendiz(pk)
         if aprendiz:
-            serializer = GetAprendizSerializer(aprendiz)
+            serializer = GetApprenticeSerializer(aprendiz)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response({"detail": "Aprendiz no encontrado."}, status=status.HTTP_404_NOT_FOUND)
 
     # ----------- CREATE (custom) -----------
     @swagger_auto_schema(
-        request_body=CreateAprendizSerializer,
+        request_body=CreateApprenticeSerializer,
         operation_description="Crea un nuevo aprendiz (nuevo endpoint avanzado).",
         tags=["Aprendiz"]
     )
     @action(detail=False, methods=['post'], url_path='Create-Aprendiz/create')
     def custom_create(self, request, *args, **kwargs):
-        serializer = CreateAprendizSerializer(data=request.data)
+        """
+        Create a new apprentice (advanced endpoint).
+        """
+        serializer = CreateApprenticeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         aprendiz, user, person = self.service.create_aprendiz(serializer.validated_data)
         return Response({
@@ -125,29 +155,35 @@ class AprendizViewset(BaseViewSet):
     # ----------- LIST (custom) -----------
     @swagger_auto_schema(
         operation_description="Lista todos los aprendices (nuevo endpoint avanzado).",
-        responses={200: GetAprendizSerializer(many=True)},
+        responses={200: GetApprenticeSerializer(many=True)},
         tags=["Aprendiz"]
     )
     @action(detail=False, methods=['get'], url_path='Create-Aprendiz/list')
     def custom_list(self, request, *args, **kwargs):
+        """
+        List all apprentices (advanced endpoint).
+        """
         aprendices = self.service.list_aprendices()
-        serializer = GetAprendizSerializer(aprendices, many=True)
+        serializer = GetApprenticeSerializer(aprendices, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     # ----------- UPDATE (custom) -----------
     @swagger_auto_schema(
-        request_body=UpdateAprendizSerializer,
+        request_body=UpdateApprenticeSerializer,
         operation_description="Actualiza los datos de un aprendiz (nuevo endpoint avanzado).",
         tags=["Aprendiz"]
     )
     @action(detail=True, methods=['put'], url_path='Create-Aprendiz/update')
     def custom_update(self, request, pk=None):
-        serializer = UpdateAprendizSerializer(data=request.data)
+        """
+        Update apprentice data (advanced endpoint).
+        """
+        serializer = UpdateApprenticeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         try:
             aprendiz = self.service.update_aprendiz(pk, serializer.validated_data)
             return Response({"detail": "Aprendiz actualizado correctamente.", "id": aprendiz.id}, status=status.HTTP_200_OK)
-        except Aprendiz.DoesNotExist:
+        except Apprentice.DoesNotExist:
             return Response({"detail": "Aprendiz no encontrado."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -159,15 +195,17 @@ class AprendizViewset(BaseViewSet):
     )
     @action(detail=True, methods=['delete'], url_path='Create-Aprendiz/delete')
     def custom_destroy(self, request, pk=None):
+        """
+        Delete an apprentice (persistent delete, advanced endpoint).
+        """
         try:
-            self.service.delete_aprendiz(pk)
+            self.service.delete_apprentice(pk)
             return Response({"detail": "Aprendiz eliminado correctamente."}, status=status.HTTP_204_NO_CONTENT)
-        except Aprendiz.DoesNotExist:
+        except Apprentice.DoesNotExist:
             return Response({"detail": "Aprendiz no encontrado."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    
     # ----------- LOGICAL DELETE OR REACTIVATE -----------
     @swagger_auto_schema(
         operation_description="Elimina lógicamente o reactiva un aprendiz (nuevo endpoint avanzado).",
@@ -175,10 +213,13 @@ class AprendizViewset(BaseViewSet):
     )
     @action(detail=True, methods=['delete'], url_path='Create-Aprendiz/logical-delete')
     def custom_logical_delete(self, request, pk=None):
+        """
+        Logically delete or reactivate an apprentice (advanced endpoint).
+        """
         try:
-            result = self.service.logical_delete_aprendiz(pk)
+            result = self.service.logical_delete_apprentice(pk)
             return Response({"detail": result}, status=status.HTTP_200_OK)
-        except Aprendiz.DoesNotExist:
+        except Apprentice.DoesNotExist:
             return Response({"detail": "Aprendiz no encontrado."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)

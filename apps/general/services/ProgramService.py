@@ -8,13 +8,14 @@ class ProgramService(BaseService):
 
     def get_fichas_by_program(self, program_id):
         """
-        Devuelve las fichas vinculadas a un programa específico.
+        Returns the records (fichas) linked to a specific program.
         """
         return self.repository.get_fichas_by_program(program_id)
-    
+
     def logical_delete_program(self, program_id):
         """
-        Realiza borrado lógico o reactivación de programa y sus fichas vinculadas.
+        Performs logical deletion or reactivation of a program and its linked records (fichas).
+        User-facing messages remain in Spanish.
         """
         program = self.get(program_id)
         if not program:

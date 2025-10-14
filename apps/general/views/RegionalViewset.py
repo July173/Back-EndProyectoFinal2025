@@ -10,6 +10,11 @@ from apps.general.entity.serializers.Regional.RegionalNestedSerializer import Re
 
 
 class RegionalViewset(BaseViewSet):
+    """
+    ViewSet for managing Regional CRUD operations and custom endpoints.
+    All internal comments and docstrings are in English. User-facing messages and API documentation remain in Spanish.
+    """
+
     service_class = RegionalService
     serializer_class = RegionalSerializer
 
@@ -21,6 +26,9 @@ class RegionalViewset(BaseViewSet):
         tags=["Regional"]
     )
     def list(self, request, *args, **kwargs):
+        """
+        List all regionals.
+        """
         return super().list(request, *args, **kwargs)
 
     # ----------- CREATE -----------
@@ -31,6 +39,9 @@ class RegionalViewset(BaseViewSet):
         tags=["Regional"]
     )
     def create(self, request, *args, **kwargs):
+        """
+        Create a new regional with the provided information.
+        """
         return super().create(request, *args, **kwargs)
 
     # ----------- RETRIEVE -----------
@@ -41,6 +52,9 @@ class RegionalViewset(BaseViewSet):
         tags=["Regional"]
     )
     def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieve information for a specific regional.
+        """
         return super().retrieve(request, *args, **kwargs)
 
     # ----------- UPDATE -----------
@@ -51,6 +65,9 @@ class RegionalViewset(BaseViewSet):
         tags=["Regional"]
     )
     def update(self, request, *args, **kwargs):
+        """
+        Update all information for a regional.
+        """
         return super().update(request, *args, **kwargs)
 
     # ----------- PARTIAL UPDATE -----------
@@ -61,6 +78,9 @@ class RegionalViewset(BaseViewSet):
         tags=["Regional"]
     )
     def partial_update(self, request, *args, **kwargs):
+        """
+        Partially update fields for a regional.
+        """
         return super().partial_update(request, *args, **kwargs)
 
     # ----------- DELETE -----------
@@ -71,6 +91,9 @@ class RegionalViewset(BaseViewSet):
         tags=["Regional"]
     )
     def destroy(self, request, *args, **kwargs):
+        """
+        Physically delete a regional from the database.
+        """
         return super().destroy(request, *args, **kwargs)
 
     # ----------- SOFT DELETE (custom) -----------
@@ -87,6 +110,9 @@ class RegionalViewset(BaseViewSet):
     )
     @action(detail=True, methods=['delete'], url_path='soft-delete')
     def soft_destroy(self, request, pk=None):
+        """
+        Perform a logical (soft) delete for the specified regional.
+        """
         deleted = self.service_class().soft_delete(pk)
         if deleted:
             return Response(
@@ -97,9 +123,8 @@ class RegionalViewset(BaseViewSet):
             {"detail": "No encontrado."},
             status=status.HTTP_404_NOT_FOUND
         )
-        
-        
-        
+
+    # ----------- GET REGIONAL WITH CENTERS (custom) -----------
     @swagger_auto_schema(
         operation_description="Obtiene una regional por id con sus centros anidados.",
         tags=["Regional"],
@@ -107,12 +132,15 @@ class RegionalViewset(BaseViewSet):
     )
     @action(detail=True, methods=['get'], url_path='with-centers')
     def with_centers_by_id(self, request, pk=None):
+        """
+        Get a regional by ID with its nested centers.
+        """
         regional = self.service_class().get_regional_with_centers_by_id(pk)
         if not regional:
             return Response({"detail": "No encontrado."}, status=status.HTTP_404_NOT_FOUND)
         serializer = RegionalNestedSerializer(regional)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
     @swagger_auto_schema(
         operation_description="Obtiene todas las regionales con sus centros anidados.",
         tags=["Regional"],
@@ -120,6 +148,9 @@ class RegionalViewset(BaseViewSet):
     )
     @action(detail=False, methods=['get'], url_path='with-centers')
     def with_centers(self, request):
+        """
+        Get all regionals with their nested centers.
+        """
         queryset = self.service_class().get_all_regionals_with_centers()
         serializer = RegionalNestedSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

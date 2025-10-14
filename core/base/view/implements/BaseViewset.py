@@ -11,7 +11,7 @@ from rest_framework.viewsets import ModelViewSet
 
 class BaseViewSet(ModelViewSet, IBaseViewSet):
     """
-    Implementación concreta del ViewSet que sigue nuestra arquitectura.
+    Concrete implementation of the ViewSet following our architecture.
     """
     service_class: Type[IBaseService] = None
     serializer_class: Type[Serializer] = None
@@ -23,9 +23,9 @@ class BaseViewSet(ModelViewSet, IBaseViewSet):
 
     def _validate_dependencies(self):
         if not self.service_class:
-            raise NotImplementedError("Debe definir 'service_class'")
+            raise NotImplementedError("Debe definir 'service_class'")  # User-facing error in Spanish
         if not self.serializer_class:
-            raise NotImplementedError("Debe definir 'serializer_class'")
+            raise NotImplementedError("Debe definir 'serializer_class'")  # User-facing error in Spanish
 
     def get_serializer_class(self) -> Type[Serializer]:
         return self.serializer_class
@@ -45,7 +45,7 @@ class BaseViewSet(ModelViewSet, IBaseViewSet):
         item = self.service.get(pk)
         if not item or (isinstance(item, dict) and item.get('status') == 'error'):
             return Response(
-                item if isinstance(item, dict) else {"detail": "No encontrado"},
+                item if isinstance(item, dict) else {"detail": "No encontrado"},  # User-facing error in Spanish
                 status=status.HTTP_404_NOT_FOUND
             )
         serializer = self.get_serializer(item)
@@ -64,7 +64,7 @@ class BaseViewSet(ModelViewSet, IBaseViewSet):
         instance = self.service.get(pk)
         if not instance or (isinstance(instance, dict) and instance.get('status') == 'error'):
             return Response(
-                instance if isinstance(instance, dict) else {"detail": "No encontrado"},
+                instance if isinstance(instance, dict) else {"detail": "No encontrado"},  # User-facing error in Spanish
                 status=status.HTTP_404_NOT_FOUND
             )
 
@@ -90,8 +90,8 @@ class BaseViewSet(ModelViewSet, IBaseViewSet):
         if isinstance(deleted, dict) and deleted.get('status') == 'error':
             return Response(deleted, status=status.HTTP_400_BAD_REQUEST)
         if deleted:
-            return Response({"detail": "Eliminado correctamente."}, status=status.HTTP_204_NO_CONTENT)
-        return Response({"detail": "No encontrado."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": "Eliminado correctamente."}, status=status.HTTP_204_NO_CONTENT)  # User-facing message in Spanish
+        return Response({"detail": "No encontrado."}, status=status.HTTP_404_NOT_FOUND)  # User-facing message in Spanish
 
     @action(detail=True, methods=['delete'], url_path='soft-delete')
     def soft_destroy(self, request: Request, pk: Any = None) -> Response:
@@ -99,5 +99,5 @@ class BaseViewSet(ModelViewSet, IBaseViewSet):
         if isinstance(deleted, dict) and deleted.get('status') == 'error':
             return Response(deleted, status=status.HTTP_400_BAD_REQUEST)
         if deleted:
-            return Response({"detail": "Eliminado lógicamente correctamente."}, status=status.HTTP_204_NO_CONTENT)
-        return Response({"detail": "No encontrado."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": "Eliminado lógicamente correctamente."}, status=status.HTTP_204_NO_CONTENT)  # User-facing message in Spanish
+        return Response({"detail": "No encontrado."}, status=status.HTTP_404_NOT_FOUND)  # User-facing message in Spanish

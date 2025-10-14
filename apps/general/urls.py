@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from apps.general.views.AprendizViewset import AprendizViewset
+from apps.general.views.AprendizViewset import ApprenticeViewset
 from apps.general.views.CenterViewset import CenterViewset
 from apps.general.views.FichaViewset import FichaViewset
 from apps.general.views.InstructorViewset import InstructorViewset
@@ -18,7 +18,7 @@ from apps.general.views.LegalSectionViewset import LegalSectionViewset
 from apps.general.views.TypeContractViewset import TypeContractViewset
 
 router = DefaultRouter()
-router.register(r'aprendices', AprendizViewset, basename='general_aprendices')
+router.register(r'aprendices', ApprenticeViewset, basename='general_aprendices')
 router.register(r'centers', CenterViewset, basename='general_centers')
 router.register(r'fichas', FichaViewset, basename='general_fichas')
 router.register(r'instructors', InstructorViewset, basename='general_instructors')

@@ -8,21 +8,27 @@ class PersonRepository(BaseRepository):
         super().__init__(Person)
 
     def update_person(self, person, data):
+        """
+        Update a Person instance with the provided data.
+        """
         for attr, value in data.items():
             setattr(person, attr, value)
         person.save()
         return person
 
     def create_person(self, data):
-        # Extraer solo los campos que pertenecen al modelo Person
+        """
+        Create a new Person instance from the provided data.
+        Only fields belonging to the Person model are used.
+        """
         person_fields = {
             'first_name', 'second_name', 'first_last_name', 'second_last_name',
             'phone_number', 'type_identification', 'number_identification', 
             'active', 'image'
         }
         person_data = {k: v for k, v in data.items() if k in person_fields}
-        
-        # El serializer maneja automáticamente la conversión del ID a objeto DocumentType
+
+        # The serializer automatically handles conversion from ID to DocumentType object
         serializer = PersonSerializer(data=person_data)
         if serializer.is_valid():
             person = serializer.save()
@@ -30,4 +36,7 @@ class PersonRepository(BaseRepository):
         return None, None, serializer.errors
 
     def delete_person(self, person):
+        """
+        Delete a Person instance.
+        """
         person.delete()

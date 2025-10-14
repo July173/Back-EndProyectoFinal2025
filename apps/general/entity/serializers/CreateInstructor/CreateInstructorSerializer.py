@@ -4,7 +4,11 @@ from apps.general.entity.models.TypeContract import TypeContract
 
 
 class CreateInstructorSerializer(serializers.Serializer):
-    # Campos de Person
+    """
+    Serializer for creating an instructor.
+    All comments and docstrings are in English. User-facing messages remain in Spanish if any.
+    """
+    # Person fields
     first_name = serializers.CharField()
     second_name = serializers.CharField(required=False, allow_blank=True)
     first_last_name = serializers.CharField()
@@ -12,15 +16,15 @@ class CreateInstructorSerializer(serializers.Serializer):
     phone_number = serializers.IntegerField(required=False)
     type_identification = serializers.PrimaryKeyRelatedField(queryset=DocumentType.objects.all())
     number_identification = serializers.IntegerField(required=True)
-    # Campos de User
+    # User fields
     email = serializers.EmailField()
     role_id = serializers.IntegerField()
-    # Campos de Instructor
+    # Instructor fields
     contractType = serializers.PrimaryKeyRelatedField(queryset=TypeContract.objects.all())
     contractStartDate = serializers.DateField()
     contractEndDate = serializers.DateField()
     knowledgeArea = serializers.IntegerField()
-    # ID de relación
+    # Relationship ID
     sede_id = serializers.IntegerField()
     is_followup_instructor = serializers.BooleanField(required=False, default=False)
 
