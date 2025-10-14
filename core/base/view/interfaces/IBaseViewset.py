@@ -5,7 +5,7 @@ from typing import Any
 
 
 class IBaseViewSet(ABC):
-    """Interfaz para ViewSets personalizados."""
+    """Interface for custom ViewSets."""
 
     @abstractmethod
     def list(self, request: Request) -> Response:
@@ -29,10 +29,10 @@ class IBaseViewSet(ABC):
 
     @abstractmethod
     def destroy(self, request: Request, pk: Any = None) -> Response:
-        """Elimina completamente el registro por id."""
+        """Physically deletes the record by id."""
         pass
 
     @abstractmethod
     def soft_destroy(self, request: Request, pk: Any = None) -> Response:
-        """Elimina lógicamente el registro por id (cambia active y delete_at)."""
+        """Logically deletes the record by id (changes active and delete_at)."""
         pass

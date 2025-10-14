@@ -5,7 +5,7 @@ T = TypeVar("T")
 
 
 class IBaseService(ABC, Generic[T]):
-    """Interfaz base para servicios."""
+    """Base interface for services."""
 
     @abstractmethod
     def list(self) -> List[T]:
@@ -29,10 +29,10 @@ class IBaseService(ABC, Generic[T]):
 
     @abstractmethod
     def delete(self, id: int) -> bool:
-        """Elimina físicamente el registro por id."""
+        """Physically deletes the record by id."""
         pass
 
     @abstractmethod
     def soft_delete(self, id: int) -> bool:
-        """Elimina lógicamente el registro por id (cambia active y delete_at)."""
+        """Logically deletes the record by id (changes active and delete_at)."""
         pass

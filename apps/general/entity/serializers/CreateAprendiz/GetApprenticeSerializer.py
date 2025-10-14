@@ -1,8 +1,8 @@
 from rest_framework import serializers
-from apps.general.entity.models import Aprendiz
+from apps.general.entity.models import Apprentice
 from apps.security.entity.models import User
 
-class GetAprendizSerializer(serializers.ModelSerializer):
+class GetApprenticeSerializer(serializers.ModelSerializer):
     # Usar type_identification_id para obtener el ID en lugar del objeto completo
     type_identification = serializers.IntegerField(source='person.type_identification_id')
     number_identification = serializers.CharField(source='person.number_identification')
@@ -17,7 +17,7 @@ class GetAprendizSerializer(serializers.ModelSerializer):
     role_id = serializers.SerializerMethodField()
 
     class Meta:
-        model = Aprendiz
+        model = Apprentice
         fields = [
             'id',
             'type_identification',

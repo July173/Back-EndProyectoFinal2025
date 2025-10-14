@@ -2,11 +2,11 @@ from django.db import models
 from apps.assign.entity.models import AsignationInstructor
 
 class AsignationInstructorHistory(models.Model):   
-    asignation_instructor = models.ForeignKey(
+    asignation_instructor_id = models.ForeignKey(
         AsignationInstructor, on_delete=models.CASCADE, related_name="history"
     )
     old_instructor_id = models.IntegerField()
-    message = models.TextField()
+    message = models.TextField(max_length=300)
     date = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):

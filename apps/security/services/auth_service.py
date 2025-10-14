@@ -3,15 +3,18 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class AuthService:
+    """
+    Service for authentication operations.
+    """
     def login(self, email, password):
         user = authenticate(email=email, password=password)
         if not user:
             return None
         refresh = RefreshToken.for_user(user)
-        # Obtener el campo person, asumiendo que user.person existe
+        # Get the person field, assuming user.person exists
         person = None
         if hasattr(user, 'person'):
-            # Si es una relación, puedes serializar el objeto o solo el id
+            # If it's a relation, you can serialize the object or just the id
             try:
                 person = user.person.id
             except Exception:

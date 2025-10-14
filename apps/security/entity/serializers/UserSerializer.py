@@ -4,7 +4,7 @@ from rest_framework import serializers
 from apps.security.entity.serializers.person.PersonSerializer import PersonSerializer
 from apps.security.entity.serializers.RoleSerializer import RoleSerializer
 # Importar los serializers de Aprendiz e Instructor
-from apps.general.entity.serializers.CreateAprendiz.AprendizSerializer import AprendizSerializer
+from apps.general.entity.serializers.CreateAprendiz.ApprenticeSerializer import AprendizSerializer
 from apps.general.entity.serializers.CreateInstructor.InstructorSerializer import InstructorSerializer
 
 class UserSerializer(serializers.ModelSerializer):

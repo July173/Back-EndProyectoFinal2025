@@ -2,7 +2,7 @@ from django.db import models
 
 
 class Boss(models.Model):
-    enterprise = models.OneToOneField(
+    enterprise_id = models.OneToOneField(
         'assign.Enterprise', on_delete=models.CASCADE, related_name='boss'
     )
     name_boss = models.CharField(max_length=100)

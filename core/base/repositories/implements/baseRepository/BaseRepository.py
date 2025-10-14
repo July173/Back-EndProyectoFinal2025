@@ -10,36 +10,36 @@ class BaseRepository(IBaseRepository[T]):
         self.model = model
 
     def get_queryset(self):
-        # Trae todos los registros, sin filtrar por delete_at ni active
+        # Returns all records, without filtering by delete_at or active
         return self.model.objects.all()
 
     def get_all(self) -> List[T]:
-        """Obtiene todos los registros del modelo."""
+        """Gets all records from the model."""
         return list(self.get_queryset())
 
     def get_by_id(self, id: int) -> Optional[T]:
-        """Obtiene un registro por su ID."""
+        """Gets a record by its ID."""
         return self.get_queryset().filter(pk=id).first()
 
     def create(self, data: dict) -> T:
-        """Crea un nuevo registro con los datos dados."""
+        """Creates a new record with the given data."""
         instance = self.model.objects.create(**data)
         return instance
 
     def update(self, entity: T) -> T:
-        """Guarda los cambios de una instancia existente (PUT)."""
+        """Saves changes to an existing instance (PUT)."""
         entity.save()
         return entity
 
     def partial_update(self, entity: T, data: dict) -> T:
-        """Actualiza parcialmente los campos de una instancia existente (PATCH)."""
+        """Partially updates fields of an existing instance (PATCH)."""
         for attr, value in data.items():
             setattr(entity, attr, value)
         entity.save()
         return entity
 
     def delete(self, id: int) -> bool:
-        """Elimina físicamente un registro por ID."""
+        """Physically deletes a record by ID."""
         instance = self.model.objects.filter(pk=id).first()
         if instance:
             instance.delete()
@@ -47,7 +47,7 @@ class BaseRepository(IBaseRepository[T]):
         return False
 
     def soft_delete(self, id: int) -> bool:
-        """Realiza borrado lógico (cambia active y delete_at)."""
+        """Performs logical deletion (changes active and delete_at)."""
         instance = self.model.objects.filter(pk=id).first()
         if instance and hasattr(instance, 'active') and hasattr(instance, 'delete_at'):
             from django.utils import timezone

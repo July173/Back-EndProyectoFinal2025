@@ -9,6 +9,7 @@ from apps.security.services.FormService import FormService
 from apps.security.entity.serializers.FormSerializer import FormSerializer
 
 
+
 class FormViewSet(BaseViewSet):
     service_class = FormService
     serializer_class = FormSerializer
@@ -16,7 +17,7 @@ class FormViewSet(BaseViewSet):
     # ----------- LIST -----------
     @swagger_auto_schema(
         operation_description=(
-            "Obtiene una lista de todos los formularios registrados."
+            "Gets a list of all registered forms."
         ),
         tags=["Form"]
     )
@@ -26,7 +27,7 @@ class FormViewSet(BaseViewSet):
     # ----------- CREATE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Crea un nuevo formulario con la información proporcionada."
+            "Creates a new form with the provided information."
         ),
         tags=["Form"]
     )
@@ -36,7 +37,7 @@ class FormViewSet(BaseViewSet):
     # ----------- RETRIEVE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Obtiene la información de un formulario específico."
+            "Gets the information of a specific form."
         ),
         tags=["Form"]
     )
@@ -46,7 +47,7 @@ class FormViewSet(BaseViewSet):
     # ----------- UPDATE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Actualiza la información completa de un formulario."
+            "Updates the complete information of a form."
         ),
         tags=["Form"]
     )
@@ -56,7 +57,7 @@ class FormViewSet(BaseViewSet):
     # ----------- PARTIAL UPDATE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Actualiza solo algunos campos de un formulario."
+            "Updates only some fields of a form."
         ),
         tags=["Form"]
     )
@@ -66,7 +67,7 @@ class FormViewSet(BaseViewSet):
     # ----------- DELETE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Elimina físicamente un formulario de la base de datos."
+            "Physically deletes a form from the database."
         ),
         tags=["Form"]
     )
@@ -77,7 +78,7 @@ class FormViewSet(BaseViewSet):
     @swagger_auto_schema(
         method='delete',
         operation_description=(
-            "Realiza un borrado lógico (soft delete) del formulario especificado."
+            "Performs a logical (soft) delete of the specified form."
         ),
         tags=["Form"],
         responses={

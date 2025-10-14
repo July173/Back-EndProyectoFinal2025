@@ -15,6 +15,9 @@ from rest_framework import status
 class UserViewSet(BaseViewSet):
 
     def get_serializer_class(self):
+        """
+        Returns the appropriate serializer class based on the current action.
+        """
         if self.action in ['create', 'update', 'partial_update']:
             return UserSimpleSerializer
         return UserSerializer
@@ -28,6 +31,9 @@ class UserViewSet(BaseViewSet):
         tags=["User"]
     )
     def list(self, request, *args, **kwargs):
+        """
+        Returns a list of all registered users.
+        """
         return super().list(request, *args, **kwargs)
 
     # ----------- CREATE -----------
@@ -38,6 +44,9 @@ class UserViewSet(BaseViewSet):
         tags=["User"]
     )
     def create(self, request, *args, **kwargs):
+        """
+        Creates a new user with the provided information.
+        """
         return super().create(request, *args, **kwargs)
 
     # ----------- RETRIEVE -----------
@@ -48,6 +57,9 @@ class UserViewSet(BaseViewSet):
         tags=["User"]
     )
     def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves information for a specific user.
+        """
         return super().retrieve(request, *args, **kwargs)
 
     # ----------- UPDATE -----------
@@ -58,6 +70,9 @@ class UserViewSet(BaseViewSet):
         tags=["User"]
     )
     def update(self, request, *args, **kwargs):
+        """
+        Updates all information for a user.
+        """
         return super().update(request, *args, **kwargs)
 
     # ----------- PARTIAL UPDATE -----------
@@ -68,6 +83,9 @@ class UserViewSet(BaseViewSet):
         tags=["User"]
     )
     def partial_update(self, request, *args, **kwargs):
+        """
+        Partially updates user fields.
+        """
         return super().partial_update(request, *args, **kwargs)
 
     # ----------- DELETE -----------
@@ -78,6 +96,9 @@ class UserViewSet(BaseViewSet):
         tags=["User"]
     )
     def destroy(self, request, *args, **kwargs):
+        """
+        Physically deletes a user from the database.
+        """
         return super().destroy(request, *args, **kwargs)
 
     # ----------- SOFT DELETE (custom) -----------
@@ -94,6 +115,9 @@ class UserViewSet(BaseViewSet):
     )
     @action(detail=True, methods=['delete'], url_path='soft-delete')
     def soft_destroy(self, request, pk=None):
+        """
+        Performs a logical (soft) delete of the specified user.
+        """
         deleted = self.service_class().soft_delete(pk)
         if deleted:
             return Response(
@@ -126,7 +150,7 @@ class UserViewSet(BaseViewSet):
     @action(detail=False, methods=['post'], url_path='reset-password')
     def reset_password(self, request):
         """
-        Restablece la contraseña usando email, código y nueva contraseña.
+        Resets the password using email and new password.
         """
         email = request.data.get('email')
         new_password = request.data.get('new_password')
@@ -156,13 +180,13 @@ class UserViewSet(BaseViewSet):
     @action(detail=False, methods=['post'], url_path='validate-institutional-login')
     def validate_institutional_login(self, request):
         """
-        Valida correo institucional y contraseña, retorna JWT si es válido.
+        Validates institutional email and password, returns JWT if valid.
         """
         email = request.data.get('email')
         password = request.data.get('password')
         result = self.service.validate_institutional_login(email, password)
-        print("usuario info: ", result['data'])
-        print("usuario 2 info: ", result)
+        print("user info: ", result['data'])
+        print("user 2 info: ", result)
         return Response(result['data'], status=result['status'])
 
     @swagger_auto_schema(
@@ -185,7 +209,7 @@ class UserViewSet(BaseViewSet):
     @action(detail=False, methods=['post'], url_path='request-password-reset')
     def request_password_reset(self, request):
         """
-        Solicita código de recuperación de contraseña, lo envía por email y lo retorna al frontend.
+        Requests a password recovery code, sends it by email, and returns it to the frontend.
         """
         email = request.data.get('email')
         result = self.service.send_password_reset_code(email)
@@ -203,6 +227,9 @@ class UserViewSet(BaseViewSet):
     )
     @action(detail=False, methods=['get'], url_path='filter')
     def filter_users(self, request):
+        """
+        Filters users by role and search text (name or document).
+        """
         role = request.query_params.get('role')
         search = request.query_params.get('search')
         service = self.service_class()

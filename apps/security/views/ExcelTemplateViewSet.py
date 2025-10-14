@@ -11,19 +11,20 @@ from apps.security.services.excel.ExcelInstructorTemplateService import ExcelIns
 from apps.security.services.excel.ExcelAprendizTemplateService import ExcelAprendizTemplateService
 
 
+
 class ExcelTemplateViewSet(ViewSet):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.instructor_service = ExcelInstructorTemplateService()
-        self.aprendiz_service = ExcelAprendizTemplateService()
+        self.apprentice_service = ExcelAprendizTemplateService()
 
     @swagger_auto_schema(
         operation_description=(
-            "Descarga la plantilla de Excel para el registro masivo de instructores. "
-            "La plantilla incluye todos los campos necesarios y hojas auxiliares con "
-            "datos actualizados de la base de datos (áreas de conocimiento, tipos de contrato, etc.)."
+            "Downloads the Excel template for bulk instructor registration. "
+            "The template includes all required fields and auxiliary sheets with "
+            "up-to-date data from the database (knowledge areas, contract types, etc.)."
         ),
-        tags=["Plantillas Excel"],
+        tags=["Excel Templates"],
         responses={
             200: openapi.Response(
                 "Archivo Excel descargado exitosamente",
@@ -42,15 +43,11 @@ class ExcelTemplateViewSet(ViewSet):
     @action(detail=False, methods=['get'], url_path='instructor-template')
     def download_instructor_template(self, request):
         """
-        Genera y descarga la plantilla de Excel para instructores.
-        Incluye datos actualizados de áreas de conocimiento, tipos de contrato, etc.
+        Generates and downloads the Excel template for instructors.
+        Includes up-to-date data for knowledge areas, contract types, etc.
         """
         try:
-            # Usar el servicio específico de instructores
             response = self.instructor_service.generate_instructor_template()
-            
-            # Para asegurar que no hay problemas de content negotiation
-            # cuando se descarga un archivo, establecemos el content type explícitamente
             if isinstance(response, HttpResponse):
                 return response
             else:
@@ -66,11 +63,11 @@ class ExcelTemplateViewSet(ViewSet):
 
     @swagger_auto_schema(
         operation_description=(
-            "Descarga la plantilla de Excel para el registro masivo de aprendices. "
-            "La plantilla incluye todos los campos necesarios y hojas auxiliares con "
-            "datos actualizados de la base de datos (programas, fichas, etc.)."
+            "Downloads the Excel template for bulk apprentice registration. "
+            "The template includes all required fields and auxiliary sheets with "
+            "up-to-date data from the database (programs, fichas, etc.)."
         ),
-        tags=["Plantillas Excel"],
+        tags=["Excel Templates"],
         responses={
             200: openapi.Response(
                 "Archivo Excel descargado exitosamente",
@@ -87,16 +84,13 @@ class ExcelTemplateViewSet(ViewSet):
         }
     )
     @action(detail=False, methods=['get'], url_path='aprendiz-template')
-    def download_aprendiz_template(self, request):
+    def download_apprentice_template(self, request):
         """
-        Genera y descarga la plantilla de Excel para aprendices.
-        Incluye datos actualizados de programas, fichas, etc.
+        Generates and downloads the Excel template for apprentices.
+        Includes up-to-date data for programs, fichas, etc.
         """
         try:
-            # Usar el servicio específico de aprendices
-            response = self.aprendiz_service.generate_aprendiz_template()
-            
-            # Para asegurar que no hay problemas de content negotiation
+            response = self.apprentice_service.generate_apprentice_template()
             if isinstance(response, HttpResponse):
                 return response
             else:
@@ -112,9 +106,9 @@ class ExcelTemplateViewSet(ViewSet):
 
     @swagger_auto_schema(
         operation_description=(
-            "Obtiene información sobre las plantillas disponibles y sus características."
+            "Gets information about available templates and their features."
         ),
-        tags=["Plantillas Excel"],
+        tags=["Excel Templates"],
         responses={
             200: openapi.Response(
                 "Información de plantillas obtenida exitosamente",
@@ -130,7 +124,7 @@ class ExcelTemplateViewSet(ViewSet):
                                 'download_url': openapi.Schema(type=openapi.TYPE_STRING)
                             }
                         ),
-                        'aprendiz_template': openapi.Schema(
+                        'apprentice_template': openapi.Schema(
                             type=openapi.TYPE_OBJECT,
                             properties={
                                 'name': openapi.Schema(type=openapi.TYPE_STRING),
@@ -147,13 +141,13 @@ class ExcelTemplateViewSet(ViewSet):
     @action(detail=False, methods=['get'], url_path='template-info')
     def get_template_info(self, request):
         """
-        Proporciona información sobre las plantillas disponibles.
+        Provides information about available templates.
         """
         try:
             info = {
                 "instructor_template": {
-                    "name": "Plantilla de Instructores",
-                    "description": "Plantilla para registro masivo de instructores del SENA",
+                    "name": "Instructor Template",
+                    "description": "Template for bulk registration of SENA instructors",
                     "fields": [
                         "Tipo Identificación*", "Número Identificación*", "Primer Nombre*", "Segundo Nombre",
                         "Primer Apellido*", "Segundo Apellido", "Correo Institucional*", "Número de Celular*",
@@ -166,9 +160,9 @@ class ExcelTemplateViewSet(ViewSet):
                         "Regionales", "Centros de Formación", "Sedes", "Instrucciones"
                     ]
                 },
-                "aprendiz_template": {
-                    "name": "Plantilla de Aprendices",
-                    "description": "Plantilla para registro masivo de aprendices del SENA",
+                "apprentice_template": {
+                    "name": "Apprentice Template",
+                    "description": "Template for bulk registration of SENA apprentices",
                     "fields": [
                         "Tipo Identificación*", "Número Identificación*", "Primer Nombre*", "Segundo Nombre",
                         "Primer Apellido*", "Segundo Apellido", "Correo Institucional*", "Número de Celular*"
@@ -179,7 +173,6 @@ class ExcelTemplateViewSet(ViewSet):
                     ]
                 }
             }
-            
             return Response(info, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(
@@ -189,16 +182,16 @@ class ExcelTemplateViewSet(ViewSet):
 
     @swagger_auto_schema(
         operation_description=(
-            "Procesa un archivo Excel con datos de instructores para registro masivo. "
-            "Los usuarios creados quedan activos automáticamente. "
-            "Retorna un resumen detallado de registros exitosos y errores."
+            "Processes an Excel file with instructor data for bulk registration. "
+            "Created users are automatically activated. "
+            "Returns a detailed summary of successful registrations and errors."
         ),
-        tags=["Registro Masivo"],
+        tags=["Bulk Registration"],
         manual_parameters=[
             openapi.Parameter(
                 'file',
                 openapi.IN_FORM,
-                description="Archivo Excel con datos de instructores (.xlsx o .xls)",
+                description="Excel file with instructor data (.xlsx or .xls)",
                 type=openapi.TYPE_FILE,
                 required=True
             )
@@ -217,39 +210,29 @@ class ExcelTemplateViewSet(ViewSet):
     @action(detail=False, methods=['post'], url_path='upload-instructor-excel', parser_classes=[MultiPartParser, FormParser])
     def upload_instructor_excel(self, request):
         """
-        Procesa archivo Excel con datos de instructores para registro masivo.
-        Los usuarios creados quedan activos automáticamente.
+        Processes Excel file with instructor data for bulk registration.
+        Created users are automatically activated.
         """
         try:
-            # Verificar que se envió un archivo
             if 'file' not in request.FILES:
                 return Response(
                     {'error': 'No se encontró el archivo en la petición'}, 
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            
             excel_file = request.FILES['file']
-            
-            # Validar que es un archivo Excel
             if not excel_file.name.endswith(('.xlsx', '.xls')):
                 return Response(
                     {'error': 'El archivo debe ser de formato Excel (.xlsx o .xls)'}, 
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            
-            # Procesar el archivo usando el servicio específico de instructores
             results = self.instructor_service.process_instructor_excel(excel_file)
-            
-            # Determinar el status code basado en los resultados
             if results['successful_registrations'] > 0:
                 response_status = status.HTTP_201_CREATED
             elif results['total_processed'] == 0:
                 response_status = status.HTTP_400_BAD_REQUEST
             else:
                 response_status = status.HTTP_207_MULTI_STATUS
-            
             return Response(results, status=response_status)
-            
         except Exception as e:
             return Response(
                 {'error': f'Error procesando archivo: {str(e)}'}, 
@@ -258,16 +241,16 @@ class ExcelTemplateViewSet(ViewSet):
 
     @swagger_auto_schema(
         operation_description=(
-            "Procesa un archivo Excel con datos de aprendices para registro masivo. "
-            "Los usuarios creados quedan activos automáticamente. "
-            "Retorna un resumen detallado de registros exitosos y errores."
+            "Processes an Excel file with apprentice data for bulk registration. "
+            "Created users are automatically activated. "
+            "Returns a detailed summary of successful registrations and errors."
         ),
-        tags=["Registro Masivo"],
+        tags=["Bulk Registration"],
         manual_parameters=[
             openapi.Parameter(
                 'file',
                 openapi.IN_FORM,
-                description="Archivo Excel con datos de aprendices (.xlsx o .xls)",
+                description="Excel file with apprentice data (.xlsx or .xls)",
                 type=openapi.TYPE_FILE,
                 required=True
             )
@@ -284,41 +267,31 @@ class ExcelTemplateViewSet(ViewSet):
         }
     )
     @action(detail=False, methods=['post'], url_path='upload-aprendiz-excel', parser_classes=[MultiPartParser, FormParser])
-    def upload_aprendiz_excel(self, request):
+    def upload_apprentice_excel(self, request):
         """
-        Procesa archivo Excel con datos de aprendices para registro masivo.
-        Los usuarios creados quedan activos automáticamente.
+        Processes Excel file with apprentice data for bulk registration.
+        Created users are automatically activated.
         """
         try:
-            # Verificar que se envió un archivo
             if 'file' not in request.FILES:
                 return Response(
                     {'error': 'No se encontró el archivo en la petición'}, 
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            
             excel_file = request.FILES['file']
-            
-            # Validar que es un archivo Excel
             if not excel_file.name.endswith(('.xlsx', '.xls')):
                 return Response(
                     {'error': 'El archivo debe ser de formato Excel (.xlsx o .xls)'}, 
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            
-            # Procesar el archivo usando el servicio específico de aprendices
-            results = self.aprendiz_service.process_aprendiz_excel(excel_file)
-            
-            # Determinar el status code basado en los resultados
+            results = self.apprentice_service.process_apprentice_excel(excel_file)
             if results['successful_registrations'] > 0:
                 response_status = status.HTTP_201_CREATED
             elif results['total_processed'] == 0:
                 response_status = status.HTTP_400_BAD_REQUEST
             else:
                 response_status = status.HTTP_207_MULTI_STATUS
-            
             return Response(results, status=response_status)
-            
         except Exception as e:
             return Response(
                 {'error': f'Error procesando archivo: {str(e)}'}, 

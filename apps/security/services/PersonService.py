@@ -13,6 +13,7 @@ from apps.security.entity.models.DocumentType import DocumentType
 from apps.general.entity.models import Aprendiz
 
 
+
 class PersonService(BaseService):
     def __init__(self):
         super().__init__(PersonRepository())
@@ -26,112 +27,112 @@ class PersonService(BaseService):
         return self.update_person(person, data)
 
     def create_person(self, data):
-        # El serializer ahora maneja correctamente el id, solo delegamos al repositorio
+        # The serializer now correctly handles the id, just delegate to the repository
         return self.repository.create_person(data)
 
     def update_person(self, person, data):
-        # Si se va a actualizar la imagen, eliminar la anterior
+        # If the image is being updated, delete the previous one
         if 'image' in data and data['image'] and person.image:
             import os
             if hasattr(person.image, 'path') and os.path.isfile(person.image.path):
                 os.remove(person.image.path)
         return self.repository.update_person(person, data)
 
-    def register_aprendiz(self, data):
+    def register_apprentice(self, data):
         """
-        Lógica de negocio para registrar un aprendiz.
-        Aplica todas las validaciones y reglas de negocio.
+        Business logic for registering an apprentice.
+        Applies all validations and business rules.
         """
         email = data.get('email')
-        numero_identificacion = data.get('number_identification')
-        type_identification = data.get('type_identification')
+        identification_number = data.get('number_identification')
+        identification_type = data.get('type_identification')
         phone_number = data.get('phone_number')
 
-        # === VALIDACIONES DE NEGOCIO ===
+        # === BUSINESS VALIDATIONS ===
 
-        # Validar correo institucional
+        # Validate institutional email
         if not email or not email.endswith('@soy.sena.edu.co'):
             return {
                 'data': {'error': 'Solo se permiten correos institucionales (@soy.sena.edu.co)'},
                 'status': status.HTTP_400_BAD_REQUEST
             }
 
-        # Validar que el correo no esté repetido
+        # Validate email is not duplicated
         if User.objects.filter(email=email).exists():
             return {
                 'data': {'error': 'El correo institucional ya está registrado.'},
                 'status': status.HTTP_400_BAD_REQUEST
             }
 
-        # Validar que el número de identificación no esté repetido
-        if Person.objects.filter(number_identification=numero_identificacion).exists():
+        # Validate identification number is not duplicated
+        if Person.objects.filter(number_identification=identification_number).exists():
             return {
                 'data': {'error': 'El número de identificación ya está registrado.'},
                 'status': status.HTTP_400_BAD_REQUEST
             }
 
-        # Nota: La validación del tipo de identificación se hace en PersonSerializer
-        # El serializer ya valida que el ID exista y esté activo
+        # Note: Identification type validation is handled in PersonSerializer
+        # The serializer already validates that the ID exists and is active
 
-        # Validar número de identificación
-        if not numero_identificacion or len(str(numero_identificacion).strip()) < 6:
+        # Validate identification number
+        if not identification_number or len(str(identification_number).strip()) < 6:
             return {
                 'data': {'error': 'El número de identificación debe tener al menos 6 dígitos'},
                 'status': status.HTTP_400_BAD_REQUEST
             }
 
-        # Validar teléfono
+        # Validate phone number
         if not phone_number or len(str(phone_number)) < 10:
             return {
                 'data': {'error': 'El número de teléfono debe tener al menos 10 dígitos'},
                 'status': status.HTTP_400_BAD_REQUEST
             }
 
-        # === LÓGICA DE NEGOCIO ===
+        # === BUSINESS LOGIC ===
 
         try:
             with transaction.atomic():
-                # Crear persona usando el método del service que transforma el id
+                # Create person using the service method that transforms the id
                 person, person_data, person_errors = self.create_person(data)
                 if not person:
                     raise Exception({'error': 'Datos inválidos', 'detalle': person_errors})
 
-                # Crear usuario inactivo sin contraseña (se establecerá cuando se active)
+                # Create inactive user without password (will be set when activated)
                 user_data = {
                     'email': email,
-                    'password': make_password('temporal_placeholder'),  # Contraseña temporal que será reemplazada
+                    'password': make_password('temporal_placeholder'),  # Temporary password to be replaced
                     'person': person.id,
                     'is_active': False,
-                    'role': 2,  # Rol de Aprendiz
+                    'role': 2,  # Apprentice role
                 }
                 user_serializer = UserSerializer(data=user_data)
                 if not user_serializer.is_valid():
                     raise Exception({'error': 'No se pudo crear el usuario', 'detalle': user_serializer.errors})
                 user = user_serializer.save()
 
-                # Crear Aprendiz vinculado a la persona (ficha se asignará después por el administrador)
-                aprendiz = Aprendiz.objects.create(person=person, ficha=None)
+                # Create Apprentice linked to the person (ficha will be assigned later by admin)
+                apprentice = Aprendiz.objects.create(person=person, ficha=None)
 
-                # Si todo es exitoso, enviar correo de registro pendiente
-                fecha_registro = datetime.now().strftime('%d/%m/%Y')
-                enviar_registro_pendiente(email, person.first_name + ' ' + person.first_last_name, fecha_registro)
+                # If everything is successful, send pending registration email
+                registration_date = datetime.now().strftime('%d/%m/%Y')
+                enviar_registro_pendiente(email, person.first_name + ' ' + person.first_last_name, registration_date)
 
                 return {
                     'data': {
                         'persona': person_data,
                         'usuario': user_serializer.data,
-                        'aprendiz_id': aprendiz.id,
+                        'aprendiz_id': apprentice.id,
                         'success': 'Usuario registrado correctamente. Tu cuenta está pendiente de activación por un administrador.'
                     },
                     'status': status.HTTP_201_CREATED
                 }
         except Exception as e:
-            # Si ocurre cualquier error, se hace rollback automáticamente
-            detalle = str(e)
-            # Si el error es un diccionario, extraer el mensaje
+            # If any error occurs, rollback is automatic
+            detail = str(e)
+            # If the error is a dictionary, extract the message
             if hasattr(e, 'args') and len(e.args) > 0 and isinstance(e.args[0], dict):
-                detalle = e.args[0]
+                detail = e.args[0]
             return {
-                'data': {'error': 'No se pudo completar el registro', 'detalle': detalle},
+                'data': {'error': 'No se pudo completar el registro', 'detalle': detail},
                 'status': status.HTTP_400_BAD_REQUEST
             }

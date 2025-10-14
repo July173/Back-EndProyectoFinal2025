@@ -8,7 +8,7 @@ class RegionalSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'name',
-            'codeRegional',
+            'code_regional',
             'description',
             'active',
             'address'

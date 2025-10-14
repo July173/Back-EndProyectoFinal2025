@@ -9,13 +9,14 @@ from apps.security.entity.serializers.FormModule.FormModuleSerializer import For
 from apps.security.entity.serializers.FormModule.CreateModuleWithFormsSerializer import CreateModuleWithFormsSerializer
 
 
+
 class FormModuleViewSet(BaseViewSet):
     service_class = FormModuleService
     serializer_class = FormModuleSerializer
-    
+
     @swagger_auto_schema(
         method='get',
-        operation_description="Obtiene un módulo y sus formularios asociados por ID.",
+        operation_description="Gets a module and its associated forms by ID.",
         tags=["FormModule"],
         responses={200: CreateModuleWithFormsSerializer}
     )
@@ -26,7 +27,6 @@ class FormModuleViewSet(BaseViewSet):
             module = Module.objects.get(pk=pk)
         except Module.DoesNotExist:
             return Response({'detail': 'Módulo no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
-        # Obtener todos los formularios asociados a ese módulo
         form_ids = list(FormModule.objects.filter(module=module).values_list('form_id', flat=True))
         data = {
             'name': module.name,
@@ -39,7 +39,7 @@ class FormModuleViewSet(BaseViewSet):
     @swagger_auto_schema(
         method='put',
         request_body=CreateModuleWithFormsSerializer,
-        operation_description="Actualiza un módulo y sus formularios asociados.",
+        operation_description="Updates a module and its associated forms.",
         tags=["FormModule"],
         responses={200: openapi.Response("Módulo y formularios actualizados correctamente.")}
     )
@@ -53,7 +53,7 @@ class FormModuleViewSet(BaseViewSet):
     @swagger_auto_schema(
         method='post',
         request_body=CreateModuleWithFormsSerializer,
-        operation_description="Crea un nuevo módulo y le asigna uno o varios formularios.",
+        operation_description="Creates a new module and assigns one or more forms to it.",
         tags=["FormModule"],
         responses={201: openapi.Response("Módulo y formularios creados correctamente.")}
     )
@@ -63,12 +63,11 @@ class FormModuleViewSet(BaseViewSet):
         serializer.is_valid(raise_exception=True)
         result = self.service_class().create_module_with_forms(serializer.validated_data)
         return Response(result, status=status.HTTP_201_CREATED)
-   
 
     # ----------- LIST -----------
     @swagger_auto_schema(
         operation_description=(
-            "Obtiene una lista de todos los módulos de formulario registrados."
+            "Gets a list of all registered form modules."
         ),
         tags=["FormModule"]
     )
@@ -78,7 +77,7 @@ class FormModuleViewSet(BaseViewSet):
     # ----------- CREATE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Crea un nuevo módulo de formulario con la información proporcionada."
+            "Creates a new form module with the provided information."
         ),
         tags=["FormModule"]
     )
@@ -88,7 +87,7 @@ class FormModuleViewSet(BaseViewSet):
     # ----------- RETRIEVE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Obtiene la información de un módulo de formulario específico."
+            "Gets the information of a specific form module."
         ),
         tags=["FormModule"]
     )
@@ -98,7 +97,7 @@ class FormModuleViewSet(BaseViewSet):
     # ----------- UPDATE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Actualiza la información completa de un módulo de formulario."
+            "Updates the complete information of a form module."
         ),
         tags=["FormModule"]
     )
@@ -108,7 +107,7 @@ class FormModuleViewSet(BaseViewSet):
     # ----------- PARTIAL UPDATE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Actualiza solo algunos campos de un módulo de formulario."
+            "Updates only some fields of a form module."
         ),
         tags=["FormModule"]
     )
@@ -118,7 +117,7 @@ class FormModuleViewSet(BaseViewSet):
     # ----------- DELETE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Elimina físicamente un módulo de formulario de la base de datos."
+            "Physically deletes a form module from the database."
         ),
         tags=["FormModule"]
     )
@@ -129,7 +128,7 @@ class FormModuleViewSet(BaseViewSet):
     @swagger_auto_schema(
         method='delete',
         operation_description=(
-            "Realiza un borrado lógico (soft delete) del módulo de formulario especificado."
+            "Performs a logical (soft) delete of the specified form module."
         ),
         tags=["FormModule"],
         responses={

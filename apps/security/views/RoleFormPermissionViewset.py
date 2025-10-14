@@ -9,12 +9,13 @@ from apps.security.entity.serializers.RolFormPermission.RoleFormPermissionSerial
 from apps.security.entity.serializers.RolFormPermission.CreateRoleWithPermissionsSerializer import CreateRoleWithPermissionsSerializer
 
 
-class RolFormPermissionViewSet(BaseViewSet):
+
+class RoleFormPermissionViewSet(BaseViewSet):
     service_class = RolFormPermissionService
     serializer_class = RolFormPermissionSerializer
 
     @swagger_auto_schema(
-        operation_description="Obtiene la matriz de permisos por rol, formulario y tipo de permiso.",
+        operation_description="Gets the permission matrix by role, form, and permission type.",
         tags=["RoleFormPermission"],
         responses={200: openapi.Response("Matriz de permisos por rol")}
     )
@@ -25,7 +26,7 @@ class RolFormPermissionViewSet(BaseViewSet):
 
     @swagger_auto_schema(
         method='get',
-        operation_description="Obtiene un rol con sus formularios y permisos asignados por ID.",
+        operation_description="Gets a role with its assigned forms and permissions by ID.",
         tags=["RoleFormPermission"],
         responses={200: CreateRoleWithPermissionsSerializer}
     )
@@ -37,9 +38,7 @@ class RolFormPermissionViewSet(BaseViewSet):
             role = Role.objects.get(pk=pk)
         except Role.DoesNotExist:
             return Response({'detail': 'Role not found.'}, status=status.HTTP_404_NOT_FOUND)
-        # Obtener todos los RolFormPermission de ese rol
         rfp_qs = RolFormPermission.objects.filter(role=role)
-        # Agrupar por formulario
         form_map = {}
         for rfp in rfp_qs:
             form_id = rfp.form.id
@@ -50,7 +49,7 @@ class RolFormPermissionViewSet(BaseViewSet):
             'type_role': role.type_role,
             'description': role.description,
             'active': role.active,
-            'formularios': list(form_map.values())
+            'forms': list(form_map.values())
         }
         serializer = CreateRoleWithPermissionsSerializer(data)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -58,7 +57,7 @@ class RolFormPermissionViewSet(BaseViewSet):
     @swagger_auto_schema(
         method='put',
         request_body=CreateRoleWithPermissionsSerializer,
-        operation_description="Actualiza un rol y sus permisos por formulario.",
+        operation_description="Updates a role and its permissions by form.",
         tags=["RoleFormPermission"],
         responses={200: openapi.Response("Rol y permisos actualizados correctamente.")}
     )
@@ -72,7 +71,7 @@ class RolFormPermissionViewSet(BaseViewSet):
     @swagger_auto_schema(
         method='post',
         request_body=CreateRoleWithPermissionsSerializer,
-        operation_description="Crea un nuevo rol y asigna uno o varios permisos a uno o varios formularios.",
+        operation_description="Creates a new role and assigns one or more permissions to one or more forms.",
         tags=["RoleFormPermission"],
         responses={201: openapi.Response("Rol y permisos creados correctamente.")}
     )
@@ -82,13 +81,11 @@ class RolFormPermissionViewSet(BaseViewSet):
         serializer.is_valid(raise_exception=True)
         result = self.service.create_role_with_permissions(serializer.validated_data)
         return Response(result, status=status.HTTP_201_CREATED)
-    
-    
 
     # ----------- LIST -----------
     @swagger_auto_schema(
         operation_description=(
-            "Obtiene una lista de todos los permisos de formulario por rol registrados."
+            "Gets a list of all registered form permissions by role."
         ),
         tags=["RoleFormPermission"]
     )
@@ -98,7 +95,7 @@ class RolFormPermissionViewSet(BaseViewSet):
     # ----------- CREATE -----------
     @swagger_auto_schema(
         request_body=RolFormPermissionSerializer,
-        operation_description="Crea un nuevo permiso de formulario para un rol.",
+        operation_description="Creates a new form permission for a role.",
         tags=["RoleFormPermission"]
     )
     def create(self, request, *args, **kwargs):
@@ -107,7 +104,7 @@ class RolFormPermissionViewSet(BaseViewSet):
     # ----------- RETRIEVE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Obtiene la información de un permiso de formulario por rol específico."
+            "Gets the information of a specific form permission by role."
         ),
         tags=["RoleFormPermission"]
     )
@@ -117,7 +114,7 @@ class RolFormPermissionViewSet(BaseViewSet):
     # ----------- UPDATE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Actualiza la información completa de un permiso de formulario por rol."
+            "Updates the complete information of a form permission by role."
         ),
         tags=["RoleFormPermission"]
     )
@@ -127,7 +124,7 @@ class RolFormPermissionViewSet(BaseViewSet):
     # ----------- PARTIAL UPDATE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Actualiza solo algunos campos de un permiso de formulario por rol."
+            "Updates only some fields of a form permission by role."
         ),
         tags=["RoleFormPermission"]
     )
@@ -137,7 +134,7 @@ class RolFormPermissionViewSet(BaseViewSet):
     # ----------- DELETE -----------
     @swagger_auto_schema(
         operation_description=(
-            "Elimina físicamente un permiso de formulario por rol de la base de datos."
+            "Physically deletes a form permission by role from the database."
         ),
         tags=["RoleFormPermission"]
     )
@@ -148,10 +145,10 @@ class RolFormPermissionViewSet(BaseViewSet):
     @swagger_auto_schema(
         method='delete',
         operation_description=(
-                "Realiza un borrado lógico (soft delete) del permiso de formulario por rol especificado."
-            ),
-            tags=["RoleFormPermission"],
-            responses={
+            "Performs a logical (soft) delete of the specified form permission by role."
+        ),
+        tags=["RoleFormPermission"],
+        responses={
             204: openapi.Response("Eliminado lógicamente correctamente."),
             404: openapi.Response("No encontrado.")
         }
@@ -168,10 +165,9 @@ class RolFormPermissionViewSet(BaseViewSet):
             {"detail": "No encontrado."},
             status=status.HTTP_404_NOT_FOUND
         )
-    
-    
+
     @swagger_auto_schema(
-        operation_description="Obtiene el menú para el usuario especificado.",
+        operation_description="Gets the menu for the specified user.",
         tags=["RoleFormPermission"],
         responses={
             200: openapi.Response("Menú obtenido correctamente."),
@@ -181,11 +177,9 @@ class RolFormPermissionViewSet(BaseViewSet):
     @action(detail=True, methods=['get'], url_path='get-menu')
     def get_menu(self, request, pk=None):
         menu = self.service.get_menu(pk)
-
         if not menu:
             return Response(
                 {"detail": "No menu found for this user."},
                 status=status.HTTP_404_NOT_FOUND
             )
-
         return Response(menu, status=status.HTTP_200_OK)

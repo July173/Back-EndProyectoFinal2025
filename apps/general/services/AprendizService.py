@@ -1,7 +1,7 @@
 from core.base.services.implements.baseService.BaseService import BaseService
-from apps.general.repositories.AprendizRepository import AprendizRepository
+from apps.general.repositories.ApprenticeRepository import ApprenticeRepository
 from apps.security.entity.models import User, Role, Person
-from apps.general.entity.models import Aprendiz, Ficha
+from apps.general.entity.models import Apprentice, Ficha
 from apps.security.emails.CreacionCuentaUsers import send_account_created_email
 from django.db import transaction
 from django.db import models
@@ -11,12 +11,12 @@ from django.utils.crypto import get_random_string
 from core.utils.Validation import is_soy_sena_email
 
 
-class AprendizService(BaseService):
+class ApprenticeService(BaseService):
 
     def __init__(self):
-        self.repository = AprendizRepository()
+        self.repository = ApprenticeRepository()
 
-    def create_aprendiz(self, validated_data):
+    def create_apprentice(self, validated_data):
         """
         Crea un aprendiz, usuario y persona. Valida datos y envía correo de bienvenida.
         """
@@ -108,7 +108,7 @@ class AprendizService(BaseService):
                 print(f"[AprendizService] No se pudo enviar el correo de registro al aprendiz: {email_error}")
             return aprendiz, user, person
 
-    def update_aprendiz(self, aprendiz_id, validated_data):
+    def update_apprentice(self, aprendiz_id, validated_data):
         """
         Actualiza los datos de aprendiz, usuario y persona. Valida datos y roles.
         """
@@ -147,23 +147,23 @@ class AprendizService(BaseService):
         ficha_id = validated_data['ficha_id']
         role_id = validated_data['role_id']
 
-        aprendiz = Aprendiz.objects.get(pk=aprendiz_id)
+        apprentice = Apprentice.objects.get(pk=aprendiz_id)
         # Validación de correo institucional
         if not user_data['email'] or not is_soy_sena_email(user_data['email']):
             raise ValueError('Solo se permiten correos institucionales (@soy.sena.edu.co) para aprendices.')
         # Obtener el usuario usando la relación con la persona
-        user = User.objects.filter(person=aprendiz.person).first()
+        user = User.objects.filter(person=apprentice.person).first()
         # Validaciones de unicidad y formato
         if not is_unique_email(user_data['email'], User, exclude_user_id=user.id if user else None):
             raise ValueError('El correo ya está registrado.')
-        if not is_unique_document_number(person_data['number_identification'], Person, exclude_person_id=aprendiz.person.id):
+        if not is_unique_document_number(person_data['number_identification'], Person, exclude_person_id=apprentice.person.id):
             raise ValueError('El número de documento ya está registrado.')
         if person_data['phone_number'] and not is_valid_phone_number(person_data['phone_number']):
             raise ValueError('El número de teléfono debe tener exactamente 10 dígitos.')
 
         with transaction.atomic():
             # Actualiza ficha y rol
-            aprendiz = Aprendiz.objects.get(pk=aprendiz_id)
+            aprendiz = Apprentice.objects.get(pk=aprendiz_id)
             ficha = Ficha.objects.get(pk=ficha_id)
             if not role_id:
                 role_id = 2
@@ -173,26 +173,26 @@ class AprendizService(BaseService):
             except Role.DoesNotExist:
                 user_data['role_id'] = 2
             self.repository.update_all_dates_apprentice(aprendiz, person_data, user_data, ficha)
-            return aprendiz
+            return apprentice
 
     def get_aprendiz(self, aprendiz_id):
         """
         Obtiene un aprendiz por id.
         """
-        return Aprendiz.objects.filter(pk=aprendiz_id).first()
+        return Apprentice.objects.filter(pk=aprendiz_id).first()
 
     def list_aprendices(self):
         """
         Lista todos los aprendices.
         """
-        return Aprendiz.objects.all()
+        return Apprentice.objects.all()
 
     def delete_aprendiz(self, aprendiz_id):
         """
         Elimina completamente un aprendiz y sus datos relacionados.
         """
         with transaction.atomic():
-            aprendiz = Aprendiz.objects.get(pk=aprendiz_id)
+            aprendiz = Apprentice.objects.get(pk=aprendiz_id)
             self.repository.delete_all_dates_apprentice(aprendiz)
 
     def logical_delete_aprendiz(self, aprendiz_id):
@@ -200,7 +200,7 @@ class AprendizService(BaseService):
         Realiza borrado lógico o reactivación de aprendiz.
         """
         with transaction.atomic():
-            aprendiz = Aprendiz.objects.get(pk=aprendiz_id)
+            aprendiz = Apprentice.objects.get(pk=aprendiz_id)
             if not aprendiz.active:
                 self.repository.set_active_state_dates_apprentice(aprendiz, active=True)
                 return "Aprendiz reactivado correctamente."

@@ -5,8 +5,8 @@ class Enterprise(models.Model):
     name_enterprise = models.CharField(max_length=100)
     locate = models.CharField(max_length=255)
     nit_enterprise = models.CharField(max_length=20)
-    active = models.BooleanField(default=True)
     email_enterprise = models.EmailField(max_length=100)
+    active = models.BooleanField(default=True)
     delete_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):

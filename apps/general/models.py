@@ -1,5 +1,5 @@
 # apps/general/modelsGeneral.py
-from apps.general.entity.models.Aprendiz import Aprendiz
+from apps.general.entity.models.Apprentice import Aprendiz
 from apps.general.entity.models.Center import Center
 from apps.general.entity.models.Ficha import Ficha
 from apps.general.entity.models.Instructor import Instructor

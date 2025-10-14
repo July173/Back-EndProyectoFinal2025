@@ -6,7 +6,6 @@ from drf_yasg import openapi
 from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.general.services.CenterService import CenterService
 from apps.general.entity.serializers.CenterSerializer import CenterSerializer
-from apps.general.entity.serializers.Center.CenterNestedSerializer import CenterNestedSerializer
 
 
 class CenterViewset(BaseViewSet):
@@ -84,31 +83,3 @@ class CenterViewset(BaseViewSet):
             status=status.HTTP_404_NOT_FOUND
         )
         
-        
-
-    # ----------- GET CENTER WITH SEDES BY ID-----------
-    @swagger_auto_schema(
-        operation_description="Obtiene un centro por id con sus sedes anidadas.",
-        tags=["Center"],
-        responses={200: CenterNestedSerializer()}
-    )
-    @action(detail=True, methods=['get'], url_path='with-sedes')
-    def with_sedes_by_id(self, request, pk=None):
-        center = self.service_class().get_center_with_sedes_by_id(pk)
-        if not center:
-            return Response({"detail": "No encontrado."}, status=status.HTTP_404_NOT_FOUND)
-        serializer = CenterNestedSerializer(center)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    
-    
-    # ----------- GET CENTER WITH SEDES -----------
-    @swagger_auto_schema(
-        operation_description="Obtiene todos los centros con sus sedes anidadas.",
-        tags=["Center"],
-        responses={200: CenterNestedSerializer(many=True)}
-    )
-    @action(detail=False, methods=['get'], url_path='with-sedes')
-    def with_sedes(self, request):
-        queryset = self.service_class().get_all_centers_with_sedes()
-        serializer = CenterNestedSerializer(queryset, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)

@@ -10,10 +10,10 @@ class SedeSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'name',
-            'codeSede',
+            'code_sede',
             'address',
-            'phoneSede',
-            'emailContact',
+            'phone_sede',
+            'email_contact',
             'center',
             'active',
         ]

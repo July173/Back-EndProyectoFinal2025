@@ -3,10 +3,10 @@ from django.db import models
 
 class Regional(models.Model):
     name = models.CharField(max_length=100)
-    codeRegional = models.BigIntegerField()
+    code_regional = models.BigIntegerField(unique=True)
     description = models.TextField(max_length=255)
-    active = models.BooleanField(default=True)
     address = models.CharField(max_length=255)
+    active = models.BooleanField(default=True)
     delete_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
