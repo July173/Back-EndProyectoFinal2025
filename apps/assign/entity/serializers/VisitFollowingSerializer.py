@@ -14,7 +14,6 @@ class VisitFollowingSerializer(serializers.ModelSerializer):
             'state_visit',
             'scheduled_date',
             'date_visit_made',
-            'active',
             'name_visit',
             'observation_state_visit',
             'asignation_instructor'

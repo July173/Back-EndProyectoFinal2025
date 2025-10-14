@@ -98,9 +98,9 @@ class GetInstructorSerializer(serializers.ModelSerializer):
 
     def get_sede_id(self, obj):
         """Get the site ID from the related PersonSede object."""
-        person_sede = PersonSede.objects.filter(PersonId=obj.person).first()
-        if person_sede and person_sede.SedeId:
-            return person_sede.SedeId.id
+        person_sede = PersonSede.objects.filter(person_id=obj.person).first()
+        if person_sede and person_sede.sede_id:
+            return person_sede.sede_id.id
         return None
 
     def get_active(self, obj):
