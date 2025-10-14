@@ -12,12 +12,19 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+
+# Repository for handling form requests and related entities
 class RequestAsignationRepository(BaseRepository):
 
     def __init__(self):
+        # Initialize with the RequestAsignation model
         super().__init__(RequestAsignation)
 
     def filter_form_requests(self, search=None, request_state=None, program_id=None):
+        """
+        Filter form requests by search text, state, and program.
+        Returns a queryset of matching requests.
+        """
         queryset = RequestAsignation.objects.select_related(
             'aprendiz__person',
             'aprendiz__ficha__program',
@@ -25,7 +32,7 @@ class RequestAsignationRepository(BaseRepository):
             'modality_productive_stage'
         ).all()
 
-        #  Filtro por texto (nombre o número de documento)
+        # Filter by text (name or document number)
         if search:
             queryset = queryset.filter(
                 Q(aprendiz__person__first_name__icontains=search) |
@@ -34,11 +41,11 @@ class RequestAsignationRepository(BaseRepository):
                 Q(aprendiz__person__number_identification__icontains=search)
             )
 
-        #  Filtro por estado
+        # Filter by state
         if request_state:
             queryset = queryset.filter(request_state=request_state)
 
-        #  Filtro por programa
+        # Filter by program
         if program_id:
             queryset = queryset.filter(aprendiz__ficha__program_id=program_id)
 
@@ -47,7 +54,11 @@ class RequestAsignationRepository(BaseRepository):
     
     def get_form_request_by_id(self, request_id):
         """
-        Obtener una solicitud de formulario por su ID con todas sus relaciones.
+        Retrieve a form request by its ID, including all related entities.
+        Returns a tuple of related objects or None if not found.
+        """
+        """
+        Get a form request by its ID with all related entities.
         """
         try:
             request_asignation = RequestAsignation.objects.select_related(
@@ -83,28 +94,33 @@ class RequestAsignationRepository(BaseRepository):
 
     def create_all_dates_form_request(self, data):
         """
-        Crea las entidades relacionadas con la solicitud de formulario en una sola transacción.
-        Vincula el aprendiz existente y actualiza su ficha.
+        Create all related entities for a form request in a single transaction.
+        Links the apprentice, updates their record, and creates enterprise, boss, human talent, and the request itself.
+        Returns all created/updated instances.
+        """
+        """
+        Creates all related entities for the form request in a single transaction.
+        Links the existing apprentice and updates their record.
         """
         
         with transaction.atomic():
-            logger.info(f"Iniciando creación de solicitud para {data.get('person_first_name')} {data.get('person_first_last_name')} {data.get('person_second_last_name', '')}")
+            logger.info(f"Iniciando creación de solicitud para {data.get('person_first_name')} {data.get('person_first_last_name')} {data.get('person_second_last_name', '')}")  # User-facing log in Spanish
             
-            # OBTENER ENTIDADES DE REFERENCIA (solo comunicación BD)
+            # Get reference entities (database communication only)
             sede = Sede.objects.get(pk=data['sede'])
             modality = ModalityProductiveStage.objects.get(pk=data['modality_productive_stage'])
             
-            # Buscar aprendiz existente
+            # Find existing apprentice
             aprendiz = Apprentice.objects.get(pk=data['aprendiz_id'])
             
-            # Buscar ficha y vincularla al aprendiz
+            # Find record and link to apprentice
             ficha = Ficha.objects.get(pk=data['ficha_id'])
             aprendiz.ficha = ficha
             aprendiz.save()
             
-            # CREACIÓN DE ENTIDADES (solo operaciones BD)
+            # Create entities (database operations only)
             
-            # 3. Crear Enterprise
+            # Create Enterprise
             enterprise_data = {
                 'name_enterprise': data['enterprise_name'],
                 'nit_enterprise': data['enterprise_nit'],
@@ -112,9 +128,9 @@ class RequestAsignationRepository(BaseRepository):
                 'email_enterprise': data['enterprise_email'],
             }
             enterprise = Enterprise.objects.create(**enterprise_data)
-            logger.info(f"Empresa creada con ID: {enterprise.id}")
+            logger.info(f"Empresa creada con ID: {enterprise.id}")  # User-facing log in Spanish
             
-            # 4. Crear Boss
+            # Create Boss
             boss_data = {
                 'enterprise': enterprise,
                 'name_boss': data['boss_name'],
@@ -123,9 +139,9 @@ class RequestAsignationRepository(BaseRepository):
                 'position': data['boss_position'],
             }
             boss = Boss.objects.create(**boss_data)
-            logger.info(f"Jefe creado con ID: {boss.id}")
+            logger.info(f"Jefe creado con ID: {boss.id}")  # User-facing log in Spanish
             
-            # 5. Crear HumanTalent
+            # Create HumanTalent
             human_talent_data = {
                 'enterprise': enterprise,
                 'name': data['human_talent_name'],
@@ -133,9 +149,9 @@ class RequestAsignationRepository(BaseRepository):
                 'phone_number': data['human_talent_phone'],
             }
             human_talent = HumanTalent.objects.create(**human_talent_data)
-            logger.info(f"Talento humano creado con ID: {human_talent.id}")
+            logger.info(f"Talento humano creado con ID: {human_talent.id}")  # User-facing log in Spanish
             
-            # 6. Crear RequestAsignation con PDF
+            # Create RequestAsignation with PDF
             request_asignation_data = {
                 'aprendiz': aprendiz,
                 'enterprise': enterprise,
@@ -147,22 +163,25 @@ class RequestAsignationRepository(BaseRepository):
                  'request_state': RequestState.SIN_ASIGNAR,  # Estado inicial correcto del enum
             }
             request_asignation = RequestAsignation.objects.create(**request_asignation_data)
-            logger.info(f"RequestAsignation creado con ID: {request_asignation.id}, PDF: {request_asignation.pdf_request}")
+            logger.info(f"RequestAsignation creado con ID: {request_asignation.id}, PDF: {request_asignation.pdf_request}")  # User-facing log in Spanish
             
-            logger.info("Solicitud de formulario creada exitosamente")
+            logger.info("Solicitud de formulario creada exitosamente")  # User-facing log in Spanish
             
-            # Retornar instancias directamente (incluyendo request_asignation)
+            # Return instances directly (including request_asignation)
             return aprendiz, ficha, enterprise, boss, human_talent, sede, modality, request_asignation
 
 
     def get_all_form_requests(self):
         """
-        Obtener todas las solicitudes de formulario con sus relaciones.
-        Usa RequestAsignation como tabla principal que conecta todo.
+        Retrieve all form requests with their related entities.
+        Returns a list of tuples with all related objects.
         """
-        logger.info("Obteniendo todas las solicitudes de formulario")
+        """
+        Get all form requests with their related entities. Uses RequestAsignation as the main table connecting everything.
+        """
+        logger.info("Obteniendo todas las solicitudes de formulario")  # User-facing log in Spanish
         
-        # Obtener todas las RequestAsignation con sus relaciones optimizadas
+    # Get all RequestAsignation objects with optimized relationships
         request_asignations = RequestAsignation.objects.select_related(
             'aprendiz__person',           # Person a través de Aprendiz
             'aprendiz__ficha',            # Ficha del aprendiz
@@ -172,18 +191,19 @@ class RequestAsignationRepository(BaseRepository):
             'modality_productive_stage'   # ModalityProductiveStage
         ).all()
         
-        # Lista para almacenar las solicitudes encontradas
+    # List to store found requests
         form_requests = []
-        
+
         for request_asignation in request_asignations:
-            # Verificar que tenga boss y human talent
+            # Iterate through all requests and collect related entities
+            # Check that the enterprise has both boss and human talent
             if hasattr(request_asignation.enterprise, 'boss') and hasattr(request_asignation.enterprise, 'human_talent'):
                 modality = request_asignation.modality_productive_stage
                 regional = getattr(modality, 'regional', None)
                 center = getattr(modality, 'center', None)
                 sede = getattr(modality, 'sede', None)
-                # Crear tupla con las entidades relacionadas
-                # Obtener la sede a través de PersonSede
+                # Create tuple with related entities
+                # Get the location through PersonSede
                 person = request_asignation.aprendiz.person
                 person_sede = PersonSede.objects.filter(PersonId=person).first()
                 sede = person_sede.SedeId if person_sede and person_sede.SedeId else None
@@ -199,7 +219,7 @@ class RequestAsignationRepository(BaseRepository):
                 )
                 form_requests.append(form_request)
 
-        logger.info(f"Se encontraron {len(form_requests)} solicitudes")
+        logger.info(f"Se encontraron {len(form_requests)} solicitudes")  # User-facing log in Spanish
         return form_requests
     
 

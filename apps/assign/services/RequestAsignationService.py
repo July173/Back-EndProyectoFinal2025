@@ -17,14 +17,27 @@ logger = logging.getLogger(__name__)
 
 
 class RequestAsignationService(BaseService):
+    # Service for managing form requests and related business logic
+    """
+    Service for managing form requests, including creation, retrieval, rejection, and dashboard logic.
+    """
     def __init__(self):
+        # Initialize repository for form requests
         self.repository = RequestAsignationRepository()
 
     def error_response(self, message, error_type="error"):
+        # Standardized error response for service methods
+        """
+        Returns a standardized error response.
+        """
         return {"success": False, "error_type": error_type, "message": str(message), "data": None}
 
 
     def get_pdf_url(self, request_id):
+        # Retrieve the PDF URL for a specific form request
+        """
+        Retrieves the PDF URL for a given form request.
+        """
         try:
             solicitud = RequestAsignation.objects.get(pk=request_id)
             if solicitud.pdf_request:
@@ -40,6 +53,10 @@ class RequestAsignationService(BaseService):
             return self.error_response(f"Error al obtener PDF: {e}", "get_pdf_url")
 
     def reject_request(self, request_id, rejection_message):
+        # Reject a form request and notify the apprentice by email
+        """
+        Rejects a form request and sends a rejection email to the apprentice.
+        """
         try:
             request = RequestAsignation.objects.get(pk=request_id)
             request.request_state = RequestState.RECHAZADO
@@ -67,6 +84,10 @@ class RequestAsignationService(BaseService):
             return self.error_response(f"Error al rechazar solicitud: {e}", "reject_request")
 
     def get_form_request_by_id(self, request_id):
+        # Retrieve a form request and all related entities, then format the response
+        """
+        Retrieves a form request by its ID, including all related entities and presentation logic.
+        """
         try:
             result = self.repository.get_form_request_by_id(request_id)
             if not result:
@@ -95,21 +116,21 @@ class RequestAsignationService(BaseService):
                 'request_state': request_asignation.request_state
             }
             person, aprendiz, enterprise, boss, human_talent, modality, request_asignation, regional, center, sede = result
-            # Obtener correo del aprendiz desde User
+            # Get apprentice's email from User
             user = User.objects.filter(person=person).first()
             correo_aprendiz = user.email if user else None
-            # Obtener sede, centro y regional desde PersonSede
+            # Get site, center, and region from PersonSede
             personsede = PersonSede.objects.filter(PersonId=person).first()
             sede_obj = personsede.SedeId if personsede else sede
             center_obj = sede_obj.center if sede_obj and hasattr(sede_obj, 'center') else center
             regional_obj = center_obj.regional if center_obj and hasattr(center_obj, 'regional') else regional
-            # Datos de talento humano
+            # Human talent data
             talento_humano = {
                 'nombre': getattr(human_talent, 'name', None),
                 'correo': getattr(human_talent, 'email', None),
                 'telefono': getattr(human_talent, 'phone_number', None)
             } if human_talent else None
-            # Obtener número de ficha y nombre del programa
+            # Get file number and program name
             ficha = aprendiz.ficha if hasattr(aprendiz, 'ficha') and aprendiz.ficha else None
             numero_ficha = ficha.file_number if ficha and hasattr(ficha, 'file_number') else None
             programa = ficha.program if ficha and hasattr(ficha, 'program') else None
@@ -154,6 +175,10 @@ class RequestAsignationService(BaseService):
             return self.error_response(f"Error al obtener la solicitud: {e}", "get_form_request_by_id")
 
     def create_form_request(self, validated_data):
+        # Create a new form request, validate business rules, and return all created/updated entities
+        """
+        Creates a new form request, validates business rules, and returns all created/updated entities.
+        """
         try:
             logger.info(f"Iniciando creación de solicitud para aprendiz ID: {validated_data.get('aprendiz_id')}")
             aprendiz = Apprentice.objects.get(pk=validated_data['aprendiz_id'])
@@ -230,8 +255,9 @@ class RequestAsignationService(BaseService):
             return self.error_response(f"Error al crear solicitud: {e}", "create_form_request")
 
     def list_form_requests(self):
+        # List form requests showing only basic apprentice data
         """
-        Listar solicitudes mostrando solo Nombre, Tipo de identificación, Número y Fecha Solicitud.
+        Lists form requests showing only basic personal data (name, ID type, number, request date).
         """
         try:
             logger.info("Obteniendo lista de solicitudes (solo datos personales básicos)")
@@ -239,8 +265,8 @@ class RequestAsignationService(BaseService):
             requests_data = []
             for person, aprendiz, enterprise, boss, human_talent, sede, modality, request_asignation in form_requests:
                 request_item = {
-                    'id': request_asignation.id,  # id de la solicitud
-                    'aprendiz_id': aprendiz.id,   # id del aprendiz
+                    'id': request_asignation.id,  # request ID
+                    'aprendiz_id': aprendiz.id,   # apprentice ID
                     'nombre': f"{getattr(person, 'first_name', '')} {getattr(person, 'first_last_name', '')} {getattr(person, 'second_last_name', '')}",
                     'tipo_identificacion': getattr(person, 'type_identification_id', None),
                     'numero_identificacion': getattr(person, 'number_identification', None),
@@ -260,18 +286,19 @@ class RequestAsignationService(BaseService):
             return self.error_response(f"Error al obtener las solicitudes: {str(e)}", "list_form_requests")
 
     def get_aprendiz_dashboard(self, aprendiz_id):
+        # Get dashboard information for the apprentice, including request and instructor details
         """
-        Obtiene la información del dashboard del aprendiz:
-        - Estado de la solicitud activa
-        - Instructor asignado (si existe)
-        - Detalles de la solicitud
+        Gets dashboard information for the apprentice:
+        - Status of the active request
+        - Assigned instructor (if exists)
+        - Request details
         """
         try:
             
             
             aprendiz = Apprentice.objects.select_related('person', 'ficha').get(pk=aprendiz_id)
             
-            # Buscar la solicitud más reciente del aprendiz
+            # Find the apprentice's most recent request
             latest_request = RequestAsignation.objects.filter(
                 aprendiz=aprendiz
             ).select_related(
@@ -288,12 +315,12 @@ class RequestAsignationService(BaseService):
             }
             
             if latest_request:
-                # Obtener el nombre del boss si existe
+                # Get boss name if exists
                 boss_name = None
                 if hasattr(latest_request.enterprise, 'boss') and latest_request.enterprise.boss:
                     boss_name = latest_request.enterprise.boss.name_boss
                 
-                # Información de la solicitud
+                # Request information
                 result['request'] = {
                     'id': latest_request.id,
                     'enterprise_name': latest_request.enterprise.name_enterprise if latest_request.enterprise else None,
@@ -307,7 +334,7 @@ class RequestAsignationService(BaseService):
                 }
                 result['request_state'] = latest_request.request_state
                 
-                # Buscar si tiene instructor asignado
+                # Check if an instructor is assigned
                 asignacion = AsignationInstructor.objects.filter(
                     request_asignation=latest_request
                 ).select_related('instructor__person', 'instructor__knowledgeArea').first()
@@ -316,7 +343,7 @@ class RequestAsignationService(BaseService):
                     from apps.security.entity.models import User
                     instructor = asignacion.instructor
                     
-                    # Obtener el email del usuario relacionado con la persona del instructor
+                    # Get the email of the user related to the instructor's person
                     email = None
                     try:
                         user = User.objects.filter(person=instructor.person).first()
@@ -347,6 +374,11 @@ class RequestAsignationService(BaseService):
 
 
     def filter_form_requests(self, search=None, request_state=None, program_id=None):
+        # Filter form requests by search text, state, and program
+        """
+        Filters form requests by search text, state, and program.
+        Returns a list of matching requests with basic info.
+        """
         try:
             requests = self.repository.filter_form_requests(search, request_state, program_id)
             data = []

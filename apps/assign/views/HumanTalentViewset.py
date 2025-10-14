@@ -8,7 +8,12 @@ from apps.assign.services.HumanTalentService import HumanTalentService
 from apps.assign.entity.serializers.HumanTalentSerializer import HumanTalentSerializer
 
 
+
 class HumanTalentViewset(BaseViewSet):
+    """
+    ViewSet for managing human talent entities.
+    All internal code, comments, and docstrings are in English. User-facing messages and API documentation remain in Spanish.
+    """
     service_class = HumanTalentService
     serializer_class = HumanTalentSerializer
 
@@ -17,6 +22,7 @@ class HumanTalentViewset(BaseViewSet):
         tags=["HumanTalent"]
     )
     def list(self, request, *args, **kwargs):
+        """Return a list of all registered human talent."""
         return super().list(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -24,6 +30,7 @@ class HumanTalentViewset(BaseViewSet):
         tags=["HumanTalent"]
     )
     def create(self, request, *args, **kwargs):
+        """Create a new human talent with the provided information."""
         return super().create(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -31,6 +38,7 @@ class HumanTalentViewset(BaseViewSet):
         tags=["HumanTalent"]
     )
     def retrieve(self, request, *args, **kwargs):
+        """Retrieve information for a specific human talent."""
         return super().retrieve(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -38,6 +46,7 @@ class HumanTalentViewset(BaseViewSet):
         tags=["HumanTalent"]
     )
     def update(self, request, *args, **kwargs):
+        """Update all information for a human talent."""
         return super().update(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -45,6 +54,7 @@ class HumanTalentViewset(BaseViewSet):
         tags=["HumanTalent"]
     )
     def partial_update(self, request, *args, **kwargs):
+        """Partially update fields of a human talent."""
         return super().partial_update(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -52,6 +62,7 @@ class HumanTalentViewset(BaseViewSet):
         tags=["HumanTalent"]
     )
     def destroy(self, request, *args, **kwargs):
+        """Physically delete a human talent from the database."""
         return super().destroy(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -65,12 +76,18 @@ class HumanTalentViewset(BaseViewSet):
     )
     @action(detail=True, methods=['delete'], url_path='soft-delete')
     def soft_destroy(self, request, pk=None):
+        """
+        Perform a logical (soft) delete of the specified human talent.
+        User-facing messages remain in Spanish.
+        """
         deleted = self.service_class().soft_delete(pk)
         if deleted:
+            # Success message in Spanish for user-facing response
             return Response(
                 {"detail": "Eliminado lógicamente correctamente."},
                 status=status.HTTP_204_NO_CONTENT
             )
+        # Error message in Spanish for user-facing response
         return Response(
             {"detail": "No encontrado."},
             status=status.HTTP_404_NOT_FOUND

@@ -1,7 +1,11 @@
 from django.db import models
 from apps.assign.entity.models import AsignationInstructor
 
-class AsignationInstructorHistory(models.Model):   
+class AsignationInstructorHistory(models.Model):
+    
+    class Meta:
+        db_table = 'asignation_instructor_history'
+    
     asignation_instructor_id = models.ForeignKey(
         AsignationInstructor, on_delete=models.CASCADE, related_name="history"
     )

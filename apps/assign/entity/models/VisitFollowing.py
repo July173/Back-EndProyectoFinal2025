@@ -3,6 +3,10 @@ from apps.assign.entity.models import AsignationInstructor
 
 
 class VisitFollowing(models.Model):
+
+    class Meta:
+        db_table = 'visit_following'
+
     asignation_instructor_id = models.ForeignKey(AsignationInstructor, on_delete=models.CASCADE, related_name='visits')
     visit_number = models.IntegerField()
     observations = models.TextField(max_length=500)

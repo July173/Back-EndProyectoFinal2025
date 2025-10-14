@@ -4,6 +4,11 @@ from apps.assign.entity.enums.request_state_enum import RequestState
 
 
 class RequestAsignation(models.Model):
+
+    class Meta:
+        db_table = 'request_asignation'
+
+
     apprentice_id = models.ForeignKey(
         Apprentice, on_delete=models.CASCADE, related_name='requests'
     )
