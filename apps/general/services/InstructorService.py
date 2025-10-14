@@ -70,9 +70,11 @@ class InstructorService(BaseService):
                 raise ValueError(f'Site with id {sede_id} does not exist.')
 
             # Prepare data for KnowledgeArea
-            knowledge_area_id = instructor_data.pop('knowledgeArea')
+            knowledge_area_id = instructor_data.pop('knowledge_area', None)
+            if not knowledge_area_id:
+                raise ValueError('El campo "knowledge_area" es obligatorio para crear un instructor.')
             knowledge_area_instance = KnowledgeArea.objects.get(pk=knowledge_area_id)
-            instructor_data['knowledgeArea'] = knowledge_area_instance
+            instructor_data['knowledge_area'] = knowledge_area_instance
 
             # Handle new optional fields
             assigned_learners = instructor_data.pop('assigned_learners', None)

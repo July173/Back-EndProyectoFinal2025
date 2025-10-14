@@ -245,10 +245,13 @@ class InstructorViewset(BaseViewSet):
         result = self.service.create_instructor(
             {k: data[k] for k in ['first_name', 'second_name', 'first_last_name', 'second_last_name', 'phone_number', 'type_identification', 'number_identification']},
             {k: data[k] for k in ['email', 'role_id', 'password'] if k in data},
-            {k: data[k] for k in ['contractType', 'contractStartDate', 'contractEndDate', 'knowledgeArea', 'is_followup_instructor'] if k in data},
+            {k: data[k] for k in ['contract_type', 'contract_start_date', 'contract_end_date', 'knowledge_area', 'is_followup_instructor'] if k in data},
             data['sede_id']
         )
-        return Response({"detail": "Instructor creado correctamente.", "ids": result}, status=status.HTTP_201_CREATED)
+        return Response({
+            "detail": "Instructor creado correctamente.",
+            "instructor_id": result["instructor_id"]
+        }, status=status.HTTP_201_CREATED)
 
     @swagger_auto_schema(
         operation_description="Lista todos los instructores (nuevo endpoint avanzado).",

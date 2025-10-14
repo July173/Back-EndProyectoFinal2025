@@ -20,10 +20,10 @@ class CreateInstructorSerializer(serializers.Serializer):
     email = serializers.EmailField()
     role_id = serializers.IntegerField()
     # Instructor fields
-    contractType = serializers.PrimaryKeyRelatedField(queryset=TypeContract.objects.all())
-    contractStartDate = serializers.DateField()
-    contractEndDate = serializers.DateField()
-    knowledgeArea = serializers.IntegerField()
+    contract_type = serializers.PrimaryKeyRelatedField(queryset=TypeContract.objects.all())
+    contract_start_date = serializers.DateField()
+    contract_end_date = serializers.DateField()
+    knowledge_area = serializers.IntegerField()
     # Relationship ID
     sede_id = serializers.IntegerField()
     is_followup_instructor = serializers.BooleanField(required=False, default=False)

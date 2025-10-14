@@ -17,10 +17,10 @@ class GetInstructorSerializer(serializers.ModelSerializer):
     number_identification = serializers.SerializerMethodField()
     email = serializers.SerializerMethodField()
     role_id = serializers.SerializerMethodField()
-    contractType = serializers.SerializerMethodField()  # Changed to return the ID
-    contractStartDate = serializers.DateField()
-    contractEndDate = serializers.DateField()
-    knowledgeArea = serializers.SerializerMethodField()
+    contract_type = serializers.SerializerMethodField()  # Changed to return the ID
+    contract_start_date = serializers.DateField()
+    contract_end_date = serializers.DateField()
+    knowledge_area = serializers.SerializerMethodField()
     sede_id = serializers.SerializerMethodField()
     active = serializers.SerializerMethodField()
 
@@ -37,10 +37,10 @@ class GetInstructorSerializer(serializers.ModelSerializer):
             'number_identification',
             'email',
             'role_id',
-            'contractType',
-            'contractStartDate',
-            'contractEndDate',
-            'knowledgeArea',
+            'contract_type',
+            'contract_start_date',
+            'contract_end_date',
+            'knowledge_area',
             'sede_id',
             'is_followup_instructor',
             'active',
@@ -88,13 +88,13 @@ class GetInstructorSerializer(serializers.ModelSerializer):
         user = User.objects.filter(person=obj.person).first()
         return user.role.id if user and user.role else None
 
-    def get_contractType(self, obj):
+    def get_contract_type(self, obj):
         """Return the ID of the contract type instead of the full object."""
-        return obj.contractType_id if obj.contractType_id else None
+        return obj.contract_type_id if obj.contract_type_id else None
 
-    def get_knowledgeArea(self, obj):
+    def get_knowledge_area(self, obj):
         """Get the knowledge area ID from the related object."""
-        return obj.knowledgeArea.id if obj.knowledgeArea else None
+        return obj.knowledge_area.id if obj.knowledge_area else None
 
     def get_sede_id(self, obj):
         """Get the site ID from the related PersonSede object."""

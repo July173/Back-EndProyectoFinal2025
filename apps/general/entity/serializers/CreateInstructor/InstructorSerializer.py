@@ -5,14 +5,14 @@ from rest_framework import serializers
 
 
 class InstructorSerializer(serializers.ModelSerializer):
-    person = serializers.PrimaryKeyRelatedField(queryset=Person.objects.all())
+    person_id = serializers.PrimaryKeyRelatedField(queryset=Person.objects.all())
     contract_type = serializers.PrimaryKeyRelatedField(queryset=TypeContract.objects.all())
 
     class Meta:
         model = Instructor
         fields = [
             'id',
-            'person',
+            'person_id',
             'contract_type',
             'contract_start_date',
             'contract_end_date',

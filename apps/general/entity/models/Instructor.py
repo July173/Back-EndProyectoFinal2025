@@ -20,4 +20,4 @@ class Instructor(models.Model):
     delete_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return f"Instructor {self.id} - {self.knowledgeArea.name}"
+        return f"Instructor {self.id} - {self.knowledge_area.name}"
