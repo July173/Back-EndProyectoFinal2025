@@ -1,8 +1,7 @@
 from rest_framework import serializers
-from apps.security.entity.models.DocumentType import DocumentType
 
 class CreateApprenticeSerializer(serializers.Serializer):
-    type_identification = serializers.PrimaryKeyRelatedField(queryset=DocumentType.objects.all())
+    type_identification = serializers.IntegerField(required=True)
     number_identification = serializers.IntegerField(required=True)
     first_name = serializers.CharField()
     second_name = serializers.CharField(required=False, allow_blank=True)

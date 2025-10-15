@@ -8,7 +8,7 @@ from apps.general.entity.serializers.CreateAprendiz.CreateApprenticeSerializer i
 from apps.general.entity.serializers.CreateAprendiz.GetApprenticeSerializer import GetApprenticeSerializer
 from apps.general.entity.serializers.CreateAprendiz.UpdateApprenticeSerializer import UpdateApprenticeSerializer
 from core.base.view.implements.BaseViewset import BaseViewSet
-from apps.general.services.AprendizService import ApprenticeService
+from apps.general.services.ApprenticeService import ApprenticeService
 from apps.general.entity.serializers.CreateAprendiz.ApprenticeSerializer import ApprenticeSerializer
 
 
@@ -24,7 +24,7 @@ class ApprenticeViewset(BaseViewSet):
     # ----------- LIST -----------
     @swagger_auto_schema(
         operation_description="Obtiene una lista de todos los aprendices registrados.",
-        tags=["Aprendiz"]
+        tags=["Apprentice"]
     )
     def list(self, request, *args, **kwargs):
         """
@@ -35,7 +35,7 @@ class ApprenticeViewset(BaseViewSet):
     # ----------- CREATE -----------
     @swagger_auto_schema(
         operation_description="Crea un nuevo aprendiz con la información proporcionada.",
-        tags=["Aprendiz"]
+        tags=["Apprentice"]
     )
     def create(self, request, *args, **kwargs):
         """
@@ -46,7 +46,7 @@ class ApprenticeViewset(BaseViewSet):
     # ----------- RETRIEVE -----------
     @swagger_auto_schema(
         operation_description="Obtiene la información de un aprendiz específico.",
-        tags=["Aprendiz"]
+        tags=["Apprentice"]
     )
     def retrieve(self, request, *args, **kwargs):
         """
@@ -57,7 +57,7 @@ class ApprenticeViewset(BaseViewSet):
     # ----------- UPDATE -----------
     @swagger_auto_schema(
         operation_description="Actualiza la información completa de un aprendiz.",
-        tags=["Aprendiz"]
+        tags=["Apprentice"]
     )
     def update(self, request, *args, **kwargs):
         """
@@ -68,7 +68,7 @@ class ApprenticeViewset(BaseViewSet):
     # ----------- PARTIAL UPDATE -----------
     @swagger_auto_schema(
         operation_description="Actualiza solo algunos campos de un aprendiz.",
-        tags=["Aprendiz"]
+        tags=["Apprentice"]
     )
     def partial_update(self, request, *args, **kwargs):
         """
@@ -79,7 +79,7 @@ class ApprenticeViewset(BaseViewSet):
     # ----------- DELETE -----------
     @swagger_auto_schema(
         operation_description="Elimina físicamente un aprendiz de la base de datos.",
-        tags=["Aprendiz"]
+        tags=["Apprentice"]
     )
     def destroy(self, request, *args, **kwargs):
         """
@@ -91,7 +91,7 @@ class ApprenticeViewset(BaseViewSet):
     @swagger_auto_schema(
         method='delete',
         operation_description="Realiza un borrado lógico (soft delete) del aprendiz especificado.",
-        tags=["Aprendiz"],
+        tags=["Apprentice"],
         responses={
             204: openapi.Response("Eliminado lógicamente correctamente."),
             404: openapi.Response("No encontrado.")
@@ -117,7 +117,7 @@ class ApprenticeViewset(BaseViewSet):
     @swagger_auto_schema(
         operation_description="Obtiene un aprendiz por su ID (nuevo endpoint avanzado).",
         responses={200: GetApprenticeSerializer},
-        tags=["Aprendiz"]
+        tags=["Apprentice"]
     )
     @action(detail=True, methods=['get'], url_path='Create-Aprendiz/GetById')
     def custom_retrieve(self, request, pk=None):
@@ -134,7 +134,7 @@ class ApprenticeViewset(BaseViewSet):
     @swagger_auto_schema(
         request_body=CreateApprenticeSerializer,
         operation_description="Crea un nuevo aprendiz (nuevo endpoint avanzado).",
-        tags=["Aprendiz"]
+        tags=["Apprentice"]
     )
     @action(detail=False, methods=['post'], url_path='Create-Aprendiz/create')
     def custom_create(self, request, *args, **kwargs):
@@ -143,17 +143,22 @@ class ApprenticeViewset(BaseViewSet):
         """
         serializer = CreateApprenticeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        aprendiz, user, person = self.service.create_apprentice(serializer.validated_data)
-        return Response({
-            "detail": "Aprendiz creado correctamente.",
-            "id": aprendiz.id
-        }, status=status.HTTP_201_CREATED)
+        try:
+            aprendiz, user, person = self.service.create_apprentice(serializer.validated_data)
+            return Response({
+                "detail": "Aprendiz creado correctamente.",
+                "id": aprendiz.id
+            }, status=status.HTTP_201_CREATED)
+        except ValueError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     # ----------- LIST (custom) -----------
     @swagger_auto_schema(
         operation_description="Lista todos los aprendices (nuevo endpoint avanzado).",
         responses={200: GetApprenticeSerializer(many=True)},
-        tags=["Aprendiz"]
+        tags=["Apprentice"]
     )
     @action(detail=False, methods=['get'], url_path='Create-Aprendiz/list')
     def custom_list(self, request, *args, **kwargs):
@@ -168,7 +173,7 @@ class ApprenticeViewset(BaseViewSet):
     @swagger_auto_schema(
         request_body=UpdateApprenticeSerializer,
         operation_description="Actualiza los datos de un aprendiz (nuevo endpoint avanzado).",
-        tags=["Aprendiz"]
+        tags=["Apprentice"]
     )
     @action(detail=True, methods=['put'], url_path='Create-Aprendiz/update')
     def custom_update(self, request, pk=None):
@@ -182,13 +187,15 @@ class ApprenticeViewset(BaseViewSet):
             return Response({"detail": "Aprendiz actualizado correctamente.", "id": aprendiz.id}, status=status.HTTP_200_OK)
         except Apprentice.DoesNotExist:
             return Response({"detail": "Aprendiz no encontrado."}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
+        except ValueError as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     # ----------- DELETE (custom) -----------
     @swagger_auto_schema(
         operation_description="Elimina un aprendiz (delete persistencial, nuevo endpoint avanzado).",
-        tags=["Aprendiz"]
+        tags=["Apprentice"]
     )
     @action(detail=True, methods=['delete'], url_path='Create-Aprendiz/delete')
     def custom_destroy(self, request, pk=None):
@@ -200,13 +207,15 @@ class ApprenticeViewset(BaseViewSet):
             return Response({"detail": "Aprendiz eliminado correctamente."}, status=status.HTTP_204_NO_CONTENT)
         except Apprentice.DoesNotExist:
             return Response({"detail": "Aprendiz no encontrado."}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
+        except ValueError as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     # ----------- LOGICAL DELETE OR REACTIVATE -----------
     @swagger_auto_schema(
         operation_description="Elimina lógicamente o reactiva un aprendiz (nuevo endpoint avanzado).",
-        tags=["Aprendiz"]
+        tags=["Apprentice"]
     )
     @action(detail=True, methods=['delete'], url_path='Create-Aprendiz/logical-delete')
     def custom_logical_delete(self, request, pk=None):
@@ -218,7 +227,9 @@ class ApprenticeViewset(BaseViewSet):
             return Response({"detail": result}, status=status.HTTP_200_OK)
         except Apprentice.DoesNotExist:
             return Response({"detail": "Aprendiz no encontrado."}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
+        except ValueError as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         

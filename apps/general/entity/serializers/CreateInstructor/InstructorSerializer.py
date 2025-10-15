@@ -5,8 +5,8 @@ from rest_framework import serializers
 
 
 class InstructorSerializer(serializers.ModelSerializer):
-    person_id = serializers.PrimaryKeyRelatedField(queryset=Person.objects.all())
-    contract_type = serializers.PrimaryKeyRelatedField(queryset=TypeContract.objects.all())
+    person_id = serializers.IntegerField(required=True)
+    contract_type = serializers.IntegerField(required=True)
 
     class Meta:
         model = Instructor

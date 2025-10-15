@@ -9,7 +9,7 @@ class Instructor(models.Model):
         db_table = 'instructor'
     
     person = models.OneToOneField(Person, on_delete=models.CASCADE, related_name='instructor')  # Relación 1:1
-    contract_type = models.OneToOneField('TypeContract', on_delete=models.PROTECT, related_name='instructors')
+    contract_type = models.ForeignKey('TypeContract', on_delete=models.PROTECT, related_name='instructors')
     knowledge_area = models.ForeignKey(KnowledgeArea, on_delete=models.PROTECT, related_name='instructors')
     contract_start_date = models.DateField()
     contract_end_date = models.DateField()

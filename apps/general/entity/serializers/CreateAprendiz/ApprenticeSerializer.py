@@ -4,8 +4,8 @@ from rest_framework import serializers
 
 
 class ApprenticeSerializer(serializers.ModelSerializer):
-    person_id = serializers.PrimaryKeyRelatedField(queryset=Person.objects.all())
-    ficha_id = serializers.PrimaryKeyRelatedField(queryset=Ficha.objects.all())
+    person_id = serializers.IntegerField(required=True)
+    ficha_id = serializers.IntegerField(required=True)
 
     class Meta:
         model = Apprentice

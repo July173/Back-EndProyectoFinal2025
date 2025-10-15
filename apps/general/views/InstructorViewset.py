@@ -242,13 +242,21 @@ class InstructorViewset(BaseViewSet):
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
-        result = self.service.create_instructor(
-            {k: data[k] for k in ['first_name', 'second_name', 'first_last_name', 'second_last_name', 'phone_number', 'type_identification', 'number_identification']},
-            {k: data[k] for k in ['email', 'role_id', 'password'] if k in data},
-            {k: data[k] for k in ['contract_type', 'contract_start_date', 'contract_end_date', 'knowledge_area', 'is_followup_instructor'] if k in data},
-            data['sede_id']
-        )
-        return Response({"detail": "Instructor creado correctamente.", "instructor_id": result["instructor_id"]}, status=status.HTTP_201_CREATED)
+        try:
+            result = self.service.create_instructor(
+                {k: data[k] for k in ['first_name', 'second_name', 'first_last_name', 'second_last_name', 'phone_number', 'type_identification', 'number_identification']},
+                {k: data[k] for k in ['email', 'role_id', 'password'] if k in data},
+                {k: data[k] for k in ['contract_type', 'contract_start_date', 'contract_end_date', 'knowledge_area', 'is_followup_instructor'] if k in data},
+                data['sede_id']
+            )
+            return Response({"detail": "Instructor creado correctamente.", "instructor_id": result["instructor_id"]}, status=status.HTTP_201_CREATED)
+        except ValueError as e:
+            msg = str(e)
+            if 'identificación' in msg:
+                return Response({"detail": "Por favor selecciona un tipo de identificación válido."}, status=status.HTTP_400_BAD_REQUEST)
+            elif 'contrato' in msg:
+                return Response({"detail": "Por favor selecciona un tipo de contrato válido."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": msg}, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
         operation_description="Lista todos los instructores (nuevo endpoint avanzado).",
@@ -289,6 +297,13 @@ class InstructorViewset(BaseViewSet):
             return Response({"detail": "Instructor actualizado correctamente.", "ids": result}, status=status.HTTP_200_OK)
         except Instructor.DoesNotExist:
             return Response({"detail": "Instructor no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+        except ValueError as e:
+            msg = str(e)
+            if 'identificación' in msg:
+                return Response({"type_identification": [msg]}, status=status.HTTP_400_BAD_REQUEST)
+            elif 'contrato' in msg:
+                return Response({"contract_type": [msg]}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": msg}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -297,7 +312,7 @@ class InstructorViewset(BaseViewSet):
         tags=["Instructor"]
     )
     @action(detail=True, methods=['delete'], url_path='Create-Instructor/destroy')
-    def custom_destroy(self, pk=None):
+    def custom_destroy(self, request, pk=None, *args, **kwargs):
         """
         Delete an instructor (persistent delete, advanced endpoint).
         """

@@ -14,13 +14,13 @@ class CreateInstructorSerializer(serializers.Serializer):
     first_last_name = serializers.CharField()
     second_last_name = serializers.CharField(required=False, allow_blank=True)
     phone_number = serializers.IntegerField(required=False)
-    type_identification = serializers.PrimaryKeyRelatedField(queryset=DocumentType.objects.all())
+    type_identification = serializers.IntegerField(required=True)
     number_identification = serializers.IntegerField(required=True)
     # User fields
     email = serializers.EmailField()
     role_id = serializers.IntegerField()
     # Instructor fields
-    contract_type = serializers.PrimaryKeyRelatedField(queryset=TypeContract.objects.all())
+    contract_type = serializers.IntegerField(required=True)
     contract_start_date = serializers.DateField()
     contract_end_date = serializers.DateField()
     knowledge_area = serializers.IntegerField()

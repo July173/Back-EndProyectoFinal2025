@@ -1,7 +1,7 @@
 from core.base.services.implements.baseService.BaseService import BaseService
 from apps.general.repositories.InstructorRepository import InstructorRepository
 from django.db import transaction
-from apps.general.entity.models import Sede, Center, Regional, PersonSede, KnowledgeArea
+from apps.general.entity.models import Sede, PersonSede, KnowledgeArea
 from apps.security.entity.models import User, Person
 from apps.general.entity.models import Instructor
 from apps.security.emails.CreacionCuentaUsers import send_account_created_email
@@ -9,6 +9,7 @@ from core.utils.Validation import is_unique_email, is_unique_document_number, is
 from django.utils.crypto import get_random_string
 from core.utils.Validation import is_sena_email
 from django.core.exceptions import ObjectDoesNotExist
+
 
 class InstructorService(BaseService):
     """
@@ -67,13 +68,16 @@ class InstructorService(BaseService):
             try:
                 sede = Sede.objects.get(id=sede_id)
             except ObjectDoesNotExist:
-                raise ValueError(f'Site with id {sede_id} does not exist.')
+                raise ValueError(f'La sede con id {sede_id} no existe.')
 
             # Prepare data for KnowledgeArea
             knowledge_area_id = instructor_data.pop('knowledge_area', None)
             if not knowledge_area_id:
-                raise ValueError('El campo "knowledge_area" es obligatorio para crear un instructor.')
-            knowledge_area_instance = KnowledgeArea.objects.get(pk=knowledge_area_id)
+                raise ValueError('El campo "Area de conocimiento" es obligatorio para crear un instructor.')
+            try:
+                knowledge_area_instance = KnowledgeArea.objects.get(pk=knowledge_area_id)
+            except KnowledgeArea.DoesNotExist:
+                raise ValueError('El área de conocimiento seleccionada no existe. Verifica y selecciona una opción válida.')
             instructor_data['knowledge_area'] = knowledge_area_instance
 
             # Handle new optional fields
@@ -81,6 +85,19 @@ class InstructorService(BaseService):
             max_assigned_learners = instructor_data.pop('max_assigned_learners', 80)
             instructor_data['assigned_learners'] = assigned_learners
             instructor_data['max_assigned_learners'] = max_assigned_learners
+
+            # Validar type_identification
+            if not person_data.get('type_identification') or str(person_data.get('type_identification')) == '0':
+                raise ValueError('Por favor selecciona un tipo de documento válido.')
+            # Validar contract_type si existe
+            if 'contract_type' in instructor_data:
+                if not instructor_data['contract_type'] or str(instructor_data['contract_type']) == '0':
+                    raise ValueError('Por favor selecciona un tipo de contrato válido.')
+
+            # Validar role_id
+            role_id = user_data.get('role_id')
+            if not role_id or int(role_id) <= 0:
+                raise ValueError('Por favor selecciona un rol válido para el usuario.')
 
             # Prepare data for user
             numero_identificacion = str(person_data['number_identification'])
@@ -180,8 +197,13 @@ class InstructorService(BaseService):
         Completely delete an instructor and related data.
         """
         with transaction.atomic():
-            instructor = Instructor.objects.get(pk=instructor_id)
-            self.repository.delete_all_dates_instructor(instructor)
+            try:
+                instructor = Instructor.objects.get(pk=instructor_id)
+                self.repository.delete_all_dates_instructor(instructor)
+            except Instructor.DoesNotExist:
+                raise ValueError('El instructor especificado no existe.')
+            except Exception as e:
+                raise ValueError(f'Error al eliminar el instructor: {str(e)}')
 
     def logical_delete_instructor(self, instructor_id):
         """

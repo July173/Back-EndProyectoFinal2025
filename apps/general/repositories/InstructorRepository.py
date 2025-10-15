@@ -1,9 +1,11 @@
 from django.db.models import Q
-   
+from apps.security.entity.models.DocumentType import DocumentType
+from apps.security.entity.models.Role import Role
 from django.utils import timezone
 from apps.security.entity.models import Person, User
 from core.base.repositories.implements.baseRepository.BaseRepository import BaseRepository
 from apps.general.entity.models import Instructor, PersonSede, Sede
+from apps.general.entity.models.TypeContract import TypeContract
 from django.db import transaction
 
 class InstructorRepository(BaseRepository):
@@ -38,7 +40,15 @@ class InstructorRepository(BaseRepository):
         Returns instructor, user, person, person_sede.
         """
         with transaction.atomic():
+            if isinstance(person_data.get('type_identification'), int):
+                person_data['type_identification'] = DocumentType.objects.get(pk=person_data['type_identification'])
             person = Person.objects.create(**person_data)
+            # Convert role_id to Role instance if present (assume valid)
+            if 'role_id' in user_data:
+                role_id = user_data['role_id']
+                if role_id and int(role_id) > 0:
+                    user_data['role'] = Role.objects.get(pk=role_id)
+                user_data.pop('role_id')
             if User.objects.filter(email=user_data['email']).exists():
                 # User-facing error message remains in Spanish
                 raise ValueError("El correo ya está registrado.")
@@ -47,6 +57,8 @@ class InstructorRepository(BaseRepository):
             user = User.objects.create_user(email=email, password=password, person=person, **user_data)
             user.registered = False
             user.save()
+            if isinstance(instructor_data.get('contract_type'), int):
+                instructor_data['contract_type'] = TypeContract.objects.get(pk=instructor_data['contract_type'])
             instructor = Instructor.objects.create(person=person, **instructor_data)
             person_sede = None
             if sede_id:

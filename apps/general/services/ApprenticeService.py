@@ -31,9 +31,7 @@ class ApprenticeService(BaseService):
         if isinstance(type_identification, int):
             # If it comes as an ID, check existence
             if not DocumentType.objects.filter(pk=type_identification, active=True).exists():
-                valid_types = DocumentType.objects.filter(active=True).values_list('id', 'name')
-                valid_types_str = ', '.join([f"{id}: {name}" for id, name in valid_types])
-                raise ValueError(f'Invalid identification type. Valid options: {valid_types_str}')
+                raise ValueError('El tipo de identificación seleccionado no existe. Verifica y selecciona una opción válida.')
         else:
             # If it comes as a string (acronym or name), look up the ID
             doc_type = DocumentType.objects.filter(
@@ -41,10 +39,7 @@ class ApprenticeService(BaseService):
                 active=True
             ).first()
             if not doc_type:
-                valid_types = DocumentType.objects.filter(active=True).values_list('acronyms', 'name')
-                valid_types_str = ', '.join([f"{acronym} ({name})" for acronym, name in valid_types])
-                raise ValueError(f'Invalid identification type. Valid options: {valid_types_str}')
-            # Replace with the ID for later use
+                raise ValueError('El tipo de identificación seleccionado no existe. Verifica y selecciona una opción válida.')
             type_identification = doc_type.id
             validated_data['type_identification'] = doc_type.id
 
@@ -67,15 +62,15 @@ class ApprenticeService(BaseService):
 
         # Institutional email validation
         if not user_data['email'] or not is_soy_sena_email(user_data['email']):
-            raise ValueError('Only institutional emails (@soy.sena.edu.co) are allowed for apprentices.')
+            raise ValueError('Solo se permiten correos institucionales (@soy.sena.edu.co) para aprendices.')
 
         # Uniqueness and format validations
         if not is_unique_email(user_data['email'], User):
-            raise ValueError('Email is already registered.')
+            raise ValueError('El correo ya está registrado.')
         if not is_unique_document_number(person_data['number_identification'], Person):
-            raise ValueError('Document number is already registered.')
+            raise ValueError('El número de documento ya está registrado.')
         if person_data['phone_number'] and not is_valid_phone_number(person_data['phone_number']):
-            raise ValueError('Phone number must be exactly 10 digits.')
+            raise ValueError('El número de teléfono debe tener exactamente 10 dígitos.')
 
         with transaction.atomic():
             # Assign password as document number + 2 random characters
@@ -93,7 +88,10 @@ class ApprenticeService(BaseService):
             # Get ficha and create records
             email = user_data.get('email')
             temp_password = password_temporal
-            ficha = Ficha.objects.get(pk=ficha_id)
+            try:
+                ficha = Ficha.objects.get(pk=ficha_id)
+            except Ficha.DoesNotExist:
+                raise ValueError("La ficha especificada no existe.")
             aprendiz, user, person = self.repository.create_all_dates_apprentice(person_data, user_data, ficha)
 
             # Send welcome email
@@ -122,7 +120,7 @@ class ApprenticeService(BaseService):
             if isinstance(type_identification, int):
                 # If it comes as an ID, check existence
                 if not DocumentType.objects.filter(pk=type_identification, active=True).exists():
-                    raise ValueError('Invalid identification type')
+                    raise ValueError('Tipo de identificación inválido.')
             else:
                 # If it comes as a string (acronym or name), look up the ID
                 doc_type = DocumentType.objects.filter(
@@ -130,7 +128,7 @@ class ApprenticeService(BaseService):
                     active=True
                 ).first()
                 if not doc_type:
-                    raise ValueError('Invalid identification type')
+                    raise ValueError('Tipo de identificación inválido.')
                 type_identification = doc_type.id
 
         # Build person data
@@ -153,21 +151,24 @@ class ApprenticeService(BaseService):
         apprentice = Apprentice.objects.get(pk=aprendiz_id)
         # Institutional email validation
         if not user_data['email'] or not is_soy_sena_email(user_data['email']):
-            raise ValueError('Only institutional emails (@soy.sena.edu.co) are allowed for apprentices.')
+            raise ValueError('Solo se permiten correos institucionales (@soy.sena.edu.co) para aprendices.')
         # Get the user using the relation to person
         user = User.objects.filter(person=apprentice.person).first()
         # Uniqueness and format validations
         if not is_unique_email(user_data['email'], User, exclude_user_id=user.id if user else None):
-            raise ValueError('Email is already registered.')
+            raise ValueError('El correo ya está registrado.')
         if not is_unique_document_number(person_data['number_identification'], Person, exclude_person_id=apprentice.person.id):
-            raise ValueError('Document number is already registered.')
+            raise ValueError('El número de documento ya está registrado.')
         if person_data['phone_number'] and not is_valid_phone_number(person_data['phone_number']):
-            raise ValueError('Phone number must be exactly 10 digits.')
+            raise ValueError('El número de teléfono debe tener exactamente 10 dígitos.')
 
         with transaction.atomic():
             # Update ficha and role
             aprendiz = Apprentice.objects.get(pk=aprendiz_id)
-            ficha = Ficha.objects.get(pk=ficha_id)
+            try:
+                ficha = Ficha.objects.get(pk=ficha_id)
+            except Ficha.DoesNotExist:
+                raise ValueError("La ficha especificada no existe.")
             if not role_id:
                 role_id = 2
             try:
@@ -190,7 +191,7 @@ class ApprenticeService(BaseService):
         """
         return Apprentice.objects.all()
 
-    def delete_aprendiz(self, aprendiz_id):
+    def delete_apprentice(self, aprendiz_id):
         """
         Completely delete an apprentice and related data.
         """

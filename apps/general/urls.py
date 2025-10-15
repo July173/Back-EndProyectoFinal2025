@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from apps.general.views.AprendizViewset import ApprenticeViewset
+from apps.general.views.ApprenticeViewset import ApprenticeViewset
 from apps.general.views.CenterViewset import CenterViewset
 from apps.general.views.FichaViewset import FichaViewset
 from apps.general.views.InstructorViewset import InstructorViewset

@@ -21,11 +21,9 @@ class ApprenticeRepository(BaseRepository):
         with transaction.atomic():
             person = Person.objects.create(**person_data)
             if User.objects.filter(email=user_data['email']).exists():
-                # User-facing error message remains in Spanish
                 raise ValueError("El correo ya está registrado.")
             email = user_data.pop('email')
             password = user_data.pop('password')
-            # Remove person_id if present in user_data to avoid overwriting the correct value
             user_data.pop('person_id', None)
             user = User.objects.create_user(email=email, password=password, person=person, **user_data)
             user.registered = False
