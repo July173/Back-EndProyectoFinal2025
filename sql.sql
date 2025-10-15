@@ -1,391 +1,320 @@
-USE bdautogestion;
-INSERT INTO `general_supportcontact` (`id`, `type`, `label`, `value`, `extra_info`, `active`) VALUES
-	(1, 'Email', 'Soporte por correo electrónico', 'servicio@sena.edu.co', 'Respuesta en 24-48 horas', 1),
-	(2, 'Teléfono', 'Linea gratuita nacional', '01 8000 910 270', 'Lunes a viernes: 7:00 AM - 7:00 PM', 1),
-	(3, 'Enlaces útiles', 'Sofia Plus - Oferta Educativa', 'https://betowa.sena.edu.co/', 'enlace', 1);
+USE `bdautogestion`;
 
-INSERT INTO `general_supportschedule` (`id`, `day_range`, `hours`, `is_closed`, `notes`, `active`) VALUES
-	(1, 'Lunes a Viernes', '7:00 AM - 7:00 PM', 0, '', 1),
-	(2, 'Sábados', '8:00 AM - 4:00 PM', 0, '', 1),
-	(3, 'Domingos y festivos', 'ninguna', 1, '', 1);
+INSERT INTO `support_contact` (`id`, `type`, `label`, `value`, `extra_info`, `active`, `delete_at`) VALUES
+  (1, 'Email', 'Soporte por correo electrónico', 'servicio@sena.edu.co', 'Respuesta en 24-48 horas', 1, NULL),
+  (2, 'Teléfono', 'Línea gratuita nacional', '01 8000 910 270', 'Lunes a viernes: 7:00 AM - 7:00 PM', 1, NULL),
+  (3, 'Enlaces útiles', 'Sofia Plus - Oferta Educativa', 'https://betowa.sena.edu.co/', 'enlace', 1, NULL);
 
-INSERT INTO `general_typecontract` (`id`, `name`, `description`, `active`, `delete_at`) VALUES
-	(1, 'Planta', 'Es un contrato estable y permanente, con todos los beneficios laborales de ley.', 1, NULL),
-	(2, 'Contrato', 'Es un acuerdo laboral formal que puede ser por tiempo definido o indefinido, según lo pactado.', 1, NULL),
-	(3, 'OPS', 'Significa Orden de Prestación de Servicios, se usa mucho en el sector público. No genera relación laboral ni prestaciones sociales, solo el pago por el servicio prestado.', 1, NULL),
-	(4, 'Provisional', 'Es un contrato temporal en un cargo mientras se adelanta un concurso o proceso de selección definitivo.', 1, NULL),
-	(5, 'Temporal', 'Es una vinculación por un periodo limitado para cubrir una necesidad específica de la empresa o institución.', 1, NULL),
-	(6, 'Prestación de Servicios', 'Es un contrato civil o comercial, donde se paga por realizar una actividad, sin subordinación ni prestaciones sociales.', 1, NULL);
+INSERT INTO `support_schedule` (`id`, `day_range`, `hours`, `is_closed`, `notes`, `active`, `delete_at`) VALUES
+  (1, 'Lunes a Viernes', '7:00 AM - 7:00 PM', 0, NULL, 1, NULL),
+  (2, 'Sábados', '8:00 AM - 4:00 PM', 0, NULL, 1, NULL),
+  (3, 'Domingos y festivos', 'Ninguna', 1, NULL, 1, NULL);
 
-INSERT INTO `general_typeofqueries` (`id`, `name`, `description`, `active`) VALUES
-	(1, 'Soporte Técnico', 'Para consultas técnicas del sistema', 1),
-	(2, 'Consulta Académica', 'Para consultas académicas del sistema', 1),
-	(3, 'Problemas con las plataforma', 'Para consulta sobre problemas con el sistema', 1),
-	(4, 'Otros', 'Para consulta sobre el sistema', 1);
+INSERT INTO `type_contract` (`id`, `name`, `description`, `active`, `delete_at`) VALUES
+  (1, 'Planta', 'Contrato estable y permanente, con todos los beneficios de ley.', 1, NULL),
+  (2, 'Contrato', 'Acuerdo laboral que puede ser por tiempo definido o indefinido.', 1, NULL),
+  (3, 'OPS', 'Orden de Prestación de Servicios. Sin relación laboral.', 1, NULL),
+  (4, 'Provisional', 'Vinculación temporal mientras se realiza selección definitiva.', 1, NULL),
+  (5, 'Temporal', 'Vinculación por periodo limitado para necesidad específica.', 1, NULL),
+  (6, 'Prestación de Servicios', 'Contrato civil/comercial por actividad determinada.', 1, NULL);
 
-INSERT INTO `security_documenttype` (`id`, `name`, `acronyms`, `active`, `delete_at`) VALUES
-	(1, 'Cédula de Ciudadanía', 'CC', 1, NULL),
-	(2, 'Tarjeta de Identidad', 'TI', 1, NULL),
-	(3, 'Cédula de Extranjería', 'CE', 1, NULL),
-	(4, 'Pasaporte', 'PASSPORT', 1, NULL),
-	(5, 'Número ciego - SENA', 'NUMERO_CIEGO_SENA', 1, NULL),
-	(6, 'Documento Nacional de Identificación', 'DNI', 1, NULL),
-	(7, 'Número de Identificación Tributaria', 'NIT', 1, NULL),
-	(8, 'Permiso por Protección Temporal', 'PERMISO_TEMPORAL', 1, NULL);
+INSERT INTO `type_of_queries` (`id`, `name`, `description`, `active`, `delete_at`) VALUES
+  (1, 'Soporte Técnico', 'Para consultas técnicas del sistema', 1, NULL),
+  (2, 'Consulta Académica', 'Para consultas académicas del sistema', 1, NULL),
+  (3, 'Problemas con la plataforma', 'Para consulta sobre problemas con el sistema', 1, NULL),
+  (4, 'Otros', 'Para consulta sobre el sistema', 1, NULL);
 
+INSERT INTO `document_type` (`id`, `name`, `acronyms`, `active`, `delete_at`) VALUES
+  (1, 'Cédula de Ciudadanía', 'CC', 1, NULL),
+  (2, 'Tarjeta de Identidad', 'TI', 1, NULL),
+  (3, 'Cédula de Extranjería', 'CE', 1, NULL),
+  (4, 'Pasaporte', 'PASSPORT', 1, NULL),
+  (5, 'Número ciego - SENA', 'NUMERO_CIEGO_SENA', 1, NULL),
+  (6, 'Documento Nacional de Identificación', 'DNI', 1, NULL),
+  (7, 'Número de Identificación Tributaria', 'NIT', 1, NULL),
+  (8, 'Permiso por Protección Temporal', 'PERMISO_TEMPORAL', 1, NULL);
 
-INSERT INTO general_regional (name, codeRegional, description, active, address) VALUES
-('Distrito Capital', '001', 'Regional que atiende Bogotá D.C. con formación técnica y tecnológica especializada', true, 'Calle 57 No. 8-69, Bogotá D.C.'),
-('Antioquia', '002', 'Regional de Antioquia enfocada en industria, servicios y desarrollo empresarial', true, 'Calle 52 No. 48-30, Medellín, Antioquia'),
-('Valle del Cauca', '003', 'Regional del Valle especializada en agroindustria y servicios portuarios', true, 'Carrera 15 No. 14-50, Cali, Valle del Cauca'),
-('Atlántico', '004', 'Regional del Atlántico con énfasis en logística portuaria y comercio exterior', true, 'Carrera 46 No. 85-35, Barranquilla, Atlántico'),
-('Santander', '005', 'Regional de Santander especializada en petróleo, gas y energías renovables', true, 'Carrera 21 No. 37-52, Bucaramanga, Santander'),
-('Cundinamarca', '006', 'Regional de Cundinamarca con programas agropecuarios y turísticos', true, 'Calle 8 No. 4-19, Fusagasugá, Cundinamarca'),
-('Huila', '007', 'Regional del Huila con programas en café, turismo y energías renovables', true, 'Carrera 5 No. 8-45, Neiva, Huila'),
-('Norte de Santander', '008', 'Regional Norte de Santander con programas fronterizos y comercio internacional', true, 'Avenida 4 No. 12-52, Cúcuta, Norte de Santander'),
-('Bolívar', '009', 'Regional de Bolívar con énfasis en turismo, logística y servicios portuarios', true, 'Calle 30 No. 17-25, Cartagena, Bolívar'),
-('Meta', '010', 'Regional del Meta enfocada en ganadería, agricultura y petróleo', true, 'Calle 32 No. 28-15, Villavicencio, Meta');
+INSERT INTO `knowledge_area` (`id`, `name`, `description`, `active`, `delete_at`) VALUES
+  (1, 'Diseño', 'Pertenece al área de diseño', 1, NULL);
 
-INSERT INTO general_center (name, codeCenter, address, active, regional_id) VALUES
-('Centro de Biotecnología Agropecuaria', '001001', 'Calle 166 No. 52-05, Bogotá D.C.', true, 1),
-('Centro de Diseño y Metrología', '001002', 'Calle 52 No. 13-65, Bogotá D.C.', true, 1),
-('Centro de Electricidad y Automatización Industrial', '001003', 'Calle 57 No. 8-69, Bogotá D.C.', true, 1),
-('Centro de Gestión de Mercados, Logística y TIC', '001004', 'Carrera 30 No. 17-52, Bogotá D.C.', true, 1),
-('Centro de Servicios y Gestión Empresarial', '002001', 'Calle 52 No. 48-30, Medellín, Antioquia', true, 2),
-('Centro de Tecnología de la Manufactura Avanzada', '002002', 'Carrera 75 No. 42-169, Medellín, Antioquia', true, 2),
-('Centro Minero', '002003', 'Carrera 80 No. 65-223, Medellín, Antioquia', true, 2),
-('Centro de Gestión Tecnológica de Servicios', '003001', 'Carrera 15 No. 14-50, Cali, Valle del Cauca', true, 3),
-('Centro de Biotecnología Industrial', '003002', 'Carrera 52 No. 2 Bis-15, Cali, Valle del Cauca', true, 3),
-('Centro Agropecuario de Buga', '003003', 'Carrera 18 No. 2-24, Buga, Valle del Cauca', true, 3),
-('Centro Industrial y de Aviación', '004001', 'Carrera 46 No. 85-35, Barranquilla, Atlántico', true, 4),
-('Centro de Comercio y Servicios', '004002', 'Calle 30 No. 15-20, Barranquilla, Atlántico', true, 4),
-('Centro de Tecnologías del Gas y Petróleo', '005001', 'Carrera 21 No. 37-52, Bucaramanga, Santander', true, 5),
-('Centro de Gestión Industrial', '005002', 'Calle 35 No. 8-43, Bucaramanga, Santander', true, 5),
-('Centro Agropecuario y de Biotecnología El Porvenir', '005003', 'Km 13 Vía Rionegro, Rionegro, Santander', true, 5),
-('Centro de Desarrollo Agroempresarial', '006001', 'Calle 8 No. 4-19, Fusagasugá, Cundinamarca', true, 6),
-('Centro de Gestión y Fortalecimiento Socioempresarial', '006002', 'Carrera 7 No. 12-45, Fusagasugá, Cundinamarca', true, 6),
-('Centro de la Industria, la Empresa y los Servicios', '007001', 'Carrera 5 No. 8-45, Neiva, Huila', true, 7),
-('Centro Agropecuario La Granja', '007002', 'Km 7 Vía Neiva-Espinal, Neiva, Huila', true, 7),
-('Centro de Desarrollo Agroindustrial y Empresarial', '007003', 'Carrera 4 No. 8-15, Pitalito, Huila', true, 7),
-('Centro de la Industria Petrolera', '008001', 'Avenida 4 No. 12-52, Cúcuta, Norte de Santander', true, 8),
-('Centro Agropecuario La Granja', '008002', 'Carrera 11 No. 10-45, Ocaña, Norte de Santander', true, 8),
-('Centro Náutico Pesquero', '009001', 'Calle 30 No. 17-25, Cartagena, Bolívar', true, 9),
-('Centro de Industria y Construcción', '009002', 'Zona Industrial Mamonal, Cartagena, Bolívar', true, 9),
-('Centro de la Macarena', '010001', 'Calle 32 No. 28-15, Villavicencio, Meta', true, 10),
-('Centro Agropecuario La Macarena', '010002', 'Carrera 11 No. 15-30, Villavicencio, Meta', true, 10);
+INSERT INTO `regional` (`id`, `name`, `code_regional`, `description`, `address`, `active`, `delete_at`) VALUES
+(1, 'Distrito Capital', '001', 'Regional que atiende Bogotá D.C. con formación técnica y tecnológica especializada', 'Calle 57 No. 8-69, Bogotá D.C.', true, NULL),
+(2, 'Antioquia', '002', 'Regional de Antioquia enfocada en industria, servicios y desarrollo empresarial', 'Calle 52 No. 48-30, Medellín, Antioquia', true, NULL),
+(3, 'Valle del Cauca', '003', 'Regional del Valle especializada en agroindustria y servicios portuarios', 'Carrera 15 No. 14-50, Cali, Valle del Cauca', true, NULL),
+(4, 'Atlántico', '004', 'Regional del Atlántico con énfasis en logística portuaria y comercio exterior', 'Carrera 46 No. 85-35, Barranquilla, Atlántico', true, NULL),
+(5, 'Santander', '005', 'Regional de Santander especializada en petróleo, gas y energías renovables', 'Carrera 21 No. 37-52, Bucaramanga, Santander', true, NULL),
+(6, 'Cundinamarca', '006', 'Regional de Cundinamarca con programas agropecuarios y turísticos', 'Calle 8 No. 4-19, Fusagasugá, Cundinamarca', true, NULL),
+(7, 'Huila', '007', 'Regional del Huila con programas en café, turismo y energías renovables', 'Carrera 5 No. 8-45, Neiva, Huila', true, NULL),
+(8, 'Norte de Santander', '008', 'Regional Norte de Santander con programas fronterizos y comercio internacional', 'Avenida 4 No. 12-52, Cúcuta, Norte de Santander', true, NULL),
+(9, 'Bolívar', '009', 'Regional de Bolívar con énfasis en turismo, logística y servicios portuarios', 'Calle 30 No. 17-25, Cartagena, Bolívar', true, NULL),
+(10, 'Meta', '010', 'Regional del Meta enfocada en ganadería, agricultura y petróleo', 'Calle 32 No. 28-15, Villavicencio, Meta', true, NULL);
 
-INSERT INTO general_sede (name, codeSede, address, phoneSede, emailContact, active, center_id) VALUES
-('Sede Principal Biotecnología', '001001001', 'Calle 166 No. 52-05, Bogotá D.C.', '601-5461500', 'biotecnologia@sena.edu.co', true, 1),
-('Sede Ricaurte', '001001002', 'Carrera 13 No. 65-10, Bogotá D.C.', '601-5461501', 'ricaurte@sena.edu.co', true, 1),
-('Sede Principal Diseño', '001002001', 'Calle 52 No. 13-65, Bogotá D.C.', '601-5461500', 'diseno@sena.edu.co', true, 2),
-('Sede Restrepo', '001002002', 'Calle 20 Sur No. 12-30, Bogotá D.C.', '601-5461502', 'restrepo@sena.edu.co', true, 2),
-('Sede Principal Electricidad', '001003001', 'Calle 57 No. 8-69, Bogotá D.C.', '601-5461500', 'electricidad@sena.edu.co', true, 3),
-('Sede Salitre', '001003002', 'Avenida El Dorado No. 68D-51, Bogotá D.C.', '601-5461503', 'salitre@sena.edu.co', true, 3),
-('Sede Principal Mercados', '001004001', 'Carrera 30 No. 17-52, Bogotá D.C.', '601-5461500', 'mercados@sena.edu.co', true, 4),
-('Sede Sur', '001004002', 'Carrera 10 No. 15-20 Sur, Bogotá D.C.', '601-5461504', 'mercados.sur@sena.edu.co', true, 4),
-('Sede Principal Empresarial', '002001001', 'Calle 52 No. 48-30, Medellín, Antioquia', '604-5190600', 'empresarial.medellin@sena.edu.co', true, 5),
-('Sede Itagüí', '002001002', 'Carrera 51 No. 50-20, Itagüí, Antioquia', '604-5190601', 'itagui@sena.edu.co', true, 5),
-('Sede Principal Manufactura', '002002001', 'Carrera 75 No. 42-169, Medellín, Antioquia', '604-5190600', 'manufactura.medellin@sena.edu.co', true, 6),
-('Sede Copacabana', '002002002', 'Carrera 47 No. 70-85, Copacabana, Antioquia', '604-5190602', 'copacabana@sena.edu.co', true, 6),
-('Sede Principal Minero', '002003001', 'Carrera 80 No. 65-223, Medellín, Antioquia', '604-5190600', 'minero.antioquia@sena.edu.co', true, 7),
-('Sede Amalfi', '002003002', 'Calle 12 No. 8-45, Amalfi, Antioquia', '604-5190603', 'amalfi@sena.edu.co', true, 7),
-('Sede Principal Servicios Cali', '003001001', 'Carrera 15 No. 14-50, Cali, Valle del Cauca', '602-4315800', 'servicios.cali@sena.edu.co', true, 8),
-('Sede Norte Cali', '003001002', 'Calle 70 No. 11-50, Cali, Valle del Cauca', '602-4315801', 'norte.cali@sena.edu.co', true, 8),
-('Sede Principal Industrial', '003002001', 'Carrera 52 No. 2 Bis-15, Cali, Valle del Cauca', '602-4315800', 'industrial.cali@sena.edu.co', true, 9),
-('Sede Yumbo', '003002002', 'Carrera 8 No. 15-30, Yumbo, Valle del Cauca', '602-4315802', 'yumbo@sena.edu.co', true, 9),
-('Sede Principal Buga', '003003001', 'Carrera 18 No. 2-24, Buga, Valle del Cauca', '602-4315800', 'buga@sena.edu.co', true, 10),
-('Sede Tuluá', '003003002', 'Calle 26 No. 23-12, Tuluá, Valle del Cauca', '602-4315803', 'tulua@sena.edu.co', true, 10),
-('Sede Principal Aviación', '004001001', 'Carrera 46 No. 85-35, Barranquilla, Atlántico', '605-3304400', 'aviacion.atlantico@sena.edu.co', true, 11),
-('Sede Soledad', '004001002', 'Carrera 21 No. 45-30, Soledad, Atlántico', '605-3304401', 'soledad@sena.edu.co', true, 11),
-('Sede Principal Comercio', '004002001', 'Calle 30 No. 15-20, Barranquilla, Atlántico', '605-3304400', 'comercio.atlantico@sena.edu.co', true, 12),
-('Sede Malambo', '004002002', 'Carrera 12 No. 8-25, Malambo, Atlántico', '605-3304402', 'malambo@sena.edu.co', true, 12),
-('Sede Principal Gas y Petróleo', '005001001', 'Carrera 21 No. 37-52, Bucaramanga, Santander', '607-6910800', 'gas.santander@sena.edu.co', true, 13),
-('Sede Barrancabermeja', '005001002', 'Carrera 28 No. 45-15, Barrancabermeja, Santander', '607-6910801', 'barrancabermeja@sena.edu.co', true, 13),
-('Sede Principal Industrial', '005002001', 'Calle 35 No. 8-43, Bucaramanga, Santander', '607-6910800', 'industrial.santander@sena.edu.co', true, 14),
-('Sede Girón', '005002002', 'Calle 33 No. 25-10, Girón, Santander', '607-6910802', 'giron@sena.edu.co', true, 14),
-('Sede Principal El Porvenir', '005003001', 'Km 13 Vía Rionegro, Rionegro, Santander', '607-6910800', 'elporvenir@sena.edu.co', true, 15),
-('Sede Principal Agroempresarial', '006001001', 'Calle 8 No. 4-19, Fusagasugá, Cundinamarca', '601-8821200', 'agroempresarial.cundinamarca@sena.edu.co', true, 16),
-('Sede Soacha', '006001002', 'Carrera 9 No. 15-21, Soacha, Cundinamarca', '601-8821201', 'soacha@sena.edu.co', true, 16),
-('Sede Principal Socioempresarial', '006002001', 'Carrera 7 No. 12-45, Fusagasugá, Cundinamarca', '601-8821200', 'socioempresarial@sena.edu.co', true, 17),
-('Sede Girardot', '006002002', 'Calle 17 No. 5-22, Girardot, Cundinamarca', '601-8821202', 'girardot@sena.edu.co', true, 17),
-('Sede Principal Neiva', '007001001', 'Carrera 5 No. 8-45, Neiva, Huila', '608-8750400', 'neiva@sena.edu.co', true, 18),
-('Sede Centro', '007001002', 'Calle 12 No. 5-30, Neiva, Huila', '608-8750401', 'neiva.centro@sena.edu.co', true, 18),
-('Sede La Granja', '007002001', 'Km 7 Vía Neiva-Espinal, Neiva, Huila', '608-8750400', 'lagranja.huila@sena.edu.co', true, 19),
-('Sede Campoalegre', '007002002', 'Calle 8 No. 6-15, Campoalegre, Huila', '608-8750402', 'campoalegre@sena.edu.co', true, 19),
-('Sede Principal Pitalito', '007003001', 'Carrera 4 No. 8-15, Pitalito, Huila', '608-8750400', 'pitalito@sena.edu.co', true, 20),
-('Sede Garzón', '007003002', 'Carrera 6 No. 7-45, Garzón, Huila', '608-8750403', 'garzon@sena.edu.co', true, 20),
-('Sede Principal Cúcuta', '008001001', 'Avenida 4 No. 12-52, Cúcuta, Norte de Santander', '607-5820400', 'cucuta@sena.edu.co', true, 21),
-('Sede Villa del Rosario', '008001002', 'Carrera 5 No. 8-20, Villa del Rosario, Norte de Santander', '607-5820401', 'villadelrosario@sena.edu.co', true, 21),
-('Sede Principal Ocaña', '008002001', 'Carrera 11 No. 10-45, Ocaña, Norte de Santander', '607-5820400', 'ocana@sena.edu.co', true, 22),
-('Sede Convención', '008002002', 'Calle 7 No. 9-25, Convención, Norte de Santander', '607-5820402', 'convencion@sena.edu.co', true, 22),
-('Sede Principal Náutico', '009001001', 'Calle 30 No. 17-25, Cartagena, Bolívar', '605-6640600', 'nautico.bolivar@sena.edu.co', true, 23),
-('Sede Bazurto', '009001002', 'Barrio Bazurto, Cartagena, Bolívar', '605-6640601', 'bazurto@sena.edu.co', true, 23),
-('Sede Principal Industrial', '009002001', 'Zona Industrial Mamonal, Cartagena, Bolívar', '605-6640600', 'industrial.bolivar@sena.edu.co', true, 24),
-('Sede Magangué', '009002002', 'Calle 15 No. 8-30, Magangué, Bolívar', '605-6640602', 'magangue@sena.edu.co', true, 24),
-('Sede Principal Villavicencio', '010001001', 'Calle 32 No. 28-15, Villavicencio, Meta', '608-6620400', 'villavicencio@sena.edu.co', true, 25),
-('Sede Kirpas', '010001002', 'Carrera 35 No. 25-40, Villavicencio, Meta', '608-6620401', 'kirpas@sena.edu.co', true, 25),
-('Sede Agropecuario Macarena', '010002001', 'Carrera 11 No. 15-30, Villavicencio, Meta', '608-6620400', 'agropecuario.meta@sena.edu.co', true, 26),
-('Sede Granada', '010002002', 'Carrera 9 No. 10-15, Granada, Meta', '608-6620402', 'granada@sena.edu.co', true, 26);
+INSERT INTO `center` (`id`, `name`, `code_center`, `address`, `active`, `delete_at`, `regional_id_id`) VALUES
+(1, 'Centro de Biotecnología Agropecuaria', '001001', 'Calle 166 No. 52-05, Bogotá D.C.', true, NULL, 1),
+(2, 'Centro de Diseño y Metrología', '001002', 'Calle 52 No. 13-65, Bogotá D.C.', true, NULL, 1),
+(3, 'Centro de Electricidad y Automatización Industrial', '001003', 'Calle 57 No. 8-69, Bogotá D.C.', true, NULL, 1),
+(4, 'Centro de Gestión de Mercados, Logística y TIC', '001004', 'Carrera 30 No. 17-52, Bogotá D.C.', true, NULL, 1),
+(5, 'Centro de Servicios y Gestión Empresarial', '002001', 'Calle 52 No. 48-30, Medellín, Antioquia', true, NULL, 2),
+(6, 'Centro de Tecnología de la Manufactura Avanzada', '002002', 'Carrera 75 No. 42-169, Medellín, Antioquia', true, NULL, 2),
+(7, 'Centro Minero', '002003', 'Carrera 80 No. 65-223, Medellín, Antioquia', true, NULL, 2),
+(8, 'Centro de Gestión Tecnológica de Servicios', '003001', 'Carrera 15 No. 14-50, Cali, Valle del Cauca', true, NULL, 3),
+(9, 'Centro de Biotecnología Industrial', '003002', 'Carrera 52 No. 2 Bis-15, Cali, Valle del Cauca', true, NULL, 3),
+(10, 'Centro Agropecuario de Buga', '003003', 'Carrera 18 No. 2-24, Buga, Valle del Cauca', true, NULL, 3),
+(11, 'Centro Industrial y de Aviación', '004001', 'Carrera 46 No. 85-35, Barranquilla, Atlántico', true, NULL, 4),
+(12, 'Centro de Comercio y Servicios', '004002', 'Calle 30 No. 15-20, Barranquilla, Atlántico', true, NULL, 4),
+(13, 'Centro de Tecnologías del Gas y Petróleo', '005001', 'Carrera 21 No. 37-52, Bucaramanga, Santander', true, NULL, 5),
+(14, 'Centro de Gestión Industrial', '005002', 'Calle 35 No. 8-43, Bucaramanga, Santander', true, NULL, 5),
+(15, 'Centro Agropecuario y de Biotecnología El Porvenir', '005003', 'Km 13 Vía Rionegro, Rionegro, Santander', true, NULL, 5),
+(16, 'Centro de Desarrollo Agroempresarial', '006001', 'Calle 8 No. 4-19, Fusagasugá, Cundinamarca', true, NULL, 6),
+(17, 'Centro de Gestión y Fortalecimiento Socioempresarial', '006002', 'Carrera 7 No. 12-45, Fusagasugá, Cundinamarca', true, NULL, 6),
+(18, 'Centro de la Industria, la Empresa y los Servicios', '007001', 'Carrera 5 No. 8-45, Neiva, Huila', true, NULL, 7),
+(19, 'Centro Agropecuario La Granja', '007002', 'Km 7 Vía Neiva-Espinal, Neiva, Huila', true, NULL, 7),
+(20, 'Centro de Desarrollo Agroindustrial y Empresarial', '007003', 'Carrera 4 No. 8-15, Pitalito, Huila', true, NULL, 7),
+(21, 'Centro de la Industria Petrolera', '008001', 'Avenida 4 No. 12-52, Cúcuta, Norte de Santander', true, NULL, 8),
+(22, 'Centro Agropecuario La Granja', '008002', 'Carrera 11 No. 10-45, Ocaña, Norte de Santander', true, NULL, 8),
+(23, 'Centro Náutico Pesquero', '009001', 'Calle 30 No. 17-25, Cartagena, Bolívar', true, NULL, 9),
+(24, 'Centro de Industria y Construcción', '009002', 'Zona Industrial Mamonal, Cartagena, Bolívar', true, NULL, 9),
+(25, 'Centro de la Macarena', '010001', 'Calle 32 No. 28-15, Villavicencio, Meta', true, NULL, 10),
+(26, 'Centro Agropecuario La Macarena', '010002', 'Carrera 11 No. 15-30, Villavicencio, Meta', true, NULL, 10);
 
-INSERT INTO general_knowledgearea VALUES (1,'Diseño','Pertence al area de diseño',1,NULL);
+INSERT INTO `sede` (`id`, `name`, `code_sede`, `address`, `phone_sede`, `email_contact`, `active`, `delete_at`, `center_id_id`) VALUES
+(1, 'Sede Principal Biotecnología', '001001001', 'Calle 166 No. 52-05, Bogotá D.C.', '6015461500', 'biotecnologia@sena.edu.co', true, NULL, 1),
+(2, 'Sede Ricaurte', '001001002', 'Carrera 13 No. 65-10, Bogotá D.C.', '6015461501', 'ricaurte@sena.edu.co', true, NULL, 1),
+(3, 'Sede Principal Diseño', '001002001', 'Calle 52 No. 13-65, Bogotá D.C.', '6015461500', 'diseno@sena.edu.co', true, NULL, 2),
+(4, 'Sede Restrepo', '001002002', 'Calle 20 Sur No. 12-30, Bogotá D.C.', '6015461502', 'restrepo@sena.edu.co', true, NULL, 2),
+(5, 'Sede Principal Electricidad', '001003001', 'Calle 57 No. 8-69, Bogotá D.C.', '6015461500', 'electricidad@sena.edu.co', true, NULL, 3),
+(6, 'Sede Salitre', '001003002', 'Avenida El Dorado No. 68D-51, Bogotá D.C.', '6015461503', 'salitre@sena.edu.co', true, NULL, 3),
+(7, 'Sede Principal Mercados', '001004001', 'Carrera 30 No. 17-52, Bogotá D.C.', '6015461500', 'mercados@sena.edu.co', true, NULL, 4),
+(8, 'Sede Sur', '001004002', 'Carrera 10 No. 15-20 Sur, Bogotá D.C.', '6015461504', 'mercados.sur@sena.edu.co', true, NULL, 4),
+(9, 'Sede Principal Empresarial', '002001001', 'Calle 52 No. 48-30, Medellín, Antioquia', '6045190600', 'empresarial.medellin@sena.edu.co', true, NULL, 5),
+(10, 'Sede Itagüí', '002001002', 'Carrera 51 No. 50-20, Itagüí, Antioquia', '6045190601', 'itagui@sena.edu.co', true, NULL, 5),
+(11, 'Sede Principal Manufactura', '002002001', 'Carrera 75 No. 42-169, Medellín, Antioquia', '6045190600', 'manufactura.medellin@sena.edu.co', true, NULL, 6),
+(12, 'Sede Copacabana', '002002002', 'Carrera 47 No. 70-85, Copacabana, Antioquia', '6045190602', 'copacabana@sena.edu.co', true, NULL, 6),
+(13, 'Sede Principal Minero', '002003001', 'Carrera 80 No. 65-223, Medellín, Antioquia', '6045190600', 'minero.antioquia@sena.edu.co', true, NULL, 7),
+(14, 'Sede Amalfi', '002003002', 'Calle 12 No. 8-45, Amalfi, Antioquia', '6045190603', 'amalfi@sena.edu.co', true, NULL, 7),
+(15, 'Sede Principal Servicios Cali', '003001001', 'Carrera 15 No. 14-50, Cali, Valle del Cauca', '6024315800', 'servicios.cali@sena.edu.co', true, NULL, 8),
+(16, 'Sede Norte Cali', '003001002', 'Calle 70 No. 11-50, Cali, Valle del Cauca', '6024315801', 'norte.cali@sena.edu.co', true, NULL, 8),
+(17, 'Sede Principal Industrial', '003002001', 'Carrera 52 No. 2 Bis-15, Cali, Valle del Cauca', '6024315800', 'industrial.cali@sena.edu.co', true, NULL, 9),
+(18, 'Sede Yumbo', '003002002', 'Carrera 8 No. 15-30, Yumbo, Valle del Cauca', '6024315802', 'yumbo@sena.edu.co', true, NULL, 9),
+(19, 'Sede Principal Buga', '003003001', 'Carrera 18 No. 2-24, Buga, Valle del Cauca', '6024315800', 'buga@sena.edu.co', true, NULL, 10),
+(20, 'Sede Tuluá', '003003002', 'Calle 26 No. 23-12, Tuluá, Valle del Cauca', '6024315803', 'tulua@sena.edu.co', true, NULL, 10),
+(21, 'Sede Principal Aviación', '004001001', 'Carrera 46 No. 85-35, Barranquilla, Atlántico', '6053304400', 'aviacion.atlantico@sena.edu.co', true, NULL, 11),
+(22, 'Sede Soledad', '004001002', 'Carrera 21 No. 45-30, Soledad, Atlántico', '6053304401', 'soledad@sena.edu.co', true, NULL, 11),
+(23, 'Sede Principal Comercio', '004002001', 'Calle 30 No. 15-20, Barranquilla, Atlántico', '6053304400', 'comercio.atlantico@sena.edu.co', true, NULL, 12),
+(24, 'Sede Malambo', '004002002', 'Carrera 12 No. 8-25, Malambo, Atlántico', '6053304402', 'malambo@sena.edu.co', true, NULL, 12),
+(25, 'Sede Principal Gas y Petróleo', '005001001', 'Carrera 21 No. 37-52, Bucaramanga, Santander', '6076910800', 'gas.santander@sena.edu.co', true, NULL, 13),
+(26, 'Sede Barrancabermeja', '005001002', 'Carrera 28 No. 45-15, Barrancabermeja, Santander', '6076910801', 'barrancabermeja@sena.edu.co', true, NULL, 13),
+(27, 'Sede Principal Industrial', '005002001', 'Calle 35 No. 8-43, Bucaramanga, Santander', '6076910800', 'industrial.santander@sena.edu.co', true, NULL, 14),
+(28, 'Sede Girón', '005002002', 'Calle 33 No. 25-10, Girón, Santander', '6076910802', 'giron@sena.edu.co', true, NULL, 14),
+(29, 'Sede Principal El Porvenir', '005003001', 'Km 13 Vía Rionegro, Rionegro, Santander', '6076910800', 'elporvenir@sena.edu.co', true, NULL, 15),
+(30, 'Sede Principal Agroempresarial', '006001001', 'Calle 8 No. 4-19, Fusagasugá, Cundinamarca', '6018821200', 'agroempresarial.cundinamarca@sena.edu.co', true, NULL, 16),
+(31, 'Sede Soacha', '006001002', 'Carrera 9 No. 15-21, Soacha, Cundinamarca', '6018821201', 'soacha@sena.edu.co', true, NULL, 16),
+(32, 'Sede Principal Socioempresarial', '006002001', 'Carrera 7 No. 12-45, Fusagasugá, Cundinamarca', '6018821200', 'socioempresarial@sena.edu.co', true, NULL, 17),
+(33, 'Sede Girardot', '006002002', 'Calle 17 No. 5-22, Girardot, Cundinamarca', '6018821202', 'girardot@sena.edu.co', true, NULL, 17),
+(34, 'Sede Principal Neiva', '007001001', 'Carrera 5 No. 8-45, Neiva, Huila', '6088750400', 'neiva@sena.edu.co', true, NULL, 18),
+(35, 'Sede Centro', '007001002', 'Calle 12 No. 5-30, Neiva, Huila', '6088750401', 'neiva.centro@sena.edu.co', true, NULL, 18),
+(36, 'Sede La Granja', '007002001', 'Km 7 Vía Neiva-Espinal, Neiva, Huila', '6088750400', 'lagranja.huila@sena.edu.co', true, NULL, 19),
+(37, 'Sede Campoalegre', '007002002', 'Calle 8 No. 6-15, Campoalegre, Huila', '6088750402', 'campoalegre@sena.edu.co', true, NULL, 19),
+(38, 'Sede Principal Pitalito', '007003001', 'Carrera 4 No. 8-15, Pitalito, Huila', '6088750400', 'pitalito@sena.edu.co', true, NULL, 20),
+(39, 'Sede Garzón', '007003002', 'Carrera 6 No. 7-45, Garzón, Huila', '6088750403', 'garzon@sena.edu.co', true, NULL, 20),
+(40, 'Sede Principal Cúcuta', '008001001', 'Avenida 4 No. 12-52, Cúcuta, Norte de Santander', '6075820400', 'cucuta@sena.edu.co', true, NULL, 21),
+(41, 'Sede Villa del Rosario', '008001002', 'Carrera 5 No. 8-20, Villa del Rosario, Norte de Santander', '6075820401', 'villadelrosario@sena.edu.co', true, NULL, 21),
+(42, 'Sede Principal Ocaña', '008002001', 'Carrera 11 No. 10-45, Ocaña, Norte de Santander', '6075820400', 'ocana@sena.edu.co', true, NULL, 22),
+(43, 'Sede Convención', '008002002', 'Calle 7 No. 9-25, Convención, Norte de Santander', '6075820402', 'convencion@sena.edu.co', true, NULL, 22),
+(44, 'Sede Principal Náutico', '009001001', 'Calle 30 No. 17-25, Cartagena, Bolívar', '6056640600', 'nautico.bolivar@sena.edu.co', true, NULL, 23),
+(45, 'Sede Bazurto', '009001002', 'Barrio Bazurto, Cartagena, Bolívar', '6056640601', 'bazurto@sena.edu.co', true, NULL, 23),
+(46, 'Sede Principal Industrial', '009002001', 'Zona Industrial Mamonal, Cartagena, Bolívar', '6056640600', 'industrial.bolivar@sena.edu.co', true, NULL, 24),
+(47, 'Sede Magangué', '009002002', 'Calle 15 No. 8-30, Magangué, Bolívar', '6056640602', 'magangue@sena.edu.co', true, NULL, 24),
+(48, 'Sede Principal Villavicencio', '010001001', 'Calle 32 No. 28-15, Villavicencio, Meta', '6086620400', 'villavicencio@sena.edu.co', true, NULL, 25),
+(49, 'Sede Kirpas', '010001002', 'Carrera 35 No. 25-40, Villavicencio, Meta', '6086620401', 'kirpas@sena.edu.co', true, NULL, 25),
+(50, 'Sede Agropecuario Macarena', '010002001', 'Carrera 11 No. 15-30, Villavicencio, Meta', '6086620400', 'agropecuario.meta@sena.edu.co', true, NULL, 26),
+(51, 'Sede Granada', '010002002', 'Carrera 9 No. 10-15, Granada, Meta', '6086620402', 'granada@sena.edu.co', true, NULL, 26);
 
-INSERT INTO assign_modalityproductivestage VALUES(1,'Contrato de aprendizaje','El aprendiz desarrolla su etapa practica con contrato de aprendizaje',1,NULL);
+INSERT INTO `program` (`id`, `name`, `code_program`, `description`, `active`, `delete_at`) VALUES
+  (1, 'Análisis y Desarrollo de Software', 1001, 'Programa de desarrollo', 1, NULL),
+  (2, 'Diseño Gráfico', 1002, 'Programa de diseño', 1, NULL);
 
-INSERT INTO general_program VALUES 
-(1,1001,'Análisis y Desarrollo de Software','Tecnologo','Programa de desarrollo',1,NULL),
-(2,1002,'Diseño Gráfico','Tecnico','Programa de diseño',1,NULL);
+INSERT INTO `ficha` (`id`, `file_number`, `type_modality`, `active`, `delete_at`, `program_id`) VALUES
+  (1, 2901817, 'Presencial', 1, NULL, 1),
+  (2, 2901885, 'Virtual', 1, NULL, 2);
 
-INSERT INTO general_ficha (file_number, program_id, active) VALUES 
-(2901817,1,1),
-(2901885,2,1);
-
-INSERT INTO security_module VALUES 
-(1,'Inicio','Parte inicial del sistema',1,NULL),
-(2,'Seguridad','Administra el sistema',1,NULL),
-(3,'Asignar seguimientos','Todo lo del proceso de asignar un instructor a un aprendiz para el seguimiento de su etapa practica',1,NULL);
+INSERT INTO `modality_productive_stage` (`id`, `name_modality`, `description`, `active`, `delete_at`) VALUES
+  (1, 'Contrato de aprendizaje', 'El aprendiz desarrolla su etapa práctica con contrato de aprendizaje', 1, NULL);
 
 
-INSERT INTO security_form VALUES
-(1,'Administración','Toda la seccion de control de administración del sistema, del modulo de seguridad','/admin',1,NULL),
-(2,'Registro Masivo','Toda la seccion de registro de usuarios masivamente mediante plantillas de excel','/mass-registration',1,NULL),
-(3,'Inicio','El inicio del sistema','/home',1,NULL),
-(4,'Solicitud','solicitud de aprendiz para asignacion de instructor','/request-registration',1,NULL),
-(5,'Reasignar','El coordinador reasigna instructor a algun aprendiz','/reassign',1,NULL),
-(6,'Seguimiento','El instructor hace seguimiento a los aprendices en su etapa practica','/following',1,NULL),
-(7,'Historial de seguimiento','Historial de todos los seguimientos de todos los aprendices','/following-history',1,NULL),
-(8,'Evaluar visita final','El coordinador evalua la visita final que suben los instructores','/evaluate-final-visit',1,NULL),
-(9,'Asignar','El coordinaro asigna instructor a aprendiz','/assign',1,NULL);
+INSERT INTO `legal_document` (`id`, `type`, `title`, `effective_date`, `last_update`, `active`, `delete_at`) VALUES
+  (1, 'terms', 'Términos y condiciones', '2025-10-01', '2025-10-01', 1, NULL);
 
-INSERT INTO security_permission VALUES 
-(1,'Ver','Visualizar los datos'),
-(2,'Editar','Editar los datos'),
-(3,'Registrar','ingresar datos nuevos'),
-(4,'Eliminar','Eliminar permanentemente datos'),
-(5,'Activar','Activar datos');
+INSERT INTO `legal_section` (`id`, `order`, `code`, `title`, `content`, `active`, `delete_at`, `document_id_id`, `parent_id_id`) VALUES
+  (1, 1, '1', 'Aceptación de los términos', 'Al acceder y utilizar los servicios del SENA (Servicio Nacional de Aprendizaje), usted acepta estar sujeto a estos términos y condiciones de uso. Si no está de acuerdo con alguno de estos términos, no debe utilizar nuestros servicios. El SENA se reserva el derecho de modificar estos términos en cualquier momento. Las modificaciones entrarán en vigor inmediatamente después de su publicación en este sitio web.', 1, NULL, 1, NULL),
+  (2, 2, '2', 'Descripción de los servicios', 'El SENA ofrece formación profesional integral gratuita en los siguientes servicios:\n - Programas de formación técnica y tecnológica\n - Cursos complementarios virtuales y presenciales\n - Servicios de empleabilidad y emprendimiento\n - Plataformas educativas digitales (Sofia Plus, LMS SENA)\n - Servicios de bienestar al aprendiz\n - Certificación de competencias laborales', 1, NULL, 1, NULL),
+  (3, 3, '3', 'Obligaciones del usuario', NULL, 1, NULL, 1, NULL),
+  (4, 4, '4', 'Derechos de propiedad intelectual', 'Todo el contenido disponible en las plataformas del SENA, incluyendo pero no limitado a textos, gráficos, logotipos, iconos, imágenes, clips de audio, descargas digitales y compilaciones de datos, es propiedad del SENA o de sus proveedores de contenido y está protegido por las leyes de derechos de autor de Colombia e internacionales. Los usuarios pueden utilizar el contenido únicamente para fines educativos personales y no comerciales, respetando siempre los créditos correspondientes.', 1, NULL, 1, NULL),
+  (5, 5, '5', 'Protección de datos personales', 'El SENA se compromete a proteger la privacidad de los usuarios conforme a la Ley 1581 de 2012 y el Decreto 1377 de 2013 sobre Protección de Datos Personales en Colombia. Para más información sobre cómo recopilamos, utilizamos y protegemos sus datos personales, consulte nuestra Política de Privacidad.', 1, NULL, 1, NULL),
+  (6, 6, '6', 'Limitación de responsabilidad', 'El SENA no será responsable por daños directos, indirectos, incidentales, especiales o consecuenciales que resulten del uso o la imposibilidad de uso de nuestros servicios. Nos esforzamos por mantener la disponibilidad continua de nuestros servicios, pero no garantizamos que estén libres de interrupciones, errores o virus.', 1, NULL, 1, NULL),
+  (7, 7, '7', 'Terminación del servicio', 'El SENA se reserva el derecho de suspender o terminar el acceso a sus servicios a cualquier usuario que viole estos términos y condiciones, sin previo aviso. Los usuarios pueden solicitar la terminación de su cuenta en cualquier momento contactando a nuestro servicio de soporte.', 1, NULL, 1, NULL),
+  (8, 8, '8', 'Ley Aplicable y jurisdicción', 'Estos términos y condiciones se rigen por las leyes de la República de Colombia. Cualquier disputa que surja en relación con estos términos será sometida a la jurisdicción exclusiva de los tribunales competentes de Bogotá D.C., Colombia.', 1, NULL, 1, NULL),
+  (9, 1, '3.1', 'Requisitos de registro', '- Proporcionar información verdadera, precisa y completa\n - Mantener actualizada su información personal\n - Ser responsables de la confidencialidad de sus credenciales\n - Cumplir con los requisitos académicos establecidos', 1, NULL, 1, 3),
+  (10, 2, '3.2', 'Conducta del usuario', '- Respetar las normas de convivencia institucional\n - No utilizar los servicios para fines ilegales o no autorizados\n - Mantener un comportamiento ético y profesional\n - Respetar los derechos de propiedad intelectual\n - No compartir contenido inapropiado o ofensivo', 1, NULL, 1, 3);
 
-INSERT INTO security_role VALUES 
-(1,'Administrador','Administra y tiene acceso absoluto al sistema',1,NULL),
-(2,'Aprendiz','Accede a sus secciones permitidas en el sistema',1,NULL),
-(3,'Instructor','Accede a sus secciones permitidas en el sistema',1,NULL),
-(4,'Coordinador','El coordinador evalua y sigue los procesos',1,NULL);
+INSERT INTO `legal_document` (`id`, `type`, `title`, `effective_date`, `last_update`, `active`, `delete_at`) VALUES
+  (2, 'privacy', 'Política de privacidad', '2025-10-01', '2025-10-01', 1, NULL);
 
-INSERT INTO security_formmodule VALUES
-(1,1,2),
-(2,2,2),
-(3,3,1),
-(10,4,3),
-(11,6,3),
-(12,5,3),
-(13,7,3),
-(14,8,3),
-(15,9,3);
+INSERT INTO `legal_section` (`id`, `order`, `code`, `title`, `content`, `active`, `delete_at`, `document_id_id`, `parent_id_id`) VALUES
+  (11, 1, '1', 'Información que recopilamos', NULL, 1, NULL, 2, NULL),
+  (12, 1, '1.1', 'Información personal', 'Nombres y apellidos completos\nNúmero de identificación\nFecha de nacimiento\nDirección de residencia\nCorreo electrónico\nNúmero de teléfono\nInformación académica y profesional\nEstado socioeconómico (cuando aplique)', 1, NULL, 2, 11),
+  (13, 2, '1.2', 'Información técnica', 'Dirección IP\nTipo de navegador y versión\nSistema operativo\nPáginas visitadas y tiempo de permanencia\nCookies y tecnologías similares', 1, NULL, 2, 11),
+  (14, 2, '2', 'Uso de la información', NULL, 1, NULL, 2, NULL),
+  (15, 1, '2.1', 'Servicios educativos', 'Gestión de inscripciones y matrículas\nSeguimiento académico y evaluación\nEmisión de certificados y títulos\nComunicación sobre programas y cursos', 1, NULL, 2, 14),
+  (16, 2, '2.2', 'Servicios administrativos', 'Verificación de identidad\nGestión de pagos (cuando aplique)\nSoporte técnico y atención al usuario\nCumplimiento de obligaciones legales', 1, NULL, 2, 14),
+  (17, 3, '2.3', 'Mejora de servicios', 'Análisis estadístico y de rendimiento\nPersonalización de la experiencia educativa\nDesarrollo de nuevos programas formativos\nInvestigación educativa institucional', 1, NULL, 2, 14),
+  (18, 3, '3', 'Protección de datos', NULL, 1, NULL, 2, NULL),
+  (19, 1, '3.1', 'Medidas técnicas', 'Cifrado de datos en tránsito y en reposo\nFirewalls y sistemas de detección de intrusiones\nCopias de seguridad regulares\nActualizaciones de seguridad constantes\nControl de acceso basado en roles', 1, NULL, 2, 18),
+  (20, 2, '3.2', 'Medidas organizativas', 'Políticas internas de manejo de datos\nCapacitación del personal en protección de datos\nProcedimientos de respuesta a incidentes\nAuditorías regulares de seguridad\nAcuerdos de confidencialidad con terceros', 1, NULL, 2, 18),
+  (21, 4, '4', 'Derechos sobre los datos', 'Acceso: Conocer qué datos tenemos sobre usted\nRectificación: Corregir datos inexactos o incompletos\nActualización: Mantener sus datos actualizados\nSupresión: Solicitar la eliminación de sus datos (cuando sea posible)\nOposición: Oponerse al tratamiento de sus datos en ciertos casos\nPortabilidad: Obtener una copia de sus datos en formato estructurado\n\nPara ejercer estos derechos, puede contactarnos a través de los canales indicados al final de esta política.', 1, NULL, 2, NULL),
+  (22, 5, '5', 'Compartir información', NULL, 1, NULL, 2, NULL),
+  (23, 1, '5.1', 'Entidades Gubernamentales', 'Con entidades del gobierno colombiano cuando sea requerido por ley o para cumplir con obligaciones regulatorias.', 1, NULL, 2, 22),
+  (24, 2, '5.2', 'Proveedores de Servicios', 'Con proveedores de servicios tecnológicos bajo estrictos acuerdos de confidencialidad.', 1, NULL, 2, 22),
+  (25, 3, '5.3', 'Instituciones Educativas', 'Con otras instituciones educativas para fines de articulación académica y reconocimiento de estudios.', 1, NULL, 2, 22),
+  (26, 6, '6', 'Retención de datos', 'Datos académicos: permanentes para efectos de certificación\nDatos de contacto: mientras mantenga relación activa con el SENA\nDatos técnicos: máximo 2 años\nDatos financieros: según legislación contable y tributaria', 1, NULL, 2, NULL),
+  (27, 7, '7', 'Menores de edad', 'Los menores de edad pueden utilizar nuestros servicios con el consentimiento de sus padres o tutores legales. \nMedidas adicionales:\n- Verificación del consentimiento parental\n- Limitación en la recopilación de datos personales\n- Supervisión adicional en el procesamiento de datos\n- Derechos especiales de eliminación de datos', 1, NULL, 2, NULL);
 
-INSERT INTO security_rolformpermission VALUES 
-(16,3,1,2),(17,3,1,3),(18,4,1,2),(19,4,4,2),(20,2,1,4),(21,2,2,4),(22,2,3,4),(23,2,4,4),(24,2,5,4),(25,3,1,4),(26,3,2,4),(27,3,3,4),(28,3,4,4),(29,3,5,4),(30,5,1,4),(31,5,2,4),(32,5,3,4),(33,5,4,4),(34,5,5,4),(35,7,1,4),(36,7,2,4),(37,7,3,4),(38,7,4,4),(39,7,5,4),(40,8,1,4),(41,8,2,4),(42,8,3,4),(43,8,4,4),(44,8,5,4),(45,9,1,4),(46,9,2,4),(47,9,3,4),(48,9,4,4),(49,9,5,4),(50,3,1,3),(51,6,1,3),(52,6,2,3),(53,6,3,3),(54,6,4,3),(55,6,5,3),(56,7,1,3),(57,7,2,3),(58,7,3,3),(59,7,4,3),(60,7,5,3),(106,1,1,1),(107,1,2,1),(108,1,3,1),(109,1,4,1),(110,1,5,1),(111,1,1,1),(112,1,2,1),(113,1,3,1),(114,1,4,1),(115,1,5,1),(116,2,1,1),(117,2,2,1),(118,2,3,1),(119,2,4,1),(120,2,5,1),(121,2,1,1),(122,2,2,1),(123,2,3,1),(124,2,4,1),(125,2,5,1),(126,3,1,1),(127,3,2,1),(128,3,3,1),(129,3,4,1),(130,3,5,1),(131,3,1,1),(132,3,2,1),(133,3,3,1),(134,3,4,1),(135,3,5,1),(136,5,1,1),(137,5,2,1),(138,5,3,1),(139,5,4,1),(140,5,5,1),(141,7,1,1),(142,7,2,1),(143,7,3,1),(144,7,4,1),(145,7,5,1),(146,8,1,1),(147,8,2,1),(148,8,3,1),(149,8,4,1),(150,8,5,1),(151,9,1,1),(152,9,2,1),(153,9,3,1),(154,9,4,1),(155,9,5,1);
+INSERT INTO `module` (`id`, `name`, `description`, `active`, `delete_at`) VALUES
+  (1, 'Inicio', 'Parte inicial del sistema', 1, NULL),
+  (2, 'Seguridad', 'Administra el sistema', 1, NULL),
+  (3, 'Asignar seguimientos', 'Proceso de asignación y seguimiento de etapa práctica', 1, NULL);
 
-USE bdautogestion;
+INSERT INTO `form` (`id`, `name`, `description`, `path`, `active`, `delete_at`) VALUES
+  (1, 'Administración', 'Sección de control de administración del sistema (módulo seguridad)', '/admin', 1, NULL),
+  (2, 'Registro Masivo', 'Registro de usuarios masivamente mediante plantillas de excel', '/mass-registration', 1, NULL),
+  (3, 'Inicio', 'Inicio del sistema', '/home', 1, NULL),
+  (4, 'Solicitud', 'Solicitud de aprendiz para asignación de instructor', '/request-registration', 1, NULL),
+  (5, 'Reasignar', 'El coordinador reasigna instructor a aprendiz', '/reassign', 1, NULL),
+  (6, 'Seguimiento', 'El instructor hace seguimiento a los aprendices', '/following', 1, NULL),
+  (7, 'Historial de seguimiento', 'Historial de todos los seguimientos', '/following-history', 1, NULL),
+  (8, 'Evaluar visita final', 'El coordinador evalúa la visita final', '/evaluate-final-visit', 1, NULL),
+  (9, 'Asignar', 'El coordinador asigna instructor a aprendiz', '/assign', 1, NULL);
 
-INSERT INTO `general_legaldocument` (`type`, `title`, `effective_date`, `last_update`, `active`)
-VALUES ('terms', 'Términos y condiciones', '2025-10-01', '2025-10-01', 1);
+INSERT INTO `permission` (`id`, `type_permission`, `description`, `delete_at`, `active`) VALUES
+  (1, 'Ver', 'Visualizar los datos', NULL, 1),
+  (2, 'Editar', 'Editar los datos', NULL, 1),
+  (3, 'Registrar', 'Ingresar datos nuevos', NULL, 1),
+  (4, 'Eliminar', 'Eliminar permanentemente datos', NULL, 1),
+  (5, 'Activar', 'Activar datos', NULL, 1);
 
-SET @docId = LAST_INSERT_ID();
+INSERT INTO `role` (`id`, `type_role`, `description`, `active`, `delete_at`) VALUES
+  (1, 'Administrador', 'Administra y tiene acceso absoluto al sistema', 1, NULL),
+  (2, 'Aprendiz', 'Accede a sus secciones permitidas en el sistema', 1, NULL),
+  (3, 'Instructor', 'Accede a sus secciones permitidas en el sistema', 1, NULL),
+  (4, 'Coordinador', 'Evalúa y sigue los procesos', 1, NULL);
 
+INSERT INTO `form_module` (`id`, `form_id_id`, `module_id_id`, `active`, `deleted_at`) VALUES
+  (1, 1, 2, 1, NULL),
+  (2, 2, 2, 1, NULL),
+  (3, 3, 1, 1, NULL),
+  (10, 4, 3, 1, NULL),
+  (11, 6, 3, 1, NULL),
+  (12, 5, 3, 1, NULL),
+  (13, 7, 3, 1, NULL),
+  (14, 8, 3, 1, NULL),
+  (15, 9, 3, 1, NULL);
 
-INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
-VALUES 
-(1, '1', 'Aceptación de los términos',
- 'Al acceder y utilizar los servicios del SENA (Servicio Nacional de Aprendizaje), usted acepta estar sujeto a estos términos y condiciones de uso. Si no está de acuerdo con alguno de estos términos, no debe utilizar nuestros servicios. El SENA se reserva el derecho de modificar estos términos en cualquier momento. Las modificaciones entrarán en vigor inmediatamente después de su publicación en este sitio web.',
- 1, @docId, NULL);
-SET @s1 = LAST_INSERT_ID();
+INSERT INTO `role_form_permission` (`id`, `role_id`, `form_id`, `permission_id`, `delete_at`, `active`) VALUES
+INSERT INTO `role_form_permission` (`id`, `role_id`, `form_id`, `permission_id`, `delete_at`, `active`) VALUES
+(16, 2, 3, 1, NULL, true),
+(17, 3, 3, 1, NULL, true),
+(18, 2, 4, 1, NULL, true),
+(19, 2, 4, 4, NULL, true),
+(20, 4, 2, 1, NULL, true),
+(21, 4, 2, 2, NULL, true),
+(22, 4, 2, 3, NULL, true),
+(23, 4, 2, 4, NULL, true),
+(24, 4, 2, 5, NULL, true),
+(25, 4, 3, 1, NULL, true),
+(26, 4, 3, 2, NULL, true),
+(27, 4, 3, 3, NULL, true),
+(28, 4, 3, 4, NULL, true),
+(29, 4, 3, 5, NULL, true),
+(30, 4, 5, 1, NULL, true),
+(31, 4, 5, 2, NULL, true),
+(32, 4, 5, 3, NULL, true),
+(33, 4, 5, 4, NULL, true),
+(34, 4, 5, 5, NULL, true),
+(35, 4, 7, 1, NULL, true),
+(36, 4, 7, 2, NULL, true),
+(37, 4, 7, 3, NULL, true),
+(38, 4, 7, 4, NULL, true),
+(39, 4, 7, 5, NULL, true),
+(40, 4, 8, 1, NULL, true),
+(41, 4, 8, 2, NULL, true),
+(42, 4, 8, 3, NULL, true),
+(43, 4, 8, 4, NULL, true),
+(44, 4, 8, 5, NULL, true),
+(45, 4, 9, 1, NULL, true),
+(46, 4, 9, 2, NULL, true),
+(47, 4, 9, 3, NULL, true),
+(48, 4, 9, 4, NULL, true),
+(49, 4, 9, 5, NULL, true),
+(50, 3, 3, 1, NULL, true),
+(51, 3, 6, 1, NULL, true),
+(52, 3, 6, 2, NULL, true),
+(53, 3, 6, 3, NULL, true),
+(54, 3, 6, 4, NULL, true),
+(55, 3, 6, 5, NULL, true),
+(56, 3, 7, 1, NULL, true),
+(57, 3, 7, 2, NULL, true),
+(58, 3, 7, 3, NULL, true),
+(59, 3, 7, 4, NULL, true),
+(60, 3, 7, 5, NULL, true),
+(106, 1, 1, 1, NULL, true),
+(107, 1, 1, 2, NULL, true),
+(108, 1, 1, 3, NULL, true),
+(109, 1, 1, 4, NULL, true),
+(110, 1, 1, 5, NULL, true),
+(111, 1, 1, 1, NULL, true),
+(112, 1, 1, 2, NULL, true),
+(113, 1, 1, 3, NULL, true),
+(114, 1, 1, 4, NULL, true),
+(115, 1, 1, 5, NULL, true),
+(116, 1, 2, 1, NULL, true),
+(117, 1, 2, 2, NULL, true),
+(118, 1, 2, 3, NULL, true),
+(119, 1, 2, 4, NULL, true),
+(120, 1, 2, 5, NULL, true),
+(121, 1, 2, 1, NULL, true),
+(122, 1, 2, 2, NULL, true),
+(123, 1, 2, 3, NULL, true),
+(124, 1, 2, 4, NULL, true),
+(125, 1, 2, 5, NULL, true),
+(126, 1, 3, 1, NULL, true),
+(127, 1, 3, 2, NULL, true),
+(128, 1, 3, 3, NULL, true),
+(129, 1, 3, 4, NULL, true),
+(130, 1, 3, 5, NULL, true),
+(131, 1, 3, 1, NULL, true),
+(132, 1, 3, 2, NULL, true),
+(133, 1, 3, 3, NULL, true),
+(134, 1, 3, 4, NULL, true),
+(135, 1, 3, 5, NULL, true),
+(136, 1, 5, 1, NULL, true),
+(137, 1, 5, 2, NULL, true),
+(138, 1, 5, 3, NULL, true),
+(139, 1, 5, 4, NULL, true),
+(140, 1, 5, 5, NULL, true),
+(141, 1, 7, 1, NULL, true),
+(142, 1, 7, 2, NULL, true),
+(143, 1, 7, 3, NULL, true),
+(144, 1, 7, 4, NULL, true),
+(145, 1, 7, 5, NULL, true),
+(146, 1, 8, 1, NULL, true),
+(147, 1, 8, 2, NULL, true),
+(148, 1, 8, 3, NULL, true),
+(149, 1, 8, 4, NULL, true),
+(150, 1, 8, 5, NULL, true),
+(151, 1, 9, 1, NULL, true),
+(152, 1, 9, 2, NULL, true),
+(153, 1, 9, 3, NULL, true),
+(154, 1, 9, 4, NULL, true),
+(155, 1, 9, 5, NULL, true);
 
-INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
-VALUES 
-(2, '2', 'Descripción de los servicios',
- 'El SENA ofrece formación profesional integral gratuita en los siguientes servicios:
- - Programas de formación técnica y tecnológica
- - Cursos complementarios virtuales y presenciales
- - Servicios de empleabilidad y emprendimiento
- - Plataformas educativas digitales (Sofia Plus, LMS SENA)
- - Servicios de bienestar al aprendiz
- - Certificación de competencias laborales',
- 1, @docId, NULL);
-SET @s2 = LAST_INSERT_ID();
-
-
-INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
-VALUES (3, '3', 'Obligaciones del usuario', NULL, 1, @docId, NULL);
-SET @s3 = LAST_INSERT_ID();
-
-
-INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
-VALUES 
-(1, '3.1', 'Requisitos de registro',
- '- Proporcionar información verdadera, precisa y completa
- - Mantener actualizada su información personal
- - Ser responsables de la confidencialidad de sus credenciales
- - Cumplir con los requisitos académicos establecidos',
- 1, @docId, @s3);
-SET @s31 = LAST_INSERT_ID();
-
-INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
-VALUES 
-(2, '3.2', 'Conducta del usuario',
- '- Respetar las normas de convivencia institucional
- - No utilizar los servicios para fines ilegales o no autorizados
- - Mantener un comportamiento ético y profesional
- - Respetar los derechos de propiedad intelectual
- - No compartir contenido inapropiado o ofensivo',
- 1, @docId, @s3);
-SET @s32 = LAST_INSERT_ID();
-
-
-INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
-VALUES
-(4, '4', 'Derechos de propiedad intelectual',
- 'Todo el contenido disponible en las plataformas del SENA, incluyendo pero no limitado a textos, gráficos, logotipos, iconos, imágenes, clips de audio, descargas digitales y compilaciones de datos, es propiedad del SENA o de sus proveedores de contenido y está protegido por las leyes de derechos de autor de Colombia e internacionales. Los usuarios pueden utilizar el contenido únicamente para fines educativos personales y no comerciales, respetando siempre los créditos correspondientes.',
- 1, @docId, NULL),
-
-(5, '5', 'Protección de datos personales',
- 'El SENA se compromete a proteger la privacidad de los usuarios conforme a la Ley 1581 de 2012 y el Decreto 1377 de 2013 sobre Protección de Datos Personales en Colombia. Para más información sobre cómo recopilamos, utilizamos y protegemos sus datos personales, consulte nuestra Política de Privacidad.',
- 1, @docId, NULL),
-
-(6, '6', 'Limitación de responsabilidad',
- 'El SENA no será responsable por daños directos, indirectos, incidentales, especiales o consecuenciales que resulten del uso o la imposibilidad de uso de nuestros servicios. Nos esforzamos por mantener la disponibilidad continua de nuestros servicios, pero no garantizamos que estén libres de interrupciones, errores o virus.',
- 1, @docId, NULL),
-
-(7, '7', 'Terminación del servicio',
- 'El SENA se reserva el derecho de suspender o terminar el acceso a sus servicios a cualquier usuario que viole estos términos y condiciones, sin previo aviso. Los usuarios pueden solicitar la terminación de su cuenta en cualquier momento contactando a nuestro servicio de soporte.',
- 1, @docId, NULL),
-
-(8, '8', 'Ley Aplicable y jurisdicción',
- 'Estos términos y condiciones se rigen por las leyes de la República de Colombia. Cualquier disputa que surja en relación con estos términos será sometida a la jurisdicción exclusiva de los tribunales competentes de Bogotá D.C., Colombia.',
- 1, @docId, NULL);
-USE bdautogestion;
-
-INSERT INTO `general_legaldocument` (`type`, `title`, `effective_date`, `last_update`, `active`)
-VALUES ('privacy', 'Política de privacidad', '2025-10-01', '2025-10-01', 1);
-
-SET @docId = LAST_INSERT_ID();
-
-INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
-VALUES (1, '1', 'Información que recopilamos', NULL, 1, @docId, NULL);
-
-SET @s1 = LAST_INSERT_ID();
-
-INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
-VALUES (1, '1.1', 'Información personal',
-'Nombres y apellidos completos
-Número de identificación
-Fecha de nacimiento
-Dirección de residencia
-Correo electrónico
-Número de teléfono
-Información académica y profesional
-Estado socioeconómico (cuando aplique)', 
-1, @docId, @s1);
-
-INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
-VALUES (2, '1.2', 'Información técnica',
-'Dirección IP
-Tipo de navegador y versión
-Sistema operativo
-Páginas visitadas y tiempo de permanencia
-Cookies y tecnologías similares',
-1, @docId, @s1);
-
-INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
-VALUES (2, '2', 'Uso de la información', NULL, 1, @docId, NULL);
-
-SET @s2 = LAST_INSERT_ID();
-
-INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
-VALUES (1, '2.1', 'Servicios educativos',
-'Gestión de inscripciones y matrículas
-Seguimiento académico y evaluación
-Emisión de certificados y títulos
-Comunicación sobre programas y cursos',
-1, @docId, @s2);
-
-INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
-VALUES (2, '2.2', 'Servicios administrativos',
-'Verificación de identidad
-Gestión de pagos (cuando aplique)
-Soporte técnico y atención al usuario
-Cumplimiento de obligaciones legales',
-1, @docId, @s2);
-
-INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
-VALUES (3, '2.3', 'Mejora de servicios',
-'Análisis estadístico y de rendimiento
-Personalización de la experiencia educativa
-Desarrollo de nuevos programas formativos
-Investigación educativa institucional',
-1, @docId, @s2);
-
-INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
-VALUES (3, '3', 'Protección de datos', NULL, 1, @docId, NULL);
-
-SET @s3 = LAST_INSERT_ID();
-
-INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
-VALUES (1, '3.1', 'Medidas técnicas',
-'Cifrado de datos en tránsito y en reposo
-Firewalls y sistemas de detección de intrusiones
-Copias de seguridad regulares
-Actualizaciones de seguridad constantes
-Control de acceso basado en roles',
-1, @docId, @s3);
-
-INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
-VALUES (2, '3.2', 'Medidas organizativas',
-'Políticas internas de manejo de datos
-Capacitación del personal en protección de datos
-Procedimientos de respuesta a incidentes
-Auditorías regulares de seguridad
-Acuerdos de confidencialidad con terceros',
-1, @docId, @s3);
-
-INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
-VALUES (4, '4', 'Derechos sobre los datos',
-'Acceso: Conocer qué datos tenemos sobre usted
-Rectificación: Corregir datos inexactos o incompletos
-Actualización: Mantener sus datos actualizados
-Supresión: Solicitar la eliminación de sus datos (cuando sea posible)
-Oposición: Oponerse al tratamiento de sus datos en ciertos casos
-Portabilidad: Obtener una copia de sus datos en formato estructurado
-
-Para ejercer estos derechos, puede contactarnos a través de los canales indicados al final de esta política.',
-1, @docId, NULL);
-
-INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
-VALUES (5, '5', 'Compartir información', NULL, 1, @docId, NULL);
-
-SET @s5 = LAST_INSERT_ID();
-
-INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
-VALUES 
-(1, '5.1', 'Entidades Gubernamentales', 'Con entidades del gobierno colombiano cuando sea requerido por ley o para cumplir con obligaciones regulatorias.', 1, @docId, @s5),
-(2, '5.2', 'Proveedores de Servicios', 'Con proveedores de servicios tecnológicos bajo estrictos acuerdos de confidencialidad.', 1, @docId, @s5),
-(3, '5.3', 'Instituciones Educativas', 'Con otras instituciones educativas para fines de articulación académica y reconocimiento de estudios.', 1, @docId, @s5),
-(4, '5.4', 'Empleadores', 'Con empleadores potenciales, con su consentimiento expreso, para fines de empleabilidad.', 1, @docId, @s5);
-
-INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
-VALUES (6, '6', 'Retención de datos',
-'Datos académicos: permanentes para efectos de certificación
-Datos de contacto: mientras mantenga relación activa con el SENA
-Datos técnicos: máximo 2 años
-Datos financieros: según legislación contable y tributaria',
-1, @docId, NULL);
-
-INSERT INTO `general_legalsection` (`order`, `code`, `title`, `content`, `active`, `documentId_id`, `parentId_id`)
-VALUES (7, '7', 'Menores de edad',
-'Los menores de edad pueden utilizar nuestros servicios con el consentimiento de sus padres o tutores legales. 
-Medidas adicionales:
-- Verificación del consentimiento parental
-- Limitación en la recopilación de datos personales
-- Supervisión adicional en el procesamiento de datos
-- Derechos especiales de eliminación de datos',
-1, @docId, NULL);
-
-
-SELECT 'Datos insertados correctamente en bdautogestion' as mensaje;
+SELECT 'Estructura e inserts cargados correctamente en bdautogestion (alineado a bd_sena.sql)' AS mensaje;
