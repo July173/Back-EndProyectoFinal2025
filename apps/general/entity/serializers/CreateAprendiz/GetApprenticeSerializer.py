@@ -17,7 +17,7 @@ class GetApprenticeSerializer(serializers.ModelSerializer):
     phone_number = serializers.CharField(source='person.phone_number')
     email = serializers.SerializerMethodField()
     program_id = serializers.IntegerField(source='ficha.program_id', required=False)
-    ficha_id = serializers.IntegerField(source='ficha_id', required=False)
+    ficha_id = serializers.IntegerField(required=False)
     role_id = serializers.SerializerMethodField()
 
     class Meta:
