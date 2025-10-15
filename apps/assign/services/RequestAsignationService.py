@@ -294,16 +294,16 @@ class RequestAsignationService(BaseService):
         """
         try:
             
-            
-            aprendiz = Apprentice.objects.select_related('person', 'ficha').get(pk=aprendiz_id)
-            
+
+            apprentice = Apprentice.objects.select_related('person', 'ficha').get(pk=apprentice_id)
+
             # Find the apprentice's most recent request
             latest_request = RequestAsignation.objects.filter(
-                aprendiz=aprendiz
+                apprentice_id=apprentice
             ).select_related(
-                'enterprise',
-                'enterprise__boss',
-                'modality_productive_stage'
+                'enterprise_id',
+                'enterprise_id__boss',
+                'modality_productive_stage_id'
             ).order_by('-request_date').first()
             
             result = {
