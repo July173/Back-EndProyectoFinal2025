@@ -63,7 +63,7 @@ class InstructorRepository(BaseRepository):
             person_sede = None
             if sede_id:
                 sede_instance = Sede.objects.get(pk=sede_id)
-                person_sede = PersonSede.objects.create(person_id=person, sede_id=sede_instance)
+                person_sede = PersonSede.objects.create(person=person, sede=sede_instance)
             return instructor, user, person, person_sede
 
     def update_all_dates_instructor(self, instructor, person_data, user_data, instructor_data, sede_id=None):

@@ -117,17 +117,19 @@ class ApprenticeService(BaseService):
         try:
             # Validate and get the document type ID
             type_identification = validated_data.get('type_identification')
-            if type_identification:
+            if type_identification is not None:
                 if isinstance(type_identification, int):
+                    if type_identification == 0:
+                        raise ValueError('El tipo de identificación seleccionado no es válido. Por favor selecciona un tipo de identificación correcto (no dejes el valor en 0).')
                     if not DocumentType.objects.filter(pk=type_identification, active=True).exists():
-                        raise ValueError('Tipo de identificación inválido.')
+                        raise ValueError('El tipo de identificación seleccionado no existe o no es válido. Por favor selecciona un tipo de identificación correcto (no dejes el valor en 0).')
                 else:
                     doc_type = DocumentType.objects.filter(
                         models.Q(acronyms=type_identification) | models.Q(name=type_identification),
                         active=True
                     ).first()
                     if not doc_type:
-                        raise ValueError('Tipo de identificación inválido.')
+                        raise ValueError('El tipo de identificación seleccionado no existe o no es válido. Por favor selecciona un tipo de identificación correcto (no dejes el valor en 0).')
                     type_identification = doc_type.id
                     validated_data['type_identification'] = doc_type.id
 
@@ -151,6 +153,9 @@ class ApprenticeService(BaseService):
             }
             ficha_id = validated_data['ficha_id']
             role_id = validated_data.get('role_id')
+            # Validación para que el rol no sea 0
+            if role_id == 0:
+                raise ValueError('El rol seleccionado no es válido. Por favor selecciona un rol correcto (no dejes el valor en 0).')
 
             # Institutional email validation
             if not user_data['email'] or not is_soy_sena_email(user_data['email']):

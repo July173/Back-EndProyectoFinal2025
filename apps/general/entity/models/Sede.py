@@ -16,4 +16,4 @@ class Sede(models.Model):
     delete_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.name} ({self.codeSede})"
+        return f"{self.name} ({self.code_sede})"
