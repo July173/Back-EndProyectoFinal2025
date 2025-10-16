@@ -114,70 +114,73 @@ class ApprenticeService(BaseService):
         """
         Update apprentice, user, and person data. Validate data and roles.
         """
-        # Validate and get the document type ID
-        type_identification = validated_data.get('type_identification')
-        if type_identification:
-            if isinstance(type_identification, int):
-                # If it comes as an ID, check existence
-                if not DocumentType.objects.filter(pk=type_identification, active=True).exists():
-                    raise ValueError('Tipo de identificación inválido.')
-            else:
-                # If it comes as a string (acronym or name), look up the ID
-                doc_type = DocumentType.objects.filter(
-                    models.Q(acronyms=type_identification) | models.Q(name=type_identification),
-                    active=True
-                ).first()
-                if not doc_type:
-                    raise ValueError('Tipo de identificación inválido.')
-                type_identification = doc_type.id
+        try:
+            # Validate and get the document type ID
+            type_identification = validated_data.get('type_identification')
+            if type_identification:
+                if isinstance(type_identification, int):
+                    if not DocumentType.objects.filter(pk=type_identification, active=True).exists():
+                        raise ValueError('Tipo de identificación inválido.')
+                else:
+                    doc_type = DocumentType.objects.filter(
+                        models.Q(acronyms=type_identification) | models.Q(name=type_identification),
+                        active=True
+                    ).first()
+                    if not doc_type:
+                        raise ValueError('Tipo de identificación inválido.')
+                    type_identification = doc_type.id
+                    validated_data['type_identification'] = doc_type.id
 
-        # Build person data
-        person_data = {
-            'type_identification_id': type_identification,  # Use _id for ForeignKey field
-            'number_identification': validated_data['number_identification'],
-            'first_name': validated_data['first_name'],
-            'second_name': validated_data.get('second_name', ''),
-            'first_last_name': validated_data['first_last_name'],
-            'second_last_name': validated_data.get('second_last_name', ''),
-            'phone_number': validated_data.get('phone_number', ''),
-        }
-        # Build user data
-        user_data = {
-            'email': validated_data['email'],
-        }
-        ficha_id = validated_data['ficha_id']
-        role_id = validated_data['role_id']
-
-        apprentice = Apprentice.objects.get(pk=apprentice_id)
-        # Institutional email validation
-        if not user_data['email'] or not is_soy_sena_email(user_data['email']):
-            raise ValueError('Solo se permiten correos institucionales (@soy.sena.edu.co) para aprendices.')
-        # Get the user using the relation to person
-        user = User.objects.filter(person=apprentice.person).first()
-        # Uniqueness and format validations
-        if not is_unique_email(user_data['email'], User, exclude_user_id=user.id if user else None):
-            raise ValueError('El correo ya está registrado.')
-        if not is_unique_document_number(person_data['number_identification'], Person, exclude_person_id=apprentice.person.id):
-            raise ValueError('El número de documento ya está registrado.')
-        if person_data['phone_number'] and not is_valid_phone_number(person_data['phone_number']):
-            raise ValueError('El número de teléfono debe tener exactamente 10 dígitos.')
-
-        with transaction.atomic():
-            # Update ficha and role
             apprentice = Apprentice.objects.get(pk=apprentice_id)
-            try:
-                ficha = Ficha.objects.get(pk=ficha_id)
-            except Ficha.DoesNotExist:
-                raise ValueError("La ficha especificada no existe.")
-            if not role_id:
-                role_id = 2
-            try:
-                role = Role.objects.get(pk=role_id)
-                user_data['role_id'] = role.id
-            except Role.DoesNotExist:
-                user_data['role_id'] = 2
-            self.repository.update_all_dates_apprentice(apprentice, person_data, user_data, ficha)
+            if not hasattr(apprentice, 'person') or apprentice.person is None:
+                raise ValueError('El aprendiz no tiene una persona asociada. Verifica la integridad de los datos.')
+
+            # Build person data
+            person_data = {
+                'type_identification_id': type_identification,
+                'number_identification': validated_data['number_identification'],
+                'first_name': validated_data['first_name'],
+                'second_name': validated_data.get('second_name', ''),
+                'first_last_name': validated_data['first_last_name'],
+                'second_last_name': validated_data.get('second_last_name', ''),
+                'phone_number': validated_data.get('phone_number', ''),
+            }
+            # Build user data
+            user_data = {
+                'email': validated_data['email'],
+            }
+            ficha_id = validated_data['ficha_id']
+            role_id = validated_data.get('role_id')
+
+            # Institutional email validation
+            if not user_data['email'] or not is_soy_sena_email(user_data['email']):
+                raise ValueError('Solo se permiten correos institucionales (@soy.sena.edu.co) para aprendices.')
+            user = User.objects.filter(person=apprentice.person).first()
+            if not is_unique_email(user_data['email'], User, exclude_user_id=user.id if user else None):
+                raise ValueError('El correo ya está registrado.')
+            if not is_unique_document_number(person_data['number_identification'], Person, exclude_person_id=apprentice.person.id):
+                raise ValueError('El número de documento ya está registrado.')
+            if person_data['phone_number'] and not is_valid_phone_number(person_data['phone_number']):
+                raise ValueError('El número de teléfono debe tener exactamente 10 dígitos.')
+
+            with transaction.atomic():
+                try:
+                    ficha = Ficha.objects.get(pk=ficha_id)
+                except Ficha.DoesNotExist:
+                    raise ValueError("La ficha especificada no existe.")
+                if not role_id:
+                    role_id = 2
+                try:
+                    role = Role.objects.get(pk=role_id)
+                    user_data['role_id'] = role.id
+                except Role.DoesNotExist:
+                    user_data['role_id'] = 2
+                self.repository.update_all_dates_apprentice(apprentice, person_data, user_data, ficha)
             return apprentice
+        except ValueError as ve:
+            raise ve
+        except Exception as e:
+            raise ValueError(f"No se pudo actualizar el aprendiz: {str(e)}")
 
     def get_apprentice(self, apprentice_id):
         """

@@ -11,7 +11,7 @@ class PersonSedeSerializer(serializers.ModelSerializer):
         model = PersonSede
         fields = [
             'id',
-            'sede_id',
-            'person_id',
+            'sede',
+            'person',
             'active',
         ]

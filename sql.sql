@@ -49,7 +49,7 @@ INSERT INTO `regional` (`id`, `name`, `code_regional`, `description`, `address`,
 (9, 'Bolívar', '009', 'Regional de Bolívar con énfasis en turismo, logística y servicios portuarios', 'Calle 30 No. 17-25, Cartagena, Bolívar', true, NULL),
 (10, 'Meta', '010', 'Regional del Meta enfocada en ganadería, agricultura y petróleo', 'Calle 32 No. 28-15, Villavicencio, Meta', true, NULL);
 
-INSERT INTO `center` (`id`, `name`, `code_center`, `address`, `active`, `delete_at`, `regional_id_id`) VALUES
+INSERT INTO `center` (`id`, `name`, `code_center`, `address`, `active`, `delete_at`, `regional_id`) VALUES
 (1, 'Centro de Biotecnología Agropecuaria', '001001', 'Calle 166 No. 52-05, Bogotá D.C.', true, NULL, 1),
 (2, 'Centro de Diseño y Metrología', '001002', 'Calle 52 No. 13-65, Bogotá D.C.', true, NULL, 1),
 (3, 'Centro de Electricidad y Automatización Industrial', '001003', 'Calle 57 No. 8-69, Bogotá D.C.', true, NULL, 1),
@@ -77,7 +77,7 @@ INSERT INTO `center` (`id`, `name`, `code_center`, `address`, `active`, `delete_
 (25, 'Centro de la Macarena', '010001', 'Calle 32 No. 28-15, Villavicencio, Meta', true, NULL, 10),
 (26, 'Centro Agropecuario La Macarena', '010002', 'Carrera 11 No. 15-30, Villavicencio, Meta', true, NULL, 10);
 
-INSERT INTO `sede` (`id`, `name`, `code_sede`, `address`, `phone_sede`, `email_contact`, `active`, `delete_at`, `center_id_id`) VALUES
+INSERT INTO `sede` (`id`, `name`, `code_sede`, `address`, `phone_sede`, `email_contact`, `active`, `delete_at`, `center_id`) VALUES
 (1, 'Sede Principal Biotecnología', '001001001', 'Calle 166 No. 52-05, Bogotá D.C.', '6015461500', 'biotecnologia@sena.edu.co', true, NULL, 1),
 (2, 'Sede Ricaurte', '001001002', 'Carrera 13 No. 65-10, Bogotá D.C.', '6015461501', 'ricaurte@sena.edu.co', true, NULL, 1),
 (3, 'Sede Principal Diseño', '001002001', 'Calle 52 No. 13-65, Bogotá D.C.', '6015461500', 'diseno@sena.edu.co', true, NULL, 2),
@@ -145,7 +145,7 @@ INSERT INTO `modality_productive_stage` (`id`, `name_modality`, `description`, `
 INSERT INTO `legal_document` (`id`, `type`, `title`, `effective_date`, `last_update`, `active`, `delete_at`) VALUES
   (1, 'terms', 'Términos y condiciones', '2025-10-01', '2025-10-01', 1, NULL);
 
-INSERT INTO `legal_section` (`id`, `order`, `code`, `title`, `content`, `active`, `delete_at`, `document_id_id`, `parent_id_id`) VALUES
+INSERT INTO `legal_section` (`id`, `order`, `code`, `title`, `content`, `active`, `delete_at`, `document_id`, `parent_id`) VALUES
   (1, 1, '1', 'Aceptación de los términos', 'Al acceder y utilizar los servicios del SENA (Servicio Nacional de Aprendizaje), usted acepta estar sujeto a estos términos y condiciones de uso. Si no está de acuerdo con alguno de estos términos, no debe utilizar nuestros servicios. El SENA se reserva el derecho de modificar estos términos en cualquier momento. Las modificaciones entrarán en vigor inmediatamente después de su publicación en este sitio web.', 1, NULL, 1, NULL),
   (2, 2, '2', 'Descripción de los servicios', 'El SENA ofrece formación profesional integral gratuita en los siguientes servicios:\n - Programas de formación técnica y tecnológica\n - Cursos complementarios virtuales y presenciales\n - Servicios de empleabilidad y emprendimiento\n - Plataformas educativas digitales (Sofia Plus, LMS SENA)\n - Servicios de bienestar al aprendiz\n - Certificación de competencias laborales', 1, NULL, 1, NULL),
   (3, 3, '3', 'Obligaciones del usuario', NULL, 1, NULL, 1, NULL),
@@ -160,7 +160,7 @@ INSERT INTO `legal_section` (`id`, `order`, `code`, `title`, `content`, `active`
 INSERT INTO `legal_document` (`id`, `type`, `title`, `effective_date`, `last_update`, `active`, `delete_at`) VALUES
   (2, 'privacy', 'Política de privacidad', '2025-10-01', '2025-10-01', 1, NULL);
 
-INSERT INTO `legal_section` (`id`, `order`, `code`, `title`, `content`, `active`, `delete_at`, `document_id_id`, `parent_id_id`) VALUES
+INSERT INTO `legal_section` (`id`, `order`, `code`, `title`, `content`, `active`, `delete_at`, `document_id`, `parent_id`) VALUES
   (11, 1, '1', 'Información que recopilamos', NULL, 1, NULL, 2, NULL),
   (12, 1, '1.1', 'Información personal', 'Nombres y apellidos completos\nNúmero de identificación\nFecha de nacimiento\nDirección de residencia\nCorreo electrónico\nNúmero de teléfono\nInformación académica y profesional\nEstado socioeconómico (cuando aplique)', 1, NULL, 2, 11),
   (13, 2, '1.2', 'Información técnica', 'Dirección IP\nTipo de navegador y versión\nSistema operativo\nPáginas visitadas y tiempo de permanencia\nCookies y tecnologías similares', 1, NULL, 2, 11),
@@ -208,7 +208,7 @@ INSERT INTO `role` (`id`, `type_role`, `description`, `active`, `delete_at`) VAL
   (3, 'Instructor', 'Accede a sus secciones permitidas en el sistema', 1, NULL),
   (4, 'Coordinador', 'Evalúa y sigue los procesos', 1, NULL);
 
-INSERT INTO `form_module` (`id`, `form_id_id`, `module_id_id`, `active`, `deleted_at`) VALUES
+INSERT INTO `form_module` (`id`, `form_id`, `module_id`, `active`, `deleted_at`) VALUES
   (1, 1, 2, 1, NULL),
   (2, 2, 2, 1, NULL),
   (3, 3, 1, 1, NULL),

@@ -14,6 +14,6 @@ class SedeSerializer(serializers.ModelSerializer):
             'address',
             'phone_sede',
             'email_contact',
-            'center_id',
+            'center',
             'active',
         ]

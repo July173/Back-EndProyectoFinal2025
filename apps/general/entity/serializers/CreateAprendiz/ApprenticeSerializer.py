@@ -11,7 +11,7 @@ class ApprenticeSerializer(serializers.ModelSerializer):
         model = Apprentice
         fields = [
             'id',
-            'person_id',
-            'ficha_id',
+            'person',
+            'ficha',
             'active'
         ]

@@ -9,13 +9,13 @@ class RequestAsignation(models.Model):
         db_table = 'request_asignation'
 
 
-    apprentice_id = models.ForeignKey(
+    apprentice = models.ForeignKey(
         Apprentice, on_delete=models.CASCADE, related_name='requests'
     )
-    enterprise_id = models.ForeignKey(
+    enterprise = models.ForeignKey(
         'assign.Enterprise', on_delete=models.CASCADE, related_name='requests'
     )
-    modality_productive_stage_id = models.ForeignKey(
+    modality_productive_stage = models.ForeignKey(
         'assign.ModalityProductiveStage', on_delete=models.CASCADE, related_name='requests'
     )
     request_date = models.DateField()

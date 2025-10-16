@@ -6,8 +6,8 @@ class LegalSection(models.Model):
     class Meta:
         db_table = 'legal_section'
     
-    document_id = models.ForeignKey(LegalDocument, on_delete=models.CASCADE, related_name='sections')
-    parent_id = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='children')
+    document = models.ForeignKey(LegalDocument, on_delete=models.CASCADE, related_name='sections')
+    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='children')
     order = models.IntegerField()
     code = models.CharField(max_length=20)
     title = models.CharField(max_length=200)

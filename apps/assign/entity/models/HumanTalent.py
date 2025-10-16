@@ -6,7 +6,7 @@ class HumanTalent(models.Model):
     class Meta:
         db_table = 'human_talent'
 
-    enterprise_id = models.OneToOneField(
+    enterprise = models.OneToOneField(
         'assign.Enterprise', on_delete=models.CASCADE, related_name='human_talent'
     )
     name = models.CharField(max_length=100)

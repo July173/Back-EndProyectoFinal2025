@@ -13,5 +13,5 @@ class CenterSerializer(serializers.ModelSerializer):
             'code_center',
             'address',
             'active',
-            'regional_id'
+            'regional'
         ]

@@ -5,4 +5,4 @@ from rest_framework import serializers
 class FormModuleSerializer(serializers.ModelSerializer):
     class Meta:
         model = FormModule
-        fields = ['id', 'form_id', 'module_id', ]
+        fields = ['id', 'form', 'module', ]
