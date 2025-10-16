@@ -83,7 +83,7 @@ class ExcelTemplateViewSet(ViewSet):
             500: openapi.Response("Error interno del servidor")
         }
     )
-    @action(detail=False, methods=['get'], url_path='aprendiz-template')
+    @action(detail=False, methods=['get'], url_path='apprentice-template')
     def download_apprentice_template(self, request):
         """
         Generates and downloads the Excel template for apprentices.
@@ -167,7 +167,7 @@ class ExcelTemplateViewSet(ViewSet):
                         "Tipo Identificación*", "Número Identificación*", "Primer Nombre*", "Segundo Nombre",
                         "Primer Apellido*", "Segundo Apellido", "Correo Institucional*", "Número de Celular*"
                     ],
-                    "download_url": "/api/excel-templates/aprendiz-template/",
+                    "download_url": "/api/excel-templates/apprentice-template/",
                     "additional_sheets": [
                         "Tipos de Identificación", "Instrucciones"
                     ]
@@ -266,7 +266,7 @@ class ExcelTemplateViewSet(ViewSet):
             500: openapi.Response("Error interno del servidor")
         }
     )
-    @action(detail=False, methods=['post'], url_path='upload-aprendiz-excel', parser_classes=[MultiPartParser, FormParser])
+    @action(detail=False, methods=['post'], url_path='upload-apprentice-excel', parser_classes=[MultiPartParser, FormParser])
     def upload_apprentice_excel(self, request):
         """
         Processes Excel file with apprentice data for bulk registration.

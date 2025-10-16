@@ -4,7 +4,8 @@ from apps.security.entity.serializers.person.PersonSerializer import PersonSeria
 from apps.security.entity.serializers.RoleSerializer import RoleSerializer
 from apps.general.entity.serializers.CreateAprendiz.ApprenticeSerializer import ApprenticeSerializer
 from apps.general.entity.serializers.CreateInstructor.InstructorSerializer import InstructorSerializer
-from apps.general.entity.models import Apprentice, Instructor
+from apps.general.entity.models import Apprentice, Instructor, Instructor, PersonSede
+
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -17,7 +18,6 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_apprentice(self, obj):
         # Buscar si la persona está vinculada como Apprentice
-        from apps.general.entity.models import Apprentice, Ficha, Program
         apprentice = Apprentice.objects.filter(person=obj.person).select_related('ficha__program').first()
         if apprentice:
             data = ApprenticeSerializer(apprentice).data
@@ -34,7 +34,6 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_instructor(self, obj):
         # Buscar si la persona está vinculada como Instructor
-        from apps.general.entity.models import Instructor, PersonSede, Sede, Center, Regional
         instructor = Instructor.objects.filter(person=obj.person).first()
         if instructor:
             data = InstructorSerializer(instructor).data

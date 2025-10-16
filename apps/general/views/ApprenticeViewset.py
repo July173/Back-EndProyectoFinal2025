@@ -124,9 +124,9 @@ class ApprenticeViewset(BaseViewSet):
         """
         Retrieve an apprentice by ID (advanced endpoint).
         """
-        aprendiz = self.service.get_aprendiz(pk)
-        if aprendiz:
-            serializer = GetApprenticeSerializer(aprendiz)
+        apprentice = self.service.get_apprentice(pk)
+        if apprentice:
+            serializer = GetApprenticeSerializer(apprentice)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response({"detail": "Aprendiz no encontrado."}, status=status.HTTP_404_NOT_FOUND)
 
@@ -144,10 +144,10 @@ class ApprenticeViewset(BaseViewSet):
         serializer = CreateApprenticeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         try:
-            aprendiz, user, person = self.service.create_apprentice(serializer.validated_data)
+            apprentice, user, person = self.service.create_apprentice(serializer.validated_data)
             return Response({
                 "detail": "Aprendiz creado correctamente.",
-                "id": aprendiz.id
+                "id": apprentice.id
             }, status=status.HTTP_201_CREATED)
         except ValueError as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -165,7 +165,7 @@ class ApprenticeViewset(BaseViewSet):
         """
         List all apprentices (advanced endpoint).
         """
-        aprendices = self.service.list_aprendices()
+        aprendices = self.service.list_apprentices()
         serializer = GetApprenticeSerializer(aprendices, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -183,8 +183,8 @@ class ApprenticeViewset(BaseViewSet):
         serializer = UpdateApprenticeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         try:
-            aprendiz = self.service.update_aprendiz(pk, serializer.validated_data)
-            return Response({"detail": "Aprendiz actualizado correctamente.", "id": aprendiz.id}, status=status.HTTP_200_OK)
+            apprentice = self.service.update_apprentice(pk, serializer.validated_data)
+            return Response({"detail": "Aprendiz actualizado correctamente.", "id": apprentice.id}, status=status.HTTP_200_OK)
         except Apprentice.DoesNotExist:
             return Response({"detail": "Aprendiz no encontrado."}, status=status.HTTP_404_NOT_FOUND)
         except ValueError as e:

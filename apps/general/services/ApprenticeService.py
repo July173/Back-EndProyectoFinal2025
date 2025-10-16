@@ -92,7 +92,7 @@ class ApprenticeService(BaseService):
                 ficha = Ficha.objects.get(pk=ficha_id)
             except Ficha.DoesNotExist:
                 raise ValueError("La ficha especificada no existe.")
-            aprendiz, user, person = self.repository.create_all_dates_apprentice(person_data, user_data, ficha)
+            apprentice, user, person = self.repository.create_all_dates_apprentice(person_data, user_data, ficha)
 
             # Send welcome email
             email_sent = False
@@ -108,9 +108,9 @@ class ApprenticeService(BaseService):
                 email_error = str(e)
             if not email_sent:
                 print(f"[ApprenticeService] Could not send registration email to apprentice: {email_error}")
-            return aprendiz, user, person
+            return apprentice, user, person
 
-    def update_apprentice(self, aprendiz_id, validated_data):
+    def update_apprentice(self, apprentice_id, validated_data):
         """
         Update apprentice, user, and person data. Validate data and roles.
         """
@@ -148,7 +148,7 @@ class ApprenticeService(BaseService):
         ficha_id = validated_data['ficha_id']
         role_id = validated_data['role_id']
 
-        apprentice = Apprentice.objects.get(pk=aprendiz_id)
+        apprentice = Apprentice.objects.get(pk=apprentice_id)
         # Institutional email validation
         if not user_data['email'] or not is_soy_sena_email(user_data['email']):
             raise ValueError('Solo se permiten correos institucionales (@soy.sena.edu.co) para aprendices.')
@@ -164,7 +164,7 @@ class ApprenticeService(BaseService):
 
         with transaction.atomic():
             # Update ficha and role
-            aprendiz = Apprentice.objects.get(pk=aprendiz_id)
+            apprentice = Apprentice.objects.get(pk=apprentice_id)
             try:
                 ficha = Ficha.objects.get(pk=ficha_id)
             except Ficha.DoesNotExist:
@@ -176,40 +176,40 @@ class ApprenticeService(BaseService):
                 user_data['role_id'] = role.id
             except Role.DoesNotExist:
                 user_data['role_id'] = 2
-            self.repository.update_all_dates_apprentice(aprendiz, person_data, user_data, ficha)
+            self.repository.update_all_dates_apprentice(apprentice, person_data, user_data, ficha)
             return apprentice
 
-    def get_aprendiz(self, aprendiz_id):
+    def get_apprentice(self, apprentice_id):
         """
         Get an apprentice by ID.
         """
-        return Apprentice.objects.filter(pk=aprendiz_id).first()
+        return Apprentice.objects.filter(pk=apprentice_id).first()
 
-    def list_aprendices(self):
+    def list_apprentices(self):
         """
         List all apprentices.
         """
         return Apprentice.objects.all()
 
-    def delete_apprentice(self, aprendiz_id):
+    def delete_apprentice(self, apprentice_id):
         """
         Completely delete an apprentice and related data.
         """
         with transaction.atomic():
-            aprendiz = Apprentice.objects.get(pk=aprendiz_id)
-            self.repository.delete_all_dates_apprentice(aprendiz)
+            apprentice = Apprentice.objects.get(pk=apprentice_id)
+            self.repository.delete_all_dates_apprentice(apprentice)
 
-    def logical_delete_aprendiz(self, aprendiz_id):
+    def logical_delete_apprentice(self, apprentice_id):
         """
         Perform logical deletion or reactivation of apprentice.
         """
         with transaction.atomic():
-            aprendiz = Apprentice.objects.get(pk=aprendiz_id)
-            if not aprendiz.active:
-                self.repository.set_active_state_dates_apprentice(aprendiz, active=True)
+            apprentice = Apprentice.objects.get(pk=apprentice_id)
+            if not apprentice.active:
+                self.repository.set_active_state_dates_apprentice(apprentice, active=True)
                 return "Aprendiz reactivado correctamente."
             else:
-                self.repository.set_active_state_dates_apprentice(aprendiz, active=False)
+                self.repository.set_active_state_dates_apprentice(apprentice, active=False)
                 return "Eliminación lógica realizada correctamente."
 
 

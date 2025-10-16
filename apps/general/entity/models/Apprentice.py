@@ -13,4 +13,4 @@ class Apprentice(models.Model):
     delete_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return f"Aprendiz {self.id}"
+        return f"Apprentice {self.id}"

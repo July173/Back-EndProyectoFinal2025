@@ -4,7 +4,7 @@ from apps.general.entity.models import Instructor
 from apps.security.entity.models import User
 from apps.assign.emails.DesvinculacionInstructor import send_unassignment_to_instructor_email
 from apps.assign.emails.ReasignacionInstructor import send_assignment_to_new_instructor_email
-from apps.assign.emails.DesvinculacionAprendiz import send_unassignment_to_aprendiz_email
+from apps.assign.emails.DesvinculacionAprendiz import send_unassignment_to_apprentice_email
 
 
 class AsignationInstructorHistoryService:
@@ -49,10 +49,10 @@ class AsignationInstructorHistoryService:
             old_user = User.objects.filter(person=old_person).first()
             old_email = old_user.email if old_user else None
             nombre_instructor = f"{old_person.first_name} {old_person.first_last_name}"
-            aprendiz_person = asignation_instructor.request_asignation.aprendiz.person
-            nombre_aprendiz = f"{aprendiz_person.first_name} {aprendiz_person.first_last_name}"
+            apprentice_person = asignation_instructor.request_asignation.apprentice.person
+            name_apprentice = f"{apprentice_person.first_name} {apprentice_person.first_last_name}"
             if old_email:
-                send_unassignment_to_instructor_email(old_email, nombre_instructor, nombre_aprendiz)
+                send_unassignment_to_instructor_email(old_email, nombre_instructor, name_apprentice)
                 # Decrement assigned learners for previous instructor
                 from apps.general.services.InstructorService import InstructorService
                 current_learners_old = old_instructor.assigned_learners or 0
@@ -63,15 +63,15 @@ class AsignationInstructorHistoryService:
             new_email = new_user.email if new_user else None
             new_instructor_name = f"{new_person.first_name} {new_person.first_last_name}"
             if new_email:
-                send_assignment_to_new_instructor_email(new_email, new_instructor_name, nombre_aprendiz)
+                send_assignment_to_new_instructor_email(new_email, new_instructor_name, name_apprentice)
                 # Increment assigned learners for new instructor
                 current_learners_new = new_instructor.assigned_learners or 0
                 InstructorService().update_learners_fields(new_instructor_id, assigned_learners=current_learners_new + 1)
             # Send email to apprentice
-            aprendiz_user = User.objects.filter(person=aprendiz_person).first()
-            aprendiz_email = aprendiz_user.email if aprendiz_user else None
-            if aprendiz_email:
-                send_unassignment_to_aprendiz_email(aprendiz_email, nombre_aprendiz)
+            apprentice_user = User.objects.filter(person=apprentice_person).first()
+            apprentice_email = apprentice_user.email if apprentice_user else None
+            if apprentice_email:
+                send_unassignment_to_apprentice_email(apprentice_email, name_apprentice)
             # Update assignment with new instructor
             asignation_instructor.instructor = new_instructor
             asignation_instructor.save()

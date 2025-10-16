@@ -6,18 +6,18 @@ from rest_framework.test import APIClient
 from openpyxl import Workbook
 
 @pytest.mark.django_db
-def test_upload_aprendiz_excel_performance():
+def test_upload_apprentice_excel_performance():
     """
     Prueba el endpoint de carga masiva de aprendices con datos simulados.
     No almacena datos reales, solo mide el tiempo de procesamiento y la respuesta.
     """
     client = APIClient()
-    url = '/api/security/excel-templates/upload-aprendiz-excel/'
+    url = '/api/security/excel-templates/upload-apprentice-excel/'
 
     # Crear archivo Excel usando la plantilla oficial del backend
     from apps.security.services.excel.ExcelAprendizTemplateService import ExcelAprendizTemplateService
     template_service = ExcelAprendizTemplateService()
-    response = template_service.generate_aprendiz_template()
+    response = template_service.generate_apprentice_template()
     # Obtener el archivo generado
     from openpyxl import load_workbook
     wb = load_workbook(io.BytesIO(response.content))
@@ -25,14 +25,14 @@ def test_upload_aprendiz_excel_performance():
     # Agregar 100 filas simuladas después de los encabezados
     for i in range(100):
         ws.append([
-            'CC', f'2000{i}', f'Aprendiz{i}', '', f'Apellido{i}', '', f'aprendiz{i}@soy.sena.edu.co', f'301{i}'
+            'CC', f'2000{i}', f'Apprentice{i}', '', f'Apellido{i}', '', f'apprentice{i}@soy.sena.edu.co', f'301{i}'
         ])
     excel_bytes = io.BytesIO()
     wb.save(excel_bytes)
     excel_bytes.seek(0)
     from django.core.files.uploadedfile import SimpleUploadedFile
     excel_file = SimpleUploadedFile(
-        "test_aprendiz.xlsx",
+        "test_apprentice.xlsx",
         excel_bytes.getvalue(),
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )

@@ -22,7 +22,7 @@ class PersonViewSet(BaseViewSet):
     def get_serializer_class(self):
         if self.action == 'partial_update':
             return PatchPersonSerializer
-        elif self.action == 'register_aprendiz':
+        elif self.action == 'register_apprentice':
             return RegisterAprendizSerializer
         return PersonSerializer
 
@@ -70,7 +70,7 @@ class PersonViewSet(BaseViewSet):
                                 'role': openapi.Schema(type=openapi.TYPE_INTEGER, description="Rol 2 = Aprendiz")
                             }
                         ),
-                        'aprendiz_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                        'apprentice_id': openapi.Schema(type=openapi.TYPE_INTEGER),
                         'success': openapi.Schema(type=openapi.TYPE_STRING)
                     }
                 ),
@@ -91,7 +91,7 @@ class PersonViewSet(BaseViewSet):
                             'is_active': False,
                             'role': 2
                         },
-                        'aprendiz_id': 1,
+                        'apprentice_id': 1,
                         'success': 'Usuario registrado correctamente. Tu cuenta está pendiente de activación por un administrador.'
                     }
                 }
@@ -119,13 +119,13 @@ class PersonViewSet(BaseViewSet):
             )
         }
     )
-    @action(detail=False, methods=['post'], url_path='register-aprendiz')
-    def register_aprendiz(self, request):
+    @action(detail=False, methods=['post'], url_path='register-apprentice')
+    def register_apprentice(self, request):
         """
         Controller: Only orchestrates the call to the service.
         Does not contain validations or business logic.
         """
-        result = self.service.register_aprendiz(request.data)
+        result = self.service.register_apprentice(request.data)
         return Response(result['data'], status=result['status'])
 
     # ----------- LIST -----------

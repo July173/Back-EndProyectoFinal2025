@@ -7,7 +7,7 @@ from django.db import transaction
 from django.contrib.auth.hashers import make_password
 from io import BytesIO
 from apps.security.entity.models import Person, User
-from apps.general.entity.models import Program, Ficha, Apprentice
+from apps.general.entity.models import Program, Ficha, Apprentice, Regional, Center, Sede
 from apps.security.entity.models.DocumentType import DocumentType
 from apps.security.emails.SendEmailsActivate import enviar_activacion_usuario
 import string
@@ -92,7 +92,7 @@ class ExcelAprendizTemplateService:
         dv.add(f'{column_letter}{start_row}:{column_letter}{end_row}')
         worksheet.add_data_validation(dv)
 
-    def generate_aprendiz_template(self):
+    def generate_apprentice_template(self):
         wb = Workbook()
         ws_main = wb.active
         ws_main.title = "Aprendices"
@@ -123,11 +123,11 @@ class ExcelAprendizTemplateService:
         self._create_identification_types_sheet(wb)
         
         # Agregar validaciones de datos (listas desplegables)
-        self._add_aprendiz_data_validations(ws_main)
+        self._add_apprentice_data_validations(ws_main)
         
         # Crear hoja de instrucciones
-        self._create_aprendiz_instructions_sheet(wb)
-        
+        self._create_apprentice_instructions_sheet(wb)
+
         # Ajustar columnas
         self._auto_adjust_columns(ws_main)
         
@@ -178,7 +178,7 @@ class ExcelAprendizTemplateService:
 
     def _create_regionales_sheet(self, workbook):
         """Crea una hoja con las regionales disponibles"""
-        from apps.general.entity.models import Regional
+
         ws = workbook.create_sheet("Regionales")
         headers = ['ID', 'NOMBRE']
         for col_idx, header in enumerate(headers, 1):
@@ -192,7 +192,6 @@ class ExcelAprendizTemplateService:
 
     def _create_centros_formacion_sheet(self, workbook):
         """Crea una hoja con los centros de formación disponibles"""
-        from apps.general.entity.models import Center
         ws = workbook.create_sheet("Centros de Formación")
         headers = ['ID', 'NOMBRE', 'REGIONAL']
         for col_idx, header in enumerate(headers, 1):
@@ -207,7 +206,6 @@ class ExcelAprendizTemplateService:
 
     def _create_sedes_sheet(self, workbook):
         """Crea una hoja con las sedes disponibles"""
-        from apps.general.entity.models import Sede
         ws = workbook.create_sheet("Sedes")
         headers = ['ID', 'NOMBRE', 'CENTRO DE FORMACIÓN']
         for col_idx, header in enumerate(headers, 1):
@@ -220,7 +218,7 @@ class ExcelAprendizTemplateService:
             ws.cell(row=row_idx, column=3, value=sede.center.name if sede.center else '')
         self._auto_adjust_columns(ws)
 
-    def _create_aprendiz_instructions_sheet(self, workbook):
+    def _create_apprentice_instructions_sheet(self, workbook):
         """Crea una hoja con instrucciones para aprendices"""
         ws = workbook.create_sheet("Instrucciones")
         instructions = [
@@ -256,7 +254,7 @@ class ExcelAprendizTemplateService:
                 cell.font = Font(italic=True)
         self._auto_adjust_columns(ws)
 
-    def _add_aprendiz_data_validations(self, worksheet):
+    def _add_apprentice_data_validations(self, worksheet):
         """Agrega validaciones de datos (listas desplegables) para la plantilla de aprendices"""
         # Validación para Tipo de Identificación (columna A)
         id_types = self._get_document_types()
@@ -316,7 +314,7 @@ class ExcelAprendizTemplateService:
         
         return False
 
-    def process_aprendiz_excel(self, excel_file):
+    def process_apprentice_excel(self, excel_file):
         """
         Procesa un archivo Excel con datos de aprendices para registro masivo.
         Los usuarios creados quedan activos automáticamente y se envían credenciales por correo.
@@ -351,7 +349,7 @@ class ExcelAprendizTemplateService:
                     }
                     
                     # Validar que los campos obligatorios estén presentes
-                    validation_errors = self._validate_aprendiz_data(row_data)
+                    validation_errors = self._validate_apprentice_data(row_data)
                     if validation_errors:
                         results['errors'].append({
                             'row': row_num,
@@ -366,7 +364,7 @@ class ExcelAprendizTemplateService:
                     
                     # Procesar el registro
                     with transaction.atomic():
-                        user_created = self._create_aprendiz_record(row_data, final_password)
+                        user_created = self._create_apprentice_record(row_data, final_password)
                         if user_created:
                             results['successful_registrations'] += 1
                             
@@ -418,7 +416,7 @@ class ExcelAprendizTemplateService:
         cell = worksheet.cell(row=row, column=column)
         return cell.value if cell.value is not None else ''
 
-    def _validate_aprendiz_data(self, data):
+    def _validate_apprentice_data(self, data):
         """Valida los datos de un aprendiz"""
         errors = []
         
@@ -452,7 +450,7 @@ class ExcelAprendizTemplateService:
         
         return errors
 
-    def _create_aprendiz_record(self, data, final_password):
+    def _create_apprentice_record(self, data, final_password):
         """Crea un registro completo de aprendiz (Person + User)"""
         try:
             # 1. Obtener el ID del tipo de documento desde la BD
@@ -482,7 +480,7 @@ class ExcelAprendizTemplateService:
             )
             
             # 4. Crear Aprendiz (sin ficha específica por ahora)
-            aprendiz = Apprentice.objects.create(
+            apprentice = Apprentice.objects.create(
                 person=person,
                 ficha=None,  # Se asignará posteriormente
                 active=True

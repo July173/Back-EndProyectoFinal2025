@@ -69,8 +69,8 @@ class AsignationInstructorService(BaseService):
             InstructorService().update_learners_fields(instructor_id, assigned_learners=current_learners + 1)
 
             # Send email to apprentice
-            aprendiz = request_asignation.aprendiz
-            person = aprendiz.person
+            apprentice = request_asignation.apprentice
+            person = apprentice.person
             user = User.objects.filter(person=person).first()
             email = user.email if user else None
             if email:

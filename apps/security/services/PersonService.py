@@ -96,7 +96,7 @@ class PersonService(BaseService):
                     raise Exception({'error': 'Datos inválidos', 'detalle': person_errors})
 
                 # Obtener instancia de rol Aprendiz
-                rol_aprendiz = Role.objects.get(id=2)  # O usa type_role="Aprendiz" si prefieres
+                rol_apprentice = Role.objects.get(id=2)  # O usa type_role="Aprendiz" si prefieres
 
                 # Crear usuario correctamente vinculado
                 user = User.objects.create(
@@ -104,7 +104,7 @@ class PersonService(BaseService):
                     password=make_password('temporal_placeholder'),
                     person=person,
                     is_active=False,
-                    role=rol_aprendiz,
+                    role=rol_apprentice,
                 )
 
                 # Create Apprentice linked to the person (ficha will be assigned later by admin)
@@ -121,7 +121,7 @@ class PersonService(BaseService):
                     'data': {
                         'persona': person_data,
                         'usuario': user_serializer.data,
-                        'aprendiz_id': apprentice.id,
+                        'apprentice_id': apprentice.id,
                         'success': 'Usuario registrado correctamente. Tu cuenta está pendiente de activación por un administrador.'
                     },
                     'status': status.HTTP_201_CREATED

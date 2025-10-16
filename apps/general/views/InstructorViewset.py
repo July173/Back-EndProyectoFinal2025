@@ -264,7 +264,7 @@ class InstructorViewset(BaseViewSet):
         tags=["Instructor"]
     )
     @action(detail=False, methods=['get'], url_path='custom-list')
-    def custom_list(self):
+    def custom_list(self, request, *args, **kwargs):
         """
         List all instructors (advanced endpoint).
         """

@@ -220,7 +220,6 @@ INSERT INTO `form_module` (`id`, `form_id_id`, `module_id_id`, `active`, `delete
   (15, 9, 3, 1, NULL);
 
 INSERT INTO `role_form_permission` (`id`, `role_id`, `form_id`, `permission_id`, `delete_at`, `active`) VALUES
-INSERT INTO `role_form_permission` (`id`, `role_id`, `form_id`, `permission_id`, `delete_at`, `active`) VALUES
 (16, 2, 3, 1, NULL, true),
 (17, 3, 3, 1, NULL, true),
 (18, 2, 4, 1, NULL, true),

@@ -61,13 +61,13 @@ class RequestAsignationService(BaseService):
             request.request_state = RequestState.RECHAZADO
             request.rejectionMessage = rejection_message
             request.save()
-            aprendiz = request.aprendiz
-            person = aprendiz.person
-            nombre_aprendiz = f"{person.first_name} {person.first_last_name}"
+            apprentice = request.apprentice
+            person = apprentice.person
+            name_apprentice = f"{person.first_name} {person.first_last_name}"
             user = User.objects.filter(person=person).first()
             email = user.email if user else None
             if email:
-                send_rejection_email(email, nombre_aprendiz, rejection_message)
+                send_rejection_email(email, name_apprentice, rejection_message)
             return {
                 'success': True,
                 'message': 'Solicitud rechazada correctamente',
@@ -91,10 +91,10 @@ class RequestAsignationService(BaseService):
             result = self.repository.get_form_request_by_id(request_id)
             if not result:
                 return self.error_response('Solicitud no encontrada', "not_found")
-            person, aprendiz, enterprise, boss, human_talent, modality, request_asignation, regional, center, sede = result
+            person, apprentice, enterprise, boss, human_talent, modality, request_asignation, regional, center, sede = result
             request_item = {
-                'aprendiz_id': aprendiz.id,
-                'ficha_id': aprendiz.ficha_id if aprendiz.ficha else None,
+                'apprentice_id': apprentice.id,
+                'ficha_id': apprentice.ficha_id if apprentice.ficha else None,
                 'fecha_inicio_contrato': request_asignation.date_start_production_stage,
                 'fecha_fin_contrato': getattr(request_asignation, 'date_end_production_stage', None),
                 'enterprise_name': enterprise.name_enterprise,
@@ -114,10 +114,10 @@ class RequestAsignationService(BaseService):
                 'modality_productive_stage': modality.id,
                 'request_state': request_asignation.request_state
             }
-            person, aprendiz, enterprise, boss, human_talent, modality, request_asignation, regional, center, sede = result
+            person, apprentice, enterprise, boss, human_talent, modality, request_asignation, regional, center, sede = result
             # Get apprentice's email from User
             user = User.objects.filter(person=person).first()
-            correo_aprendiz = user.email if user else None
+            email_apprentice = user.email if user else None
             # Get site, center, and region from PersonSede
             personsede = PersonSede.objects.filter(PersonId=person).first()
             sede_obj = personsede.SedeId if personsede else sede
@@ -130,17 +130,17 @@ class RequestAsignationService(BaseService):
                 'telefono': getattr(human_talent, 'phone_number', None)
             } if human_talent else None
             # Get file number and program name
-            ficha = aprendiz.ficha if hasattr(aprendiz, 'ficha') and aprendiz.ficha else None
+            ficha = apprentice.ficha if hasattr(apprentice, 'ficha') and apprentice.ficha else None
             numero_ficha = ficha.file_number if ficha and hasattr(ficha, 'file_number') else None
             programa = ficha.program if ficha and hasattr(ficha, 'program') else None
             nombre_programa = programa.name if programa and hasattr(programa, 'name') else None
             request_item = {
-                'aprendiz_id': aprendiz.id,
-                'nombre_aprendiz': f"{getattr(person, 'first_name', '')} {getattr(person, 'first_last_name', '')} {getattr(person, 'second_last_name', '')}",
+                'apprentice_id': apprentice.id,
+                'name_apprentice': f"{getattr(person, 'first_name', '')} {getattr(person, 'first_last_name', '')} {getattr(person, 'second_last_name', '')}",
                 'tipo_identificacion': getattr(person, 'type_identification_id', None),
                 'numero_identificacion': getattr(person, 'number_identification', None),
-                'telefono_aprendiz': getattr(person, 'phone_number', None),
-                'correo_aprendiz': correo_aprendiz,
+                'phone_apprentice': getattr(person, 'phone_number', None),
+                'email_apprentice': email_apprentice,
                 'ficha_id': ficha.id if ficha else None,
                 'numero_ficha': numero_ficha,
                 'programa': nombre_programa,
@@ -179,10 +179,10 @@ class RequestAsignationService(BaseService):
         Creates a new form request, validates business rules, and returns all created/updated entities.
         """
         try:
-            logger.info(f"Iniciando creación de solicitud para aprendiz ID: {validated_data.get('aprendiz_id')}")
-            aprendiz = Apprentice.objects.get(pk=validated_data['aprendiz_id'])
+            logger.info(f"Iniciando creación de solicitud para apprentice ID: {validated_data.get('apprentice_id')}")
+            apprentice = Apprentice.objects.get(pk=validated_data['apprentice_id'])
             ficha = Ficha.objects.get(pk=validated_data['ficha_id'])
-            last_request = RequestAsignation.objects.filter(aprendiz=aprendiz).order_by('-id').first()
+            last_request = RequestAsignation.objects.filter(apprentice=apprentice).order_by('-id').first()
             if last_request and last_request.request_state != RequestState.RECHAZADO:
                 return self.error_response("Solo puedes volver a enviar el formulario si tu última solicitud fue rechazada.", "invalid_state")
             sede = Sede.objects.get(pk=validated_data['sede'])
@@ -196,8 +196,8 @@ class RequestAsignationService(BaseService):
                     return self.error_response("La diferencia entre la fecha de inicio y fin de contrato debe ser de al menos 6 meses.", "invalid_dates")
             logger.info("Validaciones completadas exitosamente")
             with transaction.atomic():
-                aprendiz, ficha, enterprise, boss, human_talent, sede, modality, request_asignation = self.repository.create_all_dates_form_request(validated_data)
-                person = aprendiz.person
+                apprentice, ficha, enterprise, boss, human_talent, sede, modality, request_asignation = self.repository.create_all_dates_form_request(validated_data)
+                person = apprentice.person
                 PersonSede.objects.update_or_create(
                     PersonId=person,
                     defaults={"SedeId": sede}
@@ -206,10 +206,10 @@ class RequestAsignationService(BaseService):
                     'success': True,
                     'message': 'Solicitud creada exitosamente',
                     'data': {
-                        'aprendiz': {
-                            'id': aprendiz.id,
+                        'apprentice': {
+                            'id': apprentice.id,
                             'ficha_id': ficha.id,
-                            'active': aprendiz.active
+                            'active': apprentice.active
                         },
                         'enterprise': {
                             'id': enterprise.id,
@@ -262,10 +262,10 @@ class RequestAsignationService(BaseService):
             logger.info("Obteniendo lista de solicitudes (solo datos personales básicos)")
             form_requests = self.repository.get_all_form_requests()
             requests_data = []
-            for person, aprendiz, enterprise, boss, human_talent, sede, modality, request_asignation in form_requests:
+            for person, apprentice, enterprise, boss, human_talent, sede, modality, request_asignation in form_requests:
                 request_item = {
                     'id': request_asignation.id,  # request ID
-                    'aprendiz_id': aprendiz.id,   # apprentice ID
+                    'apprentice_id': apprentice.id,   # apprentice ID
                     'nombre': f"{getattr(person, 'first_name', '')} {getattr(person, 'first_last_name', '')} {getattr(person, 'second_last_name', '')}",
                     'tipo_identificacion': getattr(person, 'type_identification_id', None),
                     'numero_identificacion': getattr(person, 'number_identification', None),
@@ -284,7 +284,7 @@ class RequestAsignationService(BaseService):
             logger.error(f"Error al listar solicitudes: {str(e)}")
             return self.error_response(f"Error al obtener las solicitudes: {str(e)}", "list_form_requests")
 
-    def get_aprendiz_dashboard(self, aprendiz_id):
+    def get_apprentice_dashboard(self, apprentice_id):
         # Get dashboard information for the apprentice, including request and instructor details
         """
         Gets dashboard information for the apprentice:
@@ -383,12 +383,12 @@ class RequestAsignationService(BaseService):
             data = []
 
             for req in requests:
-                person = req.aprendiz.person
-                ficha = req.aprendiz.ficha
+                person = req.apprentice.person
+                ficha = req.apprentice.ficha
                 programa = ficha.program.name if ficha and hasattr(ficha, 'program') and ficha.program else None
                 data.append({
                     "id": req.id,
-                    "aprendiz_id": req.aprendiz.id,
+                    "apprentice_id": req.apprentice.id,
                     "nombre": f"{person.first_name} {person.first_last_name} {person.second_last_name}",
                     "tipo_identificacion": getattr(person, 'type_identification_id', None),
                     "numero_identificacion": str(person.number_identification),

@@ -26,8 +26,8 @@ class RequestAsignationRepository(BaseRepository):
         Returns a queryset of matching requests.
         """
         queryset = RequestAsignation.objects.select_related(
-            'aprendiz__person',
-            'aprendiz__ficha__program',
+            'apprentice__person',
+            'apprentice__ficha__program',
             'enterprise',
             'modality_productive_stage'
         ).all()
@@ -35,10 +35,10 @@ class RequestAsignationRepository(BaseRepository):
         # Filter by text (name or document number)
         if search:
             queryset = queryset.filter(
-                Q(aprendiz__person__first_name__icontains=search) |
-                Q(aprendiz__person__first_last_name__icontains=search) |
-                Q(aprendiz__person__second_last_name__icontains=search) |
-                Q(aprendiz__person__number_identification__icontains=search)
+                Q(apprentice__person__first_name__icontains=search) |
+                Q(apprentice__person__first_last_name__icontains=search) |
+                Q(apprentice__person__second_last_name__icontains=search) |
+                Q(apprentice__person__number_identification__icontains=search)
             )
 
         # Filter by state
@@ -47,7 +47,7 @@ class RequestAsignationRepository(BaseRepository):
 
         # Filter by program
         if program_id:
-            queryset = queryset.filter(aprendiz__ficha__program_id=program_id)
+            queryset = queryset.filter(apprentice__ficha__program_id=program_id)
 
         return queryset
 
@@ -62,8 +62,8 @@ class RequestAsignationRepository(BaseRepository):
         """
         try:
             request_asignation = RequestAsignation.objects.select_related(
-                'aprendiz__person',
-                'aprendiz__ficha',
+                'apprentice__person',
+                'apprentice__ficha',
                 'enterprise',
                 'enterprise__boss',
                 'enterprise__human_talent',
@@ -75,8 +75,8 @@ class RequestAsignationRepository(BaseRepository):
                 center = getattr(modality, 'center', None)
                 sede = getattr(modality, 'sede', None)
                 return (
-                    request_asignation.aprendiz.person,
-                    request_asignation.aprendiz,
+                    request_asignation.apprentice.person,
+                    request_asignation.apprentice,
                     request_asignation.enterprise,
                     request_asignation.enterprise.boss,
                     request_asignation.enterprise.human_talent,
@@ -111,12 +111,12 @@ class RequestAsignationRepository(BaseRepository):
             modality = ModalityProductiveStage.objects.get(pk=data['modality_productive_stage'])
             
             # Find existing apprentice
-            aprendiz = Apprentice.objects.get(pk=data['aprendiz_id'])
+            apprentice = Apprentice.objects.get(pk=data['apprentice_id'])
             
             # Find record and link to apprentice
             ficha = Ficha.objects.get(pk=data['ficha_id'])
-            aprendiz.ficha = ficha
-            aprendiz.save()
+            apprentice.ficha = ficha
+            apprentice.save()
             
             # Create entities (database operations only)
             
@@ -153,7 +153,7 @@ class RequestAsignationRepository(BaseRepository):
             
             # Create RequestAsignation with PDF
             request_asignation_data = {
-                'aprendiz': aprendiz,
+                'apprentice': apprentice,
                 'enterprise': enterprise,
                 'modality_productive_stage': modality,
                 'request_date': data['fecha_inicio_contrato'],  # Usar fecha de inicio como fecha de solicitud
@@ -168,7 +168,7 @@ class RequestAsignationRepository(BaseRepository):
             logger.info("Solicitud de formulario creada exitosamente")  # User-facing log in Spanish
             
             # Return instances directly (including request_asignation)
-            return aprendiz, ficha, enterprise, boss, human_talent, sede, modality, request_asignation
+            return apprentice, ficha, enterprise, boss, human_talent, sede, modality, request_asignation
 
 
     def get_all_form_requests(self):
@@ -183,8 +183,8 @@ class RequestAsignationRepository(BaseRepository):
         
     # Get all RequestAsignation objects with optimized relationships
         request_asignations = RequestAsignation.objects.select_related(
-            'aprendiz__person',           # Person a través de Aprendiz
-            'aprendiz__ficha',            # Ficha del aprendiz
+            'apprentice__person',           # Person a través de Apprentice
+            'apprentice__ficha',            # Ficha del apprentice
             'enterprise',                 # Enterprise
             'enterprise__boss',           # Boss (OneToOne)
             'enterprise__human_talent',   # HumanTalent (OneToOne)
@@ -204,12 +204,12 @@ class RequestAsignationRepository(BaseRepository):
                 sede = getattr(modality, 'sede', None)
                 # Create tuple with related entities
                 # Get the location through PersonSede
-                person = request_asignation.aprendiz.person
+                person = request_asignation.apprentice.person
                 person_sede = PersonSede.objects.filter(PersonId=person).first()
                 sede = person_sede.SedeId if person_sede and person_sede.SedeId else None
                 form_request = (
                     person,
-                    request_asignation.aprendiz,
+                    request_asignation.apprentice,
                     request_asignation.enterprise,
                     request_asignation.enterprise.boss,
                     request_asignation.enterprise.human_talent,

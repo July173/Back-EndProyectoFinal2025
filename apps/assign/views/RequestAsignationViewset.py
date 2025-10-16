@@ -251,7 +251,7 @@ class RequestAsignationViewset(BaseViewSet):
         tags=["RequestAsignation"],
         manual_parameters=[
             openapi.Parameter(
-                'aprendiz_id',
+                'apprentice_id',
                 openapi.IN_QUERY,
                 description="ID del aprendiz",
                 type=openapi.TYPE_INTEGER,
@@ -263,20 +263,20 @@ class RequestAsignationViewset(BaseViewSet):
             404: openapi.Response("Aprendiz no encontrado")
         }
     )
-    @action(detail=False, methods=['get'], url_path='aprendiz-dashboard')
-    def aprendiz_dashboard(self, request):
+    @action(detail=False, methods=['get'], url_path='apprentice-dashboard')
+    def apprentice_dashboard(self, request):
         """
         Get dashboard information for the authenticated apprentice (active request, assigned instructor, state).
         API documentation and user-facing messages remain in Spanish.
         """
-        aprendiz_id = request.query_params.get('aprendiz_id')
-        if not aprendiz_id:
+        apprentice_id = request.query_params.get('apprentice_id')
+        if not apprentice_id:
             return Response({
                 'success': False,
                 'message': 'Se requiere el ID del aprendiz'
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        result = self.service_class().get_aprendiz_dashboard(aprendiz_id)
+        result = self.service_class().get_apprentice_dashboard(apprentice_id)
         if result.get('success', True):
             return Response(result, status=status.HTTP_200_OK)
         else:
