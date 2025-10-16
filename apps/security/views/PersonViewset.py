@@ -125,8 +125,13 @@ class PersonViewSet(BaseViewSet):
         Controller: Only orchestrates the call to the service.
         Does not contain validations or business logic.
         """
-        result = self.service.register_apprentice(request.data)
-        return Response(result['data'], status=result['status'])
+        try:
+            result = self.service.register_apprentice(request.data)
+            return Response(result['data'], status=result['status'])
+        except ValueError as ve:
+            return Response({'error': str(ve)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'error': f'Error inesperado: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
 
     # ----------- LIST -----------
     @swagger_auto_schema(
@@ -202,13 +207,12 @@ class PersonViewSet(BaseViewSet):
     )
     @action(detail=True, methods=['delete'], url_path='soft-delete')
     def soft_destroy(self, request, pk=None):
-        deleted = self.service_class().soft_delete(pk)
-        if deleted:
-            return Response(
-                {"detail": "Eliminado lógicamente correctamente."},
-                status=status.HTTP_204_NO_CONTENT
-            )
-        return Response(
-            {"detail": "No encontrado."},
-            status=status.HTTP_404_NOT_FOUND
-        )
+        try:
+            deleted = self.service_class().soft_delete(pk)
+            if deleted:
+                return Response({"detail": "Eliminado lógicamente correctamente."}, status=status.HTTP_204_NO_CONTENT)
+            return Response({"detail": "No encontrado."}, status=status.HTTP_404_NOT_FOUND)
+        except ValueError as ve:
+            return Response({"detail": str(ve)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"detail": f"Error inesperado: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)

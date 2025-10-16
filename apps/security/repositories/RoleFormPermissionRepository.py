@@ -53,7 +53,7 @@ class RoleFormPermissionRepository(BaseRepository):
                 for m, forms in modules.items()
             ]
             menu.append({
-                "role": role,
+                "rol": role,
                 "moduleForm": module_forms
             })
 

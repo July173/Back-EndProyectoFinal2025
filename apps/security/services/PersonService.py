@@ -18,23 +18,38 @@ class PersonService(BaseService):
 
     def update(self, pk, data):
         person = self.get(pk)
-        return self.update_person(person, data)
+        if not person:
+            raise ValueError(f"No se encontró la persona con ID {pk}.")
+        try:
+            return self.update_person(person, data)
+        except Exception as e:
+            raise ValueError(f"No se pudo actualizar la persona: {str(e)}")
 
     def partial_update(self, pk, data):
         person = self.get(pk)
-        return self.update_person(person, data)
+        if not person:
+            raise ValueError(f"No se encontró la persona con ID {pk}.")
+        try:
+            return self.update_person(person, data)
+        except Exception as e:
+            raise ValueError(f"No se pudo actualizar parcialmente la persona: {str(e)}")
 
     def create_person(self, data):
-        # The serializer now correctly handles the id, just delegate to the repository
-        return self.repository.create_person(data)
+        try:
+            return self.repository.create_person(data)
+        except Exception as e:
+            raise ValueError(f"No se pudo crear la persona: {str(e)}")
 
     def update_person(self, person, data):
         # If the image is being updated, delete the previous one
-        if 'image' in data and data['image'] and person.image:
-            import os
-            if hasattr(person.image, 'path') and os.path.isfile(person.image.path):
-                os.remove(person.image.path)
-        return self.repository.update_person(person, data)
+        try:
+            if 'image' in data and data['image'] and person.image:
+                import os
+                if hasattr(person.image, 'path') and os.path.isfile(person.image.path):
+                    os.remove(person.image.path)
+            return self.repository.update_person(person, data)
+        except Exception as e:
+            raise ValueError(f"No se pudo actualizar la persona: {str(e)}")
 
     def register_apprentice(self, data):
         """

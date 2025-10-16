@@ -134,9 +134,14 @@ class ProgramViewset(BaseViewSet):
         """
         Get all records (fichas) linked to a specific program.
         """
-        fichas = self.service_class().get_fichas_by_program(pk)
-        serializer = FichaSerializer(fichas, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        try:
+            fichas = self.service_class().get_fichas_by_program(pk)
+            serializer = FichaSerializer(fichas, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except ValueError as ve:
+            return Response({"detail": str(ve)}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"detail": f"Error inesperado: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
     # ----------- DISABLE PROGRAM WITH FICHAS (custom) -----------
     @swagger_auto_schema(
@@ -156,12 +161,8 @@ class ProgramViewset(BaseViewSet):
         """
         try:
             mensaje = self.service_class().logical_delete_program(pk)
-            return Response(
-                {"detail": mensaje},
-                status=status.HTTP_200_OK
-            )
-        except ValueError as e:
-            return Response(
-                {"error": str(e)}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"detail": mensaje}, status=status.HTTP_200_OK)
+        except ValueError as ve:
+            return Response({"detail": str(ve)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"detail": f"Error inesperado: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)

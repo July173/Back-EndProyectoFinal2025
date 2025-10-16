@@ -8,4 +8,12 @@ class ModuleService(BaseService):
     
     # method to get filtered modules
     def get_filtered_modules(self, active=None, search=None):
-        return self.repository.get_filtered_modules(active, search)
+        try:
+            modules = self.repository.get_filtered_modules(active, search)
+            if not modules.exists():
+                raise ValueError("No se encontraron módulos con los filtros proporcionados.")
+            return modules
+        except ValueError as ve:
+            raise ve
+        except Exception as e:
+            raise ValueError(f"Error inesperado: {str(e)}")

@@ -23,11 +23,13 @@ class UserService(BaseService):
         self.repository = UserRepository()
 
     def update(self, pk, data):
-        # If a new password is provided, hash it before updating
         pwd = data.get('password')
         if pwd:
             data['password'] = make_password(pwd)
-        return super().update(pk, data)
+        try:
+            return super().update(pk, data)
+        except Exception as e:
+            raise ValueError(f"No se pudo actualizar el usuario: {str(e)}")
 
     def reset_password(self, email, new_password):
         # Validate email and new password
@@ -107,7 +109,10 @@ class UserService(BaseService):
         pwd = data.get('password')
         if pwd:
             data['password'] = make_password(pwd)
-        return super().create(data)
+        try:
+            return super().create(data)
+        except Exception as e:
+            raise ValueError(f"No se pudo crear el usuario: {str(e)}")
 
     def change_password(self, pk, new_password):
         inst = self.get(pk)
@@ -234,15 +239,23 @@ class UserService(BaseService):
 
     def get_filtered_users(self, role=None, search=None):
         from django.db import models
-        queryset = self.repository.get_queryset()
-        if role:
-            queryset = queryset.filter(role__type_role__icontains=role)
-        if search:
-            queryset = queryset.filter(
-                models.Q(person__first_name__icontains=search) |
-                models.Q(person__second_name__icontains=search) |
-                models.Q(person__first_last_name__icontains=search) |
-                models.Q(person__second_last_name__icontains=search) |
-                models.Q(person__number_identification__icontains=search)
-            )
-        return list(queryset)
+        try:
+            queryset = self.repository.get_queryset()
+            if role:
+                queryset = queryset.filter(role__type_role__icontains=role)
+            if search:
+                queryset = queryset.filter(
+                    models.Q(person__first_name__icontains=search) |
+                    models.Q(person__second_name__icontains=search) |
+                    models.Q(person__first_last_name__icontains=search) |
+                    models.Q(person__second_last_name__icontains=search) |
+                    models.Q(person__number_identification__icontains=search)
+                )
+            users = list(queryset)
+            if not users:
+                raise ValueError("No se encontraron usuarios con los filtros proporcionados.")
+            return users
+        except ValueError as ve:
+            raise ve
+        except Exception as e:
+            raise ValueError(f"Error inesperado: {str(e)}")

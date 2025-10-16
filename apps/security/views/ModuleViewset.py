@@ -27,9 +27,14 @@ class ModuleViewSet(BaseViewSet):
         if active is not None:
             active = active.lower() in ['true', '1', 'yes']
         service = self.service_class()
-        modules = service.get_filtered_modules(active, search)
-        serializer = self.get_serializer(modules, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        try:
+            modules = service.get_filtered_modules(active, search)
+            serializer = self.get_serializer(modules, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except ValueError as ve:
+            return Response({"detail": str(ve)}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"detail": f"Error inesperado: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
     service_class = ModuleService
     serializer_class = ModuleSerializer
 
@@ -107,13 +112,12 @@ class ModuleViewSet(BaseViewSet):
     )
     @action(detail=True, methods=['delete'], url_path='soft-delete')
     def soft_destroy(self, request, pk=None):
-        deleted = self.service_class().soft_delete(pk)
-        if deleted:
-            return Response(
-                {"detail": "Eliminado lógicamente correctamente."},
-                status=status.HTTP_204_NO_CONTENT
-            )
-        return Response(
-            {"detail": "No encontrado."},
-            status=status.HTTP_404_NOT_FOUND
-        )
+        try:
+            deleted = self.service_class().soft_delete(pk)
+            if deleted:
+                return Response({"detail": "Eliminado lógicamente correctamente."}, status=status.HTTP_204_NO_CONTENT)
+            return Response({"detail": "No encontrado."}, status=status.HTTP_404_NOT_FOUND)
+        except ValueError as ve:
+            return Response({"detail": str(ve)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"detail": f"Error inesperado: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)

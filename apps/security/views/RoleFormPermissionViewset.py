@@ -21,8 +21,13 @@ class RoleFormPermissionViewSet(BaseViewSet):
     )
     @action(detail=False, methods=['get'], url_path='permission-matrix')
     def permission_matrix(self, request):
-        matrix = self.service.get_permission_matrix()
-        return Response(matrix, status=status.HTTP_200_OK)
+            try:
+                matrix = self.service.get_permission_matrix()
+                return Response(matrix, status=status.HTTP_200_OK)
+            except ValueError as ve:
+                return Response({'detail': str(ve)}, status=status.HTTP_404_NOT_FOUND)
+            except Exception as e:
+                return Response({'detail': f'Error inesperado: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
         method='get',
@@ -155,16 +160,15 @@ class RoleFormPermissionViewSet(BaseViewSet):
     )
     @action(detail=True, methods=['delete'], url_path='soft-delete')
     def soft_destroy(self, request, pk=None):
-        deleted = self.service_class().soft_delete(pk)
-        if deleted:
-            return Response(
-                {"detail": "Eliminado lógicamente correctamente."},
-                status=status.HTTP_204_NO_CONTENT
-            )
-        return Response(
-            {"detail": "No encontrado."},
-            status=status.HTTP_404_NOT_FOUND
-        )
+            try:
+                deleted = self.service_class().soft_delete(pk)
+                if deleted:
+                    return Response({"detail": "Eliminado lógicamente correctamente."}, status=status.HTTP_204_NO_CONTENT)
+                return Response({"detail": "No encontrado."}, status=status.HTTP_404_NOT_FOUND)
+            except ValueError as ve:
+                return Response({"detail": str(ve)}, status=status.HTTP_400_BAD_REQUEST)
+            except Exception as e:
+                return Response({"detail": f"Error inesperado: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
         operation_description="Gets the menu for the specified user.",

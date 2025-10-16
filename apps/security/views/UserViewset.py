@@ -118,16 +118,15 @@ class UserViewSet(BaseViewSet):
         """
         Performs a logical (soft) delete of the specified user.
         """
-        deleted = self.service_class().soft_delete(pk)
-        if deleted:
-            return Response(
-                {"detail": "Eliminado lógicamente correctamente."},
-                status=status.HTTP_204_NO_CONTENT
-            )
-        return Response(
-            {"detail": "No encontrado."},
-            status=status.HTTP_404_NOT_FOUND
-        )
+        try:
+            deleted = self.service_class().soft_delete(pk)
+            if deleted:
+                return Response({"detail": "Eliminado lógicamente correctamente."}, status=status.HTTP_204_NO_CONTENT)
+            return Response({"detail": "No encontrado."}, status=status.HTTP_404_NOT_FOUND)
+        except ValueError as ve:
+            return Response({"detail": str(ve)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"detail": f"Error inesperado: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
         operation_description=(
@@ -233,8 +232,13 @@ class UserViewSet(BaseViewSet):
         role = request.query_params.get('role')
         search = request.query_params.get('search')
         service = self.service_class()
-        users = service.get_filtered_users(role, search)
-        serializer = self.get_serializer(users, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        try:
+            users = service.get_filtered_users(role, search)
+            serializer = self.get_serializer(users, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except ValueError as ve:
+            return Response({"detail": str(ve)}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"detail": f"Error inesperado: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
     service_class = UserService
     serializer_class = UserSerializer
