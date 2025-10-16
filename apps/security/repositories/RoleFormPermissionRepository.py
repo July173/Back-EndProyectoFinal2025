@@ -15,11 +15,11 @@ class RoleFormPermissionRepository(BaseRepository):
         """
         data = (
             RoleFormPermission.objects
-            .filter(role__user__id=user_id, form__formmodule__module__active=True)  # Filter by user and active modules
-            .select_related("role", "form__formmodule__module", "form")
+            .filter(role__user__id=user_id, form__formmodule__module_id__active=True)
+            .select_related("role", "form__formmodule__module_id", "form")
             .values(
                 "role__type_role",                       # role name
-                "form__formmodule__module__name",        # module name
+                "form__formmodule__module_id__name",     # module name
                 "form__name",                            # form name
                 "form__path"                             # form path
             )
@@ -28,7 +28,7 @@ class RoleFormPermissionRepository(BaseRepository):
         result = {}
         for d in data:
             role = d["role__type_role"]
-            module = d["form__formmodule__module__name"]
+            module = d["form__formmodule__module_id__name"]
             form_name = d["form__name"]
             form_path = d["form__path"]
 

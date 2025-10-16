@@ -10,7 +10,7 @@ class Sede(models.Model):
     name = models.CharField(max_length=100)
     code_sede = models.BigIntegerField(unique=True)
     address = models.CharField(max_length=255)
-    phone_sede = models.IntegerField()
+    phone_sede = models.BigIntegerField()
     email_contact = models.EmailField(max_length=100)
     active = models.BooleanField(default=True)
     delete_at = models.DateTimeField(null=True, blank=True)
