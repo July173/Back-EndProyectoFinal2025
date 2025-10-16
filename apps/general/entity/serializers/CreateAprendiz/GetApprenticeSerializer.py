@@ -16,9 +16,9 @@ class GetApprenticeSerializer(serializers.ModelSerializer):
     second_last_name = serializers.CharField(source='person.second_last_name')
     phone_number = serializers.CharField(source='person.phone_number')
     email = serializers.SerializerMethodField()
-    program_id = serializers.IntegerField(source='ficha.program_id', required=False)
-    ficha_id = serializers.IntegerField(required=False)
-    role_id = serializers.SerializerMethodField()
+    program = serializers.IntegerField(source='ficha.program_id', required=False)
+    ficha = serializers.IntegerField(required=False)
+    role = serializers.SerializerMethodField()
 
     class Meta:
         model = Apprentice
@@ -32,9 +32,9 @@ class GetApprenticeSerializer(serializers.ModelSerializer):
             'second_last_name',
             'phone_number',
             'email',
-            'program_id',
-            'ficha_id',
-            'role_id'
+            'program',
+            'ficha',
+            'role'
         ]
 
     def get_email(self, obj):

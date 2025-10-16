@@ -16,12 +16,12 @@ class GetInstructorSerializer(serializers.ModelSerializer):
     type_identification = serializers.SerializerMethodField()
     number_identification = serializers.SerializerMethodField()
     email = serializers.SerializerMethodField()
-    role_id = serializers.SerializerMethodField()
+    role = serializers.SerializerMethodField()
     contract_type = serializers.SerializerMethodField()  # Changed to return the ID
     contract_start_date = serializers.DateField()
     contract_end_date = serializers.DateField()
     knowledge_area = serializers.SerializerMethodField()
-    sede_id = serializers.SerializerMethodField()
+    sede = serializers.SerializerMethodField()
     active = serializers.SerializerMethodField()
 
     class Meta:
@@ -36,12 +36,12 @@ class GetInstructorSerializer(serializers.ModelSerializer):
             'type_identification',
             'number_identification',
             'email',
-            'role_id',
+            'role',
             'contract_type',
             'contract_start_date',
             'contract_end_date',
             'knowledge_area',
-            'sede_id',
+            'sede',
             'is_followup_instructor',
             'active',
         ]
@@ -98,9 +98,9 @@ class GetInstructorSerializer(serializers.ModelSerializer):
 
     def get_sede_id(self, obj):
         """Get the site ID from the related PersonSede object."""
-        person_sede = PersonSede.objects.filter(person_id=obj.person).first()
-        if person_sede and person_sede.sede_id:
-            return person_sede.sede_id.id
+        person_sede = PersonSede.objects.filter(person=obj.person).first()
+        if person_sede and person_sede.sede:
+            return person_sede.sede.id
         return None
 
     def get_active(self, obj):

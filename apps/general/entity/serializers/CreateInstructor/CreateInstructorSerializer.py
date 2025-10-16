@@ -18,14 +18,14 @@ class CreateInstructorSerializer(serializers.Serializer):
     number_identification = serializers.IntegerField(required=True)
     # User fields
     email = serializers.EmailField()
-    role_id = serializers.IntegerField()
+    role = serializers.IntegerField()
     # Instructor fields
     contract_type = serializers.IntegerField(required=True)
     contract_start_date = serializers.DateField()
     contract_end_date = serializers.DateField()
     knowledge_area = serializers.IntegerField()
     # Relationship ID
-    sede_id = serializers.IntegerField()
+    sede = serializers.IntegerField()
     is_followup_instructor = serializers.BooleanField(required=False, default=False)
 
     class Meta:

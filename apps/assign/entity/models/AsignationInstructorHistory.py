@@ -6,7 +6,7 @@ class AsignationInstructorHistory(models.Model):
     class Meta:
         db_table = 'asignation_instructor_history'
     
-    asignation_instructor_id = models.ForeignKey(
+    asignation_instructor = models.ForeignKey(
         AsignationInstructor, on_delete=models.CASCADE, related_name="history"
     )
     old_instructor_id = models.IntegerField()

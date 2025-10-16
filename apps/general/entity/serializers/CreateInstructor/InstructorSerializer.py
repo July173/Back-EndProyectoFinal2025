@@ -5,14 +5,14 @@ from rest_framework import serializers
 
 
 class InstructorSerializer(serializers.ModelSerializer):
-    person_id = serializers.IntegerField(required=True)
+    person = serializers.IntegerField(required=True)
     contract_type = serializers.IntegerField(required=True)
 
     class Meta:
         model = Instructor
         fields = [
             'id',
-            'person_id',
+            'person',
             'contract_type',
             'contract_start_date',
             'contract_end_date',

@@ -9,5 +9,5 @@ class UpdateApprenticeSerializer(serializers.Serializer):
     second_last_name = serializers.CharField(required=False, allow_blank=True)
     phone_number = serializers.IntegerField(required=False)
     email = serializers.EmailField()
-    ficha_id = serializers.IntegerField()
-    role_id = serializers.IntegerField(required=False)
+    ficha = serializers.IntegerField()
+    role = serializers.IntegerField(required=False)

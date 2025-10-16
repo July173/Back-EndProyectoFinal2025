@@ -5,8 +5,8 @@ class FormRequestSerializer(serializers.Serializer):
     Serializer for form requests. All help texts remain in Spanish for user-facing documentation.
     """
     # IDs to link existing entities
-    apprentice_id = serializers.IntegerField(help_text="ID del aprendiz")
-    ficha_id = serializers.IntegerField(help_text="ID de la ficha")
+    apprentice = serializers.IntegerField(help_text="ID del aprendiz")
+    ficha = serializers.IntegerField(help_text="ID de la ficha")
 
     # Data created in the request
     fecha_inicio_contrato = serializers.DateField(help_text="Fecha de inicio de contrato de aprendizaje")
