@@ -187,37 +187,8 @@ class ApprenticeService(BaseService):
         except Exception as e:
             raise ValueError(f"No se pudo actualizar el aprendiz: {str(e)}")
 
-    def get_apprentice(self, apprentice_id):
-        """
-        Get an apprentice by ID.
-        """
-        return Apprentice.objects.filter(pk=apprentice_id).first()
-
     def list_apprentices(self):
         """
         List all apprentices.
         """
         return Apprentice.objects.all()
-
-    def delete_apprentice(self, apprentice_id):
-        """
-        Completely delete an apprentice and related data.
-        """
-        with transaction.atomic():
-            apprentice = Apprentice.objects.get(pk=apprentice_id)
-            self.repository.delete_all_dates_apprentice(apprentice)
-
-    def logical_delete_apprentice(self, apprentice_id):
-        """
-        Perform logical deletion or reactivation of apprentice.
-        """
-        with transaction.atomic():
-            apprentice = Apprentice.objects.get(pk=apprentice_id)
-            if not apprentice.active:
-                self.repository.set_active_state_dates_apprentice(apprentice, active=True)
-                return "Aprendiz reactivado correctamente."
-            else:
-                self.repository.set_active_state_dates_apprentice(apprentice, active=False)
-                return "Eliminación lógica realizada correctamente."
-
-

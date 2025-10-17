@@ -93,6 +93,8 @@ class AsignationInstructorViewset(BaseViewSet):
             status=status.HTTP_404_NOT_FOUND
         )
 
+
+
     @swagger_auto_schema(
         method='post',
         operation_description="Crea una asignación de instructor personalizada (fecha automática)",

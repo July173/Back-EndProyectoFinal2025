@@ -12,7 +12,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-
 # Repository for handling form requests and related entities
 class RequestAsignationRepository(BaseRepository):
 

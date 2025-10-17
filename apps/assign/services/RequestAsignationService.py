@@ -294,7 +294,6 @@ class RequestAsignationService(BaseService):
         """
         try:
             
-
             apprentice = Apprentice.objects.select_related('person', 'ficha').get(pk=apprentice_id)
 
             # Find the apprentice's most recent request

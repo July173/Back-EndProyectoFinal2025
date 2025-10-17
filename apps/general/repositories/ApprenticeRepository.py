@@ -51,35 +51,3 @@ class ApprenticeRepository(BaseRepository):
             apprentice.save()
             return apprentice
 
-    def delete_all_dates_apprentice(self, apprentice):
-        """
-        Delete apprentice, user, and person in cascade.
-        """
-        with transaction.atomic():
-            person = apprentice.person
-            user = User.objects.filter(person=person).first()
-            apprentice.delete()
-            if user:
-                user.delete()
-            person.delete()
-
-    def set_active_state_dates_apprentice(self, apprentice, active=True):
-        """
-        Activate or deactivate apprentice, user, and person in cascade.
-        """
-        with transaction.atomic():
-            apprentice.active = active
-            apprentice.delete_at = None if active else timezone.now()
-            apprentice.save()
-            person = apprentice.person
-            person.active = active
-            person.delete_at = None if active else timezone.now()
-            person.save()
-            user = User.objects.filter(person=person).first()
-            if user:
-                user.is_active = active
-                user.deleted_at = None if active else timezone.now()
-                user.save()
-            return apprentice
-
-

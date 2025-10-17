@@ -112,24 +112,8 @@ class ApprenticeViewset(BaseViewSet):
             {"detail": "No encontrado."},
             status=status.HTTP_404_NOT_FOUND
         )
-
-    # ----------- RETRIEVE (custom) -----------
-    @swagger_auto_schema(
-        operation_description="Obtiene un aprendiz por su ID (nuevo endpoint avanzado).",
-        responses={200: GetApprenticeSerializer},
-        tags=["Apprentice"]
-    )
-    @action(detail=True, methods=['get'], url_path='Create-Aprendiz/GetById')
-    def custom_retrieve(self, request, pk=None):
-        """
-        Retrieve an apprentice by ID (advanced endpoint).
-        """
-        apprentice = self.service.get_apprentice(pk)
-        if apprentice:
-            serializer = GetApprenticeSerializer(apprentice)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response({"detail": "Aprendiz no encontrado."}, status=status.HTTP_404_NOT_FOUND)
-
+        
+        
     # ----------- CREATE (custom) -----------
     @swagger_auto_schema(
         request_body=CreateApprenticeSerializer,
@@ -191,45 +175,3 @@ class ApprenticeViewset(BaseViewSet):
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    # ----------- DELETE (custom) -----------
-    @swagger_auto_schema(
-        operation_description="Elimina un aprendiz (delete persistencial, nuevo endpoint avanzado).",
-        tags=["Apprentice"]
-    )
-    @action(detail=True, methods=['delete'], url_path='Create-Aprendiz/delete')
-    def custom_destroy(self, request, pk=None):
-        """
-        Delete an apprentice (persistent delete, advanced endpoint).
-        """
-        try:
-            self.service.delete_apprentice(pk)
-            return Response({"detail": "Aprendiz eliminado correctamente."}, status=status.HTTP_204_NO_CONTENT)
-        except Apprentice.DoesNotExist:
-            return Response({"detail": "Aprendiz no encontrado."}, status=status.HTTP_404_NOT_FOUND)
-        except ValueError as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    # ----------- LOGICAL DELETE OR REACTIVATE -----------
-    @swagger_auto_schema(
-        operation_description="Elimina lógicamente o reactiva un aprendiz (nuevo endpoint avanzado).",
-        tags=["Apprentice"]
-    )
-    @action(detail=True, methods=['delete'], url_path='Create-Aprendiz/logical-delete')
-    def custom_logical_delete(self, request, pk=None):
-        """
-        Logically delete or reactivate an apprentice (advanced endpoint).
-        """
-        try:
-            result = self.service.logical_delete_apprentice(pk)
-            return Response({"detail": result}, status=status.HTTP_200_OK)
-        except Apprentice.DoesNotExist:
-            return Response({"detail": "Aprendiz no encontrado."}, status=status.HTTP_404_NOT_FOUND)
-        except ValueError as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-        
