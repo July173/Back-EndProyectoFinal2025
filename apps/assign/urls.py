@@ -8,7 +8,7 @@ from apps.assign.views.RequestAsignationViewset import RequestAsignationViewset
 from apps.assign.views.AsignationInstructorViewset import AsignationInstructorViewset
 from apps.assign.views.AsignationInstructorHistoryViewset import AsignationInstructorHistoryViewset
 from apps.assign.views.VisitFollowingViewset import VisitFollowingViewset
-from apps.assign.views.FormRequestPDFViewset import FormRequestPDFAPIView
+from apps.assign.views.FormRequestPDFViewset import FormRequestPDFViewset
 from apps.assign.views.MessageViewset import MessageViewset
 
 router = DefaultRouter()
@@ -23,7 +23,8 @@ router.register(r'messages', MessageViewset, basename='assign_messages')
 router.register(r'visit_following', VisitFollowingViewset, basename='assign_visit_following')
 
 
+router.register(r'form-requests/upload-pdf', FormRequestPDFViewset, basename='form_requests_upload_pdf')
+
 urlpatterns = [
     path('', include(router.urls)),
-    path('form-requests/upload-pdf/', FormRequestPDFAPIView.as_view(), name='form_requests_upload_pdf'),
 ]

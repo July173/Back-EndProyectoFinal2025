@@ -1,11 +1,21 @@
-from core.base.services.implements.baseService.BaseService import BaseService
+from apps.assign.entity.models.RequestAsignation import RequestAsignation
 from apps.assign.repositories.FormRequestPDFRepository import FormRequestRepository
 from django.db import transaction
 import logging
 
 logger = logging.getLogger(__name__)
 
-class FormRequestService(BaseService):
+class FormRequestService:
+    def error_response(self, detail, error_type="error"):
+        """
+        Returns a structured error response with 'detail' field.
+        """
+        return {
+            'success': False,
+            'error_type': error_type,
+            'detail': str(detail),
+            'data': None
+        }
     """
     Service for handling PDF uploads to form requests.
     """
@@ -23,23 +33,19 @@ class FormRequestService(BaseService):
 
             # BUSINESS VALIDATIONS
 
-            # Validate that the file is not empty
+            # Validations for pdf_file 
             if not pdf_file:
-                raise ValueError("No se proporcionó ningún archivo PDF")  # User-facing error in Spanish
-
-            # Validate request_id
-            if not request_id or request_id <= 0:
-                raise ValueError("ID de solicitud inválido")  # User-facing error in Spanish
-
-            # Validate file size (redundant but for safety)
-            if pdf_file.size > 10 * 1024 * 1024:  # 10MB
-                raise ValueError("El archivo PDF no puede ser mayor a 10MB")  # User-facing error in Spanish
-
-            # Validate extension (redundant but for safety)
+                raise ValueError("No se proporcionó ningún archivo PDF")
             if not pdf_file.name.lower().endswith('.pdf'):
-                raise ValueError("El archivo debe ser un PDF (.pdf)")  # User-facing error in Spanish
+                raise ValueError("El archivo debe ser un PDF (.pdf)")
+            if pdf_file.size > 1024 * 1024:
+                raise ValueError("El archivo PDF no puede ser mayor a 1MB")
 
-            logger.info("Validaciones de negocio completadas exitosamente")  # User-facing log in Spanish
+            # Validar request_id
+            if not request_id or request_id <= 0:
+                raise ValueError("ID de solicitud inválido")
+
+            logger.info("Validaciones de negocio completadas exitosamente")  # User-facing log en español
 
             # ATOMIC TRANSACTION
             with transaction.atomic():
@@ -71,13 +77,33 @@ class FormRequestService(BaseService):
             logger.error(f"Error de validación en upload_pdf_to_request: {str(e)}")  # User-facing log in Spanish
             return {
                 'success': False,
-                'message': str(e),
+                'detail': str(e),
                 'error_type': 'validation_error'
             }
         except Exception as e:
-            logger.error(f"Error interno en upload_pdf_to_request: {str(e)}")  # User-facing log in Spanish
+            logger.error(f"Error interno en upload_pdf_to_request: {str(e)}")  # User-facing log en Spanish
             return {
                 'success': False,
-                'message': f'Error interno al cargar PDF: {str(e)}',  # User-facing message in Spanish
+                'detail': f'Error interno al cargar PDF: {str(e)}',  # User-facing message in Spanish
                 'error_type': 'server_error'
             }
+
+
+    def get_pdf_url(self, request_id):
+        # Retrieve the PDF URL for a specific form request
+        """
+        Retrieves the PDF URL for a given form request.
+        """
+        try:
+            solicitud = RequestAsignation.objects.get(pk=request_id)
+            if solicitud.pdf_request:
+                return {
+                    'success': True,
+                    'pdf_url': solicitud.pdf_request.url
+                }
+            else:
+                return self.error_response('La solicitud no tiene PDF adjunto.', "no_pdf")
+        except RequestAsignation.DoesNotExist:
+            return self.error_response('Solicitud no encontrada.', "not_found")
+        except Exception as e:
+            return self.error_response(f"Error al obtener PDF: {e}", "get_pdf_url")

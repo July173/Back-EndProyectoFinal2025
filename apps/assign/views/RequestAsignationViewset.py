@@ -190,27 +190,6 @@ class RequestAsignationViewset(BaseViewSet):
         else:
             return Response(result, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-    @swagger_auto_schema(
-        operation_description="Obtiene la URL del PDF de la solicitud.",
-        tags=["FormRequest PDF"],
-        responses={
-            200: openapi.Response("URL del PDF obtenida correctamente."),
-            404: openapi.Response("Error: {'success': False, 'error_type': 'not_found', 'message': 'Solicitud no encontrada', 'data': None}")
-        }
-    )
-    @action(detail=True, methods=['get'], url_path='form-request-pdf-url')
-    def get_pdf_url(self, request, pk=None):
-        """
-        Get the PDF URL for a form request.
-        API documentation and user-facing messages remain in Spanish.
-        """
-        result = self.service_class().get_pdf_url(pk)
-        if result['success']:
-            return Response(result, status=status.HTTP_200_OK)
-        else:
-            return Response(result, status=status.HTTP_404_NOT_FOUND)
-        
         
     @swagger_auto_schema(
         method='patch',

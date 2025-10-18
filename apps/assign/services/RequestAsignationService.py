@@ -32,25 +32,6 @@ class RequestAsignationService(BaseService):
         """
         return {"success": False, "error_type": error_type, "message": str(message), "data": None}
 
-    def get_pdf_url(self, request_id):
-        # Retrieve the PDF URL for a specific form request
-        """
-        Retrieves the PDF URL for a given form request.
-        """
-        try:
-            solicitud = RequestAsignation.objects.get(pk=request_id)
-            if solicitud.pdf_request:
-                return {
-                    'success': True,
-                    'pdf_url': solicitud.pdf_request.url
-                }
-            else:
-                return self.error_response('La solicitud no tiene PDF adjunto.', "no_pdf")
-        except RequestAsignation.DoesNotExist:
-            return self.error_response('Solicitud no encontrada.', "not_found")
-        except Exception as e:
-            return self.error_response(f"Error al obtener PDF: {e}", "get_pdf_url")
-
     def reject_request(self, request_id, rejection_message):
         # Reject a form request and notify the apprentice by email
         """

@@ -1,15 +1,14 @@
-from core.base.repositories.implements.baseRepository.BaseRepository import BaseRepository
 from apps.assign.entity.models import RequestAsignation
 import logging
 
 logger = logging.getLogger(__name__)
 
-class FormRequestRepository(BaseRepository):
+class FormRequestRepository:
     """
     Repository for handling PDF updates in form requests.
     """
     def __init__(self):
-        super().__init__(RequestAsignation)
+        self.model = RequestAsignation
 
     def update_request_pdf(self, request_id, pdf_file):
         """
