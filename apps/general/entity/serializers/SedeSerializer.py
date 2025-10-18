@@ -3,7 +3,8 @@ from rest_framework import serializers
 
 
 class SedeSerializer(serializers.ModelSerializer):
-    center = serializers.IntegerField(required=True)
+    # Use PrimaryKeyRelatedField for foreign key to Center
+    center = serializers.PrimaryKeyRelatedField(queryset=Center.objects.all())
 
     class Meta:
         model = Sede

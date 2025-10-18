@@ -37,15 +37,16 @@ class UserSerializer(serializers.ModelSerializer):
         instructor = Instructor.objects.filter(person=obj.person).first()
         if instructor:
             data = InstructorSerializer(instructor).data
-            # Buscar la sede vinculada
-            person_sede = PersonSede.objects.filter(PersonId=instructor.person).select_related('SedeId__center__regional').first()
-            if person_sede and person_sede.SedeId:
-                sede = person_sede.SedeId
-                centro = sede.center if hasattr(sede, 'center') else None
-                regional = centro.regional if centro and hasattr(centro, 'regional') else None
-                data['sede'] = {'id': sede.id, 'name': sede.name} if sede else None
-                data['centro'] = {'id': centro.id, 'name': centro.name} if centro else None
-                data['regional'] = {'id': regional.id, 'name': regional.name} if regional else None
+            # Buscar la sede vinculada usando nombres de campo del modelo
+            # PersonSede model fields: person (FK to Person), sede (FK to Sede)
+            person_sede = PersonSede.objects.filter(person=instructor.person).select_related('sede__center__regional').first()
+            if person_sede and person_sede.sede:
+                sede = person_sede.sede
+                centro = getattr(sede, 'center', None)
+                regional = getattr(centro, 'regional', None) if centro else None
+                data['sede'] = {'id': sede.id, 'name': getattr(sede, 'name', None)} if sede else None
+                data['centro'] = {'id': centro.id, 'name': getattr(centro, 'name', None)} if centro else None
+                data['regional'] = {'id': regional.id, 'name': getattr(regional, 'name', None)} if regional else None
             else:
                 data['sede'] = None
                 data['centro'] = None

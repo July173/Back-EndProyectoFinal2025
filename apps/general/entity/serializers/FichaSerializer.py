@@ -11,5 +11,8 @@ class FichaSerializer(serializers.ModelSerializer):
             'id',
             'file_number',
             'program',
-            'active'
+            'active',
+            'type_modality'
+
+
         ]

@@ -4,8 +4,9 @@ from rest_framework import serializers
 
 
 class PersonSedeSerializer(serializers.ModelSerializer):
-    sede = serializers.IntegerField(required=True)
-    person = serializers.IntegerField(required=True)
+    # Use PrimaryKeyRelatedField for foreign keys
+    sede = serializers.PrimaryKeyRelatedField(queryset=Sede.objects.all(), required=True)
+    person = serializers.PrimaryKeyRelatedField(queryset=Person.objects.all(), required=True)
 
     class Meta:
         model = PersonSede

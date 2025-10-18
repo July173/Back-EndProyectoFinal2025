@@ -13,13 +13,17 @@ class RoleFormPermissionRepository(BaseRepository):
         Returns the menu structure for a given user.
         Uses the relationship User -> Role -> RoleFormPermission.
         """
+        # Use correct field names: FormModule has field 'module' (FK to Module).
+        # Note: traversing reverse FK (form -> formmodule) requires lookups but
+        # select_related cannot follow reverse relations, so we avoid selecting
+        # the reverse path and use values() lookups instead.
         data = (
             RoleFormPermission.objects
-            .filter(role__user__id=user_id, form__formmodule__module_id__active=True)
-            .select_related("role", "form__formmodule__module_id", "form")
+            .filter(role__user__id=user_id, form__formmodule__module__active=True)
+            .select_related("role", "form")
             .values(
                 "role__type_role",                       # role name
-                "form__formmodule__module_id__name",     # module name
+                "form__formmodule__module__name",     # module name
                 "form__name",                            # form name
                 "form__path"                             # form path
             )
@@ -28,7 +32,7 @@ class RoleFormPermissionRepository(BaseRepository):
         result = {}
         for d in data:
             role = d["role__type_role"]
-            module = d["form__formmodule__module_id__name"]
+            module = d.get("form__formmodule__module__name")
             form_name = d["form__name"]
             form_path = d["form__path"]
 
