@@ -90,20 +90,17 @@ class FormRequestService:
 
 
     def get_pdf_url(self, request_id):
-        # Retrieve the PDF URL for a specific form request
         """
-        Retrieves the PDF URL for a given form request.
+        Retrieves the PDF URL for a given form request using the repository.
         """
         try:
-            solicitud = RequestAsignation.objects.get(pk=request_id)
-            if solicitud.pdf_request:
+            pdf_url = self.repository.get_pdf_url(request_id)
+            if pdf_url:
                 return {
                     'success': True,
-                    'pdf_url': solicitud.pdf_request.url
+                    'pdf_url': pdf_url
                 }
             else:
                 return self.error_response('La solicitud no tiene PDF adjunto.', "no_pdf")
-        except RequestAsignation.DoesNotExist:
-            return self.error_response('Solicitud no encontrada.', "not_found")
         except Exception as e:
             return self.error_response(f"Error al obtener PDF: {e}", "get_pdf_url")
