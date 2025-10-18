@@ -71,6 +71,11 @@ class InstructorRepository(BaseRepository):
         Update person, user, instructor, and person_sede in a single transaction.
         """
         with transaction.atomic():
+            # Convert and validate FK ids in person_data before assignment
+            # Ensure type_identification is a DocumentType instance if an id was provided
+            if 'type_identification' in person_data and isinstance(person_data['type_identification'], int):
+                person_data['type_identification'] = DocumentType.objects.get(pk=person_data['type_identification'])
+
             # Update person
             for attr, value in person_data.items():
                 setattr(instructor.person, attr, value)
@@ -82,15 +87,24 @@ class InstructorRepository(BaseRepository):
                     setattr(user, attr, value)
                 user.save()
             # Update instructor
+            # Convert known FK ids to model instances before assigning to instructor
+            if 'contract_type' in instructor_data and isinstance(instructor_data['contract_type'], int):
+                instructor_data['contract_type'] = TypeContract.objects.get(pk=instructor_data['contract_type'])
+
             for attr, value in instructor_data.items():
                 setattr(instructor, attr, value)
             instructor.save()
             # Update person_sede
             if sede_id:
                 sede_instance = Sede.objects.get(pk=sede_id)
-                person_sede = PersonSede.objects.filter(PersonId=instructor.person).first()
+                # PersonSede model uses lowercase field names; attempt both conventions
+                person_sede = PersonSede.objects.filter(person=instructor.person).first() or PersonSede.objects.filter(PersonId=instructor.person).first()
                 if person_sede:
-                    person_sede.SedeId = sede_instance
+                    # Try to set canonical field names, fallback to legacy ones
+                    if hasattr(person_sede, 'sede'):
+                        person_sede.sede = sede_instance
+                    elif hasattr(person_sede, 'SedeId'):
+                        person_sede.SedeId = sede_instance
                     person_sede.save()
             return instructor
 
