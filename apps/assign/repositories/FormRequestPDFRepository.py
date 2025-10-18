@@ -4,6 +4,22 @@ import logging
 logger = logging.getLogger(__name__)
 
 class FormRequestRepository:
+    def get_pdf_url(self, request_id):
+        """
+        Retrieves the PDF URL for a given form request.
+        """
+        try:
+            request_asignation = RequestAsignation.objects.get(id=request_id)
+            if request_asignation.pdf_request:
+                return request_asignation.pdf_request.url
+            else:
+                return None
+        except RequestAsignation.DoesNotExist:
+            logger.error(f"Solicitud con ID {request_id} no encontrada")
+            return None
+        except Exception as e:
+            logger.error(f"Error en get_pdf_url: {e}")
+            return None
     """
     Repository for handling PDF updates in form requests.
     """
