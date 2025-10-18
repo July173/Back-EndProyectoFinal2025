@@ -13,3 +13,9 @@ class AsignationInstructorHistoryRepository:
 
     def list_by_asignation(self, asignation_instructor_id):
         return self.model.objects.filter(asignation_instructor_id=asignation_instructor_id)
+
+    def get_by_id(self, pk):
+        try:
+            return self.model.objects.get(id=pk)
+        except self.model.DoesNotExist:
+            return None
