@@ -24,6 +24,8 @@ class AsignationInstructorHistoryViewset(ViewSet):
         """Return the serializer for instructor history objects."""
         return AsignationInstructorHistorySerializer(*args, **kwargs)
 
+
+    # Create reassignment and save history
     @swagger_auto_schema(
         operation_description="Reasigna un instructor y guarda el historial automáticamente.",
         request_body=ReasignationInstructorSerializer,
@@ -37,7 +39,6 @@ class AsignationInstructorHistoryViewset(ViewSet):
     def reasignar_instructor(self, request):
         """
         Reassign an instructor and automatically save the history.
-        API documentation and user-facing messages remain in Spanish.
         """
         serializer = ReasignationInstructorSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -56,6 +57,8 @@ class AsignationInstructorHistoryViewset(ViewSet):
         # Success message in Spanish for user-facing response
         return Response({"detail": "Reasignación realizada y guardada en historial."}, status=status.HTTP_200_OK)
 
+
+    # List All history AsignationInstructor
     @swagger_auto_schema(
         operation_description="Obtiene el historial de reasignaciones para una asignación.",
         manual_parameters=[
@@ -71,7 +74,6 @@ class AsignationInstructorHistoryViewset(ViewSet):
     def list_history(self, request):
         """
         Get the reassignment history for a given instructor assignment.
-        API documentation and user-facing messages remain in Spanish.
         """
         asignation_instructor_id = request.query_params.get('asignation_instructor_id')
         service = self.get_service()
@@ -82,3 +84,23 @@ class AsignationInstructorHistoryViewset(ViewSet):
         serializer = self.get_serializer(history, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
+    # Retrieve history by ID
+    @swagger_auto_schema(
+        operation_description="Obtiene el historial de reasignación por id.",
+        tags=["AsignationInstructorHistory"],
+        responses={
+            200: AsignationInstructorHistorySerializer(),
+            404: "No existe el historial."
+        }
+    )
+    def retrieve(self, request, pk=None):
+        """
+        Get reassignment history by id.
+        """
+        service = self.get_service()
+        result = service.get_by_id(pk)
+        if isinstance(result, dict) and result.get('status') == 'error':
+            return Response(result.get('detail', 'No encontrado'), status=status.HTTP_404_NOT_FOUND)
+        serializer = self.get_serializer(result)
+        return Response(serializer.data, status=status.HTTP_200_OK)

@@ -20,10 +20,10 @@ router.register(r'request_asignation', RequestAsignationViewset, basename='assig
 router.register(r'asignation_instructor', AsignationInstructorViewset, basename='assign_asignation_instructor')
 router.register(r'asignation_instructor_history', AsignationInstructorHistoryViewset, basename='assign_asignation_instructor_history')
 router.register(r'messages', MessageViewset, basename='assign_messages')
+router.register(r'visit_following', VisitFollowingViewset, basename='assign_visit_following')
 
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('visit_following/', VisitFollowingViewset.as_view(), name='assign_visit_following'),
     path('form-requests/upload-pdf/', FormRequestPDFAPIView.as_view(), name='form_requests_upload_pdf'),
 ]

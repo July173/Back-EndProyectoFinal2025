@@ -82,3 +82,10 @@ class AsignationInstructorHistoryService:
             return self.error_response("El nuevo instructor no existe.", "not_found")  # User-facing error in Spanish
         except Exception as e:
             return self.error_response(f"Error al reasignar instructor: {e}", "reasignar_instructor")  # User-facing error in Spanish
+
+
+    def get_by_id(self, pk):
+        obj = self.repository.get_by_id(pk)
+        if not obj:
+            return {"status": "error", "type": "not_found", "detail": f"No existe un historial con id {pk}."}
+        return obj
