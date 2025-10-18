@@ -12,54 +12,29 @@ class AsignationInstructorService(BaseService):
     """
     Service for managing instructor assignments and related logic.
     """
-    def delete_custom(self, asignation_instructor_id):
-        """
-        Deletes an instructor assignment and updates the assigned learners count.
-        """
-        try:
-            from apps.assign.entity.models import AsignationInstructor
-            asignation = AsignationInstructor.objects.get(id=asignation_instructor_id)
-            instructor = asignation.instructor
-            current_learners = instructor.assigned_learners or 0
-            from apps.general.services.InstructorService import InstructorService
-            InstructorService().update_learners_fields(instructor.id, assigned_learners=max(current_learners - 1, 0))
-            asignation.delete()
-            return {"status": "success", "message": "Asignación eliminada y contador actualizado."}
-        except AsignationInstructor.DoesNotExist:
-            return self.error_response("La asignación no existe.", "not_found")  # User-facing error in Spanish
-        except Exception as e:
-            return self.error_response(f"Error al eliminar la asignación: {e}", "delete_custom")  # User-facing error in Spanish
 
     def __init__(self):
         self.repository = AsignationInstructorRepository()
 
-    def error_response(self, message, error_type="error"):
+    def create(self, validated_data):
         """
-        Returns a standardized error response.
-        """
-        return {"status": "error", "type": error_type, "message": str(message)}
-
-    def create_custom(self, instructor_id, request_asignation_id):
-        """
-        Creates a custom instructor assignment, updates states, and sends notifications.
+        Creates an instructor assignment, updates states, and sends notifications.
         """
         try:
+            instructor_id = validated_data.get('instructor')
+            request_asignation_id = validated_data.get('request_asignation')
             instructor = Instructor.objects.get(id=instructor_id)
             request_asignation = RequestAsignation.objects.get(id=request_asignation_id)
 
-            # Validate that the state is not REJECTED
+            # Validate that the request is not rejected
             if request_asignation.request_state == RequestState.RECHAZADO:
-                return self.error_response("No se puede asignar un instructor a una solicitud rechazada.", "invalid_state")  # User-facing error in Spanish
+                raise Exception("No se puede asignar un instructor a una solicitud rechazada.")
 
-            # Validate that the instructor has not reached their maximum number of assigned learners
+            # Validate that the instructor has not reached the maximum number of learners
             current_learners = instructor.assigned_learners or 0
             max_learners = instructor.max_assigned_learners or 80
-
             if current_learners >= max_learners:
-                return self.error_response(
-                    f"El instructor ha alcanzado su límite máximo de aprendices ({max_learners}). No se pueden asignar más aprendices.",
-                    "limit_reached"
-                )  # User-facing error in Spanish
+                raise Exception(f"El instructor ha alcanzado su límite máximo de aprendices ({max_learners}). No se pueden asignar más aprendices.")
 
             asignation = self.repository.create_custom(instructor, request_asignation)
             request_asignation.request_state = RequestState.ASIGNADO
@@ -68,7 +43,7 @@ class AsignationInstructorService(BaseService):
             # Update assigned learners for the instructor
             InstructorService().update_learners_fields(instructor_id, assigned_learners=current_learners + 1)
 
-            # Send email to apprentice
+            # Send email to the apprentice
             apprentice = request_asignation.apprentice
             person = apprentice.person
             user = User.objects.filter(person=person).first()
@@ -81,7 +56,7 @@ class AsignationInstructorService(BaseService):
                     person.number_identification,
                     email
                 )
-            # Send email to assigned instructor
+            # Send email to the assigned instructor
             instructor_user = User.objects.filter(person=instructor.person).first()
             instructor_email = instructor_user.email if instructor_user else None
             if instructor_email:
@@ -92,9 +67,9 @@ class AsignationInstructorService(BaseService):
                 )
             return asignation
         except Instructor.DoesNotExist:
-            return self.error_response("El instructor no existe.", "not_found")  # User-facing error in Spanish
+            raise Exception("El instructor no existe.")
         except RequestAsignation.DoesNotExist:
-            return self.error_response("La solicitud de asignación no existe.", "not_found")  # User-facing error in Spanish
+            raise Exception("La solicitud de asignación no existe.")
         except Exception as e:
-            return self.error_response(f"Error al crear la asignación: {e}", "create_custom")  # User-facing error in Spanish
+            raise Exception(f"Error al crear la asignación: {e}")
 

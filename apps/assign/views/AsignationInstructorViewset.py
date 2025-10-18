@@ -78,56 +78,5 @@ class AsignationInstructorViewset(BaseViewSet):
     def soft_destroy(self, request, pk=None):
         """
         Perform a logical (soft) delete of the specified instructor assignment.
-        User-facing messages remain in Spanish.
         """
-        deleted = self.service_class().soft_delete(pk)
-        if deleted:
-            # Success message in Spanish for user-facing response
-            return Response(
-                {"detail": "Eliminado lógicamente correctamente."},
-                status=status.HTTP_204_NO_CONTENT
-            )
-        # Error message in Spanish for user-facing response
-        return Response(
-            {"detail": "No encontrado."},
-            status=status.HTTP_404_NOT_FOUND
-        )
-
-
-
-    @swagger_auto_schema(
-        method='post',
-        operation_description="Crea una asignación de instructor personalizada (fecha automática)",
-        request_body=AsignationInstructorSerializer,
-        responses={
-            201: openapi.Response("Asignación creada correctamente", AsignationInstructorSerializer),
-            400: openapi.Response("Error: {'status': 'error', 'type': 'not_found', 'message': 'El instructor no existe.'}")
-        },
-        tags=["AsignationInstructor"]
-    )
-    @action(detail=False, methods=['post'], url_path='custom-create')
-    def custom_create(self, request):
-        """
-        Create a custom instructor assignment (automatic date).
-        User-facing messages and API documentation remain in Spanish.
-        """
-        instructor_id = request.data.get('instructor')
-        request_asignation_id = request.data.get('request_asignation')
-        if not instructor_id or not request_asignation_id:
-            # Error message in Spanish for user-facing response
-            return Response({"status": "error", "type": "missing_data", "message": "Faltan datos obligatorios."}, status=status.HTTP_400_BAD_REQUEST)
-        service = self.service_class()
-        result = service.create_custom(instructor_id, request_asignation_id)
-        if isinstance(result, dict) and result.get('status') == 'error':
-            # Error message in Spanish for user-facing response
-            return Response(result, status=status.HTTP_400_BAD_REQUEST)
-        from apps.general.entity.models import Instructor
-        from apps.general.entity.serializers.CreateInstructor.InstructorSerializer import InstructorSerializer
-        instructor = Instructor.objects.get(pk=instructor_id)
-        instructor_data = InstructorSerializer(instructor).data
-        serializer = self.serializer_class(result)
-        return Response({
-            'asignation': serializer.data,
-            'instructor': instructor_data
-        }, status=status.HTTP_201_CREATED)
-    
+        return super().soft_destroy(request, pk)
