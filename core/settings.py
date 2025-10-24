@@ -179,15 +179,23 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # ============================
 # CORS
 # ============================
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://localhost:8080",
-    "http://127.0.0.1:8080",
-]
+# Load allowed origins from environment variable CORS_ALLOWED_ORIGINS.
+# The environment value should be a comma-separated list, for example:
+# CORS_ALLOWED_ORIGINS="http://localhost:8000,http://127.0.0.1:8000"
+_cors_env = os.getenv('CORS_ALLOWED_ORIGINS', '')
+if _cors_env:
+    CORS_ALLOWED_ORIGINS = [o.strip() for o in _cors_env.split(',') if o.strip()]
+else:
+    # Fallback to the default local origins used during development
+    CORS_ALLOWED_ORIGINS = [
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:8080",
+        "http://127.0.0.1:8080",
+    ]
 
 # ============================
 # EMAIL CONFIG (desde .env)
