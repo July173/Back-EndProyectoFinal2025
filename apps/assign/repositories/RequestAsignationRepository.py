@@ -3,7 +3,7 @@ from apps.assign.entity.models import RequestAsignation
 from apps.assign.entity.enums.request_state_enum import RequestState
 from django.db.models import Q
 from apps.general.entity.models import PersonSede
-from apps.general.entity.models import Aprendiz, Sede
+from apps.general.entity.models import Apprentice, Sede
 from apps.assign.entity.models import Enterprise, Boss, HumanTalent, ModalityProductiveStage, RequestAsignation
 from django.db import transaction
 from apps.general.entity.models import Ficha
@@ -95,7 +95,7 @@ class RequestAsignationRepository(BaseRepository):
             modality = ModalityProductiveStage.objects.get(pk=data['modality_productive_stage'])
             
             # Buscar aprendiz existente
-            aprendiz = Aprendiz.objects.get(pk=data['aprendiz_id'])
+            aprendiz = Apprentice.objects.get(pk=data['aprendiz_id'])
             
             # Buscar ficha y vincularla al aprendiz
             ficha = Ficha.objects.get(pk=data['ficha_id'])

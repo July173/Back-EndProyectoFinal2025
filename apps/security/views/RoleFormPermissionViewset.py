@@ -4,14 +4,15 @@ from rest_framework.decorators import action
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from core.base.view.implements.BaseViewset import BaseViewSet
-from apps.security.services.RoleFormPermissionService import RolFormPermissionService
-from apps.security.entity.serializers.RolFormPermission.RoleFormPermissionSerializer import RolFormPermissionSerializer
+from apps.security.services.RoleFormPermissionService import RoleFormPermissionService
+from apps.security.entity.serializers.RolFormPermission.RoleFormPermissionSerializer import RoleFormPermissionSerializer
 from apps.security.entity.serializers.RolFormPermission.CreateRoleWithPermissionsSerializer import CreateRoleWithPermissionsSerializer
+from apps.security.entity.models import Role, RoleFormPermission
 
 
-class RolFormPermissionViewSet(BaseViewSet):
-    service_class = RolFormPermissionService
-    serializer_class = RolFormPermissionSerializer
+class RoleFormPermissionViewSet(BaseViewSet):
+    service_class = RoleFormPermissionService
+    serializer_class = RoleFormPermissionSerializer
 
     @swagger_auto_schema(
         operation_description="Obtiene la matriz de permisos por rol, formulario y tipo de permiso.",
@@ -31,14 +32,12 @@ class RolFormPermissionViewSet(BaseViewSet):
     )
     @action(detail=True, methods=['get'], url_path='get-role-with-permissions')
     def get_role_with_permissions(self, request, pk=None):
-        from apps.security.entity.models import Role, RolFormPermission
-        from apps.security.entity.serializers.RolFormPermission.CreateRoleWithPermissionsSerializer import CreateRoleWithPermissionsSerializer
         try:
             role = Role.objects.get(pk=pk)
         except Role.DoesNotExist:
             return Response({'detail': 'Role not found.'}, status=status.HTTP_404_NOT_FOUND)
-        # Obtener todos los RolFormPermission de ese rol
-        rfp_qs = RolFormPermission.objects.filter(role=role)
+        # Obtener todos los RoleFormPermission de ese rol
+        rfp_qs = RoleFormPermission.objects.filter(role=role)
         # Agrupar por formulario
         form_map = {}
         for rfp in rfp_qs:
@@ -97,7 +96,7 @@ class RolFormPermissionViewSet(BaseViewSet):
 
     # ----------- CREATE -----------
     @swagger_auto_schema(
-        request_body=RolFormPermissionSerializer,
+        request_body=RoleFormPermissionSerializer,
         operation_description="Crea un nuevo permiso de formulario para un rol.",
         tags=["RoleFormPermission"]
     )

@@ -1,7 +1,7 @@
 from core.base.services.implements.baseService.BaseService import BaseService
 from apps.general.repositories.AprendizRepository import AprendizRepository
 from apps.security.entity.models import User, Role, Person
-from apps.general.entity.models import Aprendiz, Ficha
+from apps.general.entity.models import Apprentice, Ficha
 from apps.security.emails.CreacionCuentaUsers import send_account_created_email
 from django.db import transaction
 from django.db import models
@@ -147,7 +147,7 @@ class AprendizService(BaseService):
         ficha_id = validated_data['ficha_id']
         role_id = validated_data['role_id']
 
-        aprendiz = Aprendiz.objects.get(pk=aprendiz_id)
+        aprendiz = Apprentice.objects.get(pk=aprendiz_id)
         # Validación de correo institucional
         if not user_data['email'] or not is_soy_sena_email(user_data['email']):
             raise ValueError('Solo se permiten correos institucionales (@soy.sena.edu.co) para aprendices.')
@@ -163,7 +163,7 @@ class AprendizService(BaseService):
 
         with transaction.atomic():
             # Actualiza ficha y rol
-            aprendiz = Aprendiz.objects.get(pk=aprendiz_id)
+            aprendiz = Apprentice.objects.get(pk=aprendiz_id)
             ficha = Ficha.objects.get(pk=ficha_id)
             if not role_id:
                 role_id = 2
@@ -179,4 +179,4 @@ class AprendizService(BaseService):
         """
         Lista todos los aprendices.
         """
-        return Aprendiz.objects.all()
+        return Apprentice.objects.all()

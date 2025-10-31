@@ -2,7 +2,7 @@ from core.base.services.implements.baseService.BaseService import BaseService
 from apps.assign.repositories.RequestAsignationRepository import RequestAsignationRepository
 from django.db import transaction
 import logging
-from apps.general.entity.models import Aprendiz, Ficha, Sede
+from apps.general.entity.models import Apprentice, Ficha, Sede
 from apps.assign.entity.models import ModalityProductiveStage
 from apps.assign.entity.enums.request_state_enum import RequestState
 from apps.assign.entity.models import RequestAsignation
@@ -155,7 +155,7 @@ class RequestAsignationService(BaseService):
     def create_form_request(self, validated_data):
         try:
             logger.info(f"Iniciando creación de solicitud para aprendiz ID: {validated_data.get('aprendiz_id')}")
-            aprendiz = Aprendiz.objects.get(pk=validated_data['aprendiz_id'])
+            aprendiz = Apprentice.objects.get(pk=validated_data['aprendiz_id'])
             ficha = Ficha.objects.get(pk=validated_data['ficha_id'])
             last_request = RequestAsignation.objects.filter(aprendiz=aprendiz).order_by('-id').first()
             if last_request and last_request.request_state != RequestState.RECHAZADO:
@@ -221,7 +221,7 @@ class RequestAsignationService(BaseService):
                 }
                 logger.info("Solicitud creada exitosamente")
                 return response
-        except (Aprendiz.DoesNotExist, Ficha.DoesNotExist) as e:
+        except (Apprentice.DoesNotExist, Ficha.DoesNotExist) as e:
             return self.error_response(f"Entidad no encontrada: {str(e)}", "not_found")
         except (Sede.DoesNotExist, ModalityProductiveStage.DoesNotExist) as e:
             return self.error_response(f"Entidad de referencia no encontrada: {str(e)}", "not_found")
@@ -268,7 +268,7 @@ class RequestAsignationService(BaseService):
         try:
             
             
-            aprendiz = Aprendiz.objects.select_related('person', 'ficha').get(pk=aprendiz_id)
+            aprendiz = Apprentice.objects.select_related('person', 'ficha').get(pk=aprendiz_id)
             
             # Buscar la solicitud más reciente del aprendiz
             latest_request = RequestAsignation.objects.filter(
@@ -338,7 +338,7 @@ class RequestAsignationService(BaseService):
             
             return result
             
-        except Aprendiz.DoesNotExist:
+        except Apprentice.DoesNotExist:
             return self.error_response('Aprendiz no encontrado', 'not_found')
         except Exception as e:
             logger.error(f"Error al obtener dashboard del aprendiz: {str(e)}")

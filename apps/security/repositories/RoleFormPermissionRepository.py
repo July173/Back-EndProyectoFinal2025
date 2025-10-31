@@ -1,18 +1,18 @@
 from core.base.repositories.implements.baseRepository.BaseRepository import BaseRepository
-from apps.security.entity.models import RolFormPermission
+from apps.security.entity.models import RoleFormPermission
 
-class RolFormPermissionRepository(BaseRepository):
+class RoleFormPermissionRepository(BaseRepository):
     def __init__(self):
-        super().__init__(RolFormPermission)
+        super().__init__(RoleFormPermission)
 
     def get_menu(self, user_id: int):
             
             """
             Retorna la estructura de menú para un usuario dado.
-            Usamos directamente la relación User -> Role -> RolFormPermission.
+            Usamos directamente la relación User -> Role -> RoleFormPermission.
             """
             datos = (
-                RolFormPermission.objects
+                RoleFormPermission.objects
                 .filter(role__user__id=user_id, form__formmodule__module__active=True)  # Filtrar por usuario y módulos activos
                 .select_related("role", "form__formmodule__module", "form")
                 .values(

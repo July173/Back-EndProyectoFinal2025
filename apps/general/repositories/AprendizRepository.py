@@ -1,5 +1,5 @@
 from core.base.repositories.implements.baseRepository.BaseRepository import BaseRepository
-from apps.general.entity.models import Aprendiz
+from apps.general.entity.models import Apprentice
 from apps.security.entity.models import Person, User
 from django.utils import timezone
 from django.db import transaction
@@ -7,7 +7,7 @@ from django.db import transaction
 class AprendizRepository(BaseRepository):
     
     def __init__(self):
-        super().__init__(Aprendiz)
+        super().__init__(Apprentice)
 
     def create_all_dates_apprentice(self, person_data, user_data, file):
         """
@@ -26,7 +26,7 @@ class AprendizRepository(BaseRepository):
             user = User.objects.create_user(email=email, password=password, person=person, **user_data)
             user.registered = False
             user.save()
-            apprentice = Aprendiz.objects.create(person=person, ficha=file)
+            apprentice = Apprentice.objects.create(person=person, ficha=file)
             return apprentice, user, person
 
     def update_all_dates_apprentice(self, apprentice, person_data, user_data, file):

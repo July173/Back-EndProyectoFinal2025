@@ -6,14 +6,15 @@ from django.http import HttpResponse
 from django.db import transaction
 from django.contrib.auth.hashers import make_password
 from io import BytesIO
-from apps.security.entity.models import Role, Person, User
-from apps.general.entity.models import Program, Ficha, Aprendiz
+from apps.general.entity.models.Center import Center
+from apps.general.entity.models.Regional import Regional
+from apps.general.entity.models.Sede import Sede
+from apps.security.entity.models import Person, User
+from apps.general.entity.models import Program, Ficha, Apprentice
 from apps.security.entity.models.DocumentType import DocumentType
 from apps.security.emails.SendEmailsActivate import enviar_activacion_usuario
-from datetime import datetime
 import string
 import random
-import os
 
 class ExcelAprendizTemplateService:
     """
@@ -179,7 +180,6 @@ class ExcelAprendizTemplateService:
 
     def _create_regionales_sheet(self, workbook):
         """Crea una hoja con las regionales disponibles"""
-        from apps.general.entity.models import Regional
         ws = workbook.create_sheet("Regionales")
         headers = ['ID', 'NOMBRE']
         for col_idx, header in enumerate(headers, 1):
@@ -193,7 +193,6 @@ class ExcelAprendizTemplateService:
 
     def _create_centros_formacion_sheet(self, workbook):
         """Crea una hoja con los centros de formación disponibles"""
-        from apps.general.entity.models import Center
         ws = workbook.create_sheet("Centros de Formación")
         headers = ['ID', 'NOMBRE', 'REGIONAL']
         for col_idx, header in enumerate(headers, 1):
@@ -208,7 +207,6 @@ class ExcelAprendizTemplateService:
 
     def _create_sedes_sheet(self, workbook):
         """Crea una hoja con las sedes disponibles"""
-        from apps.general.entity.models import Sede
         ws = workbook.create_sheet("Sedes")
         headers = ['ID', 'NOMBRE', 'CENTRO DE FORMACIÓN']
         for col_idx, header in enumerate(headers, 1):
@@ -483,7 +481,7 @@ class ExcelAprendizTemplateService:
             )
             
             # 4. Crear Aprendiz (sin ficha específica por ahora)
-            aprendiz = Aprendiz.objects.create(
+            aprendiz = Apprentice.objects.create(
                 person=person,
                 ficha=None,  # Se asignará posteriormente
                 active=True

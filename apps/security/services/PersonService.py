@@ -7,7 +7,7 @@ from datetime import datetime
 from django.contrib.auth.hashers import make_password
 from apps.security.entity.models import Person, User
 from django.db import transaction
-from apps.general.entity.models import Aprendiz
+from apps.general.entity.models import Apprentice
 from apps.security.entity.models import Role
 from apps.security.entity.serializers.User.UserSerializer import UserSerializer
 
@@ -36,9 +36,9 @@ class PersonService(BaseService):
                 os.remove(person.image.path)
         return self.repository.update_person(person, data)
 
-    def register_aprendiz(self, data):
+    def register_apprentice(self, data):
         """
-        Lógica de negocio para registrar un aprendiz.
+    Lógica de negocio para registrar un aprendiz.
         Aplica todas las validaciones y reglas de negocio.
         """
         email = data.get('email')
@@ -107,8 +107,8 @@ class PersonService(BaseService):
                     role=rol_aprendiz,
                 )
 
-                # Crear Aprendiz vinculado a la persona (ficha se asignará después por el administrador)
-                aprendiz = Aprendiz.objects.create(person=person, ficha=None)
+                # Crear Apprentice vinculado a la persona (ficha se asignará después por el administrador)
+                aprendiz = Apprentice.objects.create(person=person, ficha=None)
 
                 # Si todo es exitoso, enviar correo de registro pendiente
                 fecha_registro = datetime.now().strftime('%d/%m/%Y')
