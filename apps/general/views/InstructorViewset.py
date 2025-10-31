@@ -12,90 +12,18 @@ from apps.general.entity.serializers.CreateInstructor.GetInstructorSerializer im
 
 
 class InstructorViewset(BaseViewSet):
-
-    @swagger_auto_schema(
-        operation_description="Filtra instructores por nombre, número de documento y área de conocimiento.",
-        manual_parameters=[
-            openapi.Parameter('search', openapi.IN_QUERY, description="Buscar por nombre o número de documento", type=openapi.TYPE_STRING),
-            openapi.Parameter('knowledge_area_id', openapi.IN_QUERY, description="Filtrar por área de conocimiento (ID)", type=openapi.TYPE_INTEGER),
-        ],
-        responses={200: openapi.Response("Lista de instructores filtrados")},
-        tags=["Instructor"]
-    )
-    @action(detail=False, methods=['get'], url_path='filter')
-    def filter_instructors(self, request):
-        search = request.query_params.get('search')
-        knowledge_area_id = request.query_params.get('knowledge_area_id')
-        if knowledge_area_id:
-            try:
-                knowledge_area_id = int(knowledge_area_id)
-            except ValueError:
-                return Response({"detail": "El ID de área de conocimiento debe ser un número."}, status=status.HTTP_400_BAD_REQUEST)
-        instructors = self.service_class().repository.get_filtered_instructors(search, knowledge_area_id)
-        serializer = self.get_serializer(instructors, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    
     
     def get_queryset(self):
-        from apps.general.entity.models import Instructor
         return Instructor.objects.all()
-    @swagger_auto_schema(
-        method='patch',
-        operation_description="Actualiza solo los campos assigned_learners y max_assigned_learners de un instructor.",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'assigned_learners': openapi.Schema(type=openapi.TYPE_INTEGER, description='Aprendices actualmente asignados', nullable=True),
-                'max_assigned_learners': openapi.Schema(type=openapi.TYPE_INTEGER, description='Límite máximo permitido', nullable=True)
-            },
-            required=[]
-        ),
-        responses={200: InstructorSerializer},
-        tags=["Instructor"]
-    )
-    @action(detail=True, methods=['patch'], url_path='update-learners')
-    def update_learners(self, request, pk=None):
-        service = InstructorService()
-        assigned_learners = request.data.get('assigned_learners', None)
-        max_assigned_learners = request.data.get('max_assigned_learners', None)
-        try:
-            instructor = service.update_learners_fields(pk, assigned_learners, max_assigned_learners)
-        except ValueError as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        if not instructor:
-            return Response({"detail": "Instructor no encontrado."}, status=status.HTTP_404_NOT_FOUND)
-        serializer = InstructorSerializer(instructor)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    service_class = InstructorService
-    serializer_class = GetInstructorSerializer
-
+    
     # ----------- LIST -----------
     @swagger_auto_schema(
         operation_description="Obtiene una lista de todos los instructores registrados.",
-        manual_parameters=[
-            openapi.Parameter(
-                'is_followup_instructor',
-                openapi.IN_QUERY,
-                description="Filtrar instructores: 'all' (todos), 'true' (solo seguimiento), 'false' (solo no seguimiento)",
-                type=openapi.TYPE_STRING,
-                enum=['all', 'true', 'false']
-            )
-        ],
         tags=["Instructor"]
     )
     def list(self, request, *args, **kwargs):
-        is_followup = request.query_params.get('is_followup_instructor', 'all')
-        queryset = self.get_queryset()
-        if is_followup == 'true':
-            queryset = queryset.filter(is_followup_instructor=True)
-        elif is_followup == 'false':
-            queryset = queryset.filter(is_followup_instructor=False)
-        # Si es 'all' no se filtra
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+        return super().list(request, *args, **kwargs)
 
     # ----------- CREATE -----------
     @swagger_auto_schema(
@@ -174,21 +102,7 @@ class InstructorViewset(BaseViewSet):
 
 #-----------------------------------------------------------------------------------
 
-
-    @swagger_auto_schema(
-        operation_description="Obtiene un instructor por su ID (nuevo endpoint avanzado).",
-        responses={200: GetInstructorSerializer},
-        tags=["Instructor"]
-    )
-    @action(detail=True, methods=['get'], url_path='Create-Instructor/Retrieve')
-    def custom_retrieve(self, request, pk=None):
-        instructor = self.service.get_instructor(pk)
-        if instructor:
-            serializer = GetInstructorSerializer(instructor)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response({"detail": "Instructor no encontrado."}, status=status.HTTP_404_NOT_FOUND)
-    service = InstructorService()
-
+    # ----------- CUSTOM CREATE -----------
     @swagger_auto_schema(
         request_body=CreateInstructorSerializer,
         operation_description="Crea un nuevo instructor (nuevo endpoint avanzado).",
@@ -208,6 +122,8 @@ class InstructorViewset(BaseViewSet):
         )
         return Response({"detail": "Instructor creado correctamente.", "ids": result}, status=status.HTTP_201_CREATED)
 
+
+    # ----------- CUSTOM LIST -----------
     @swagger_auto_schema(
         operation_description="Lista todos los instructores (nuevo endpoint avanzado).",
         responses={200: GetInstructorSerializer(many=True)},
@@ -219,6 +135,39 @@ class InstructorViewset(BaseViewSet):
         serializer = GetInstructorSerializer(instructors, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
+    # ----------- LIST -----------
+    @swagger_auto_schema(
+        operation_description="Obtiene una lista de todos los instructores registrados.",
+        manual_parameters=[
+            openapi.Parameter(
+                'is_followup_instructor',
+                openapi.IN_QUERY,
+                description="Filtrar instructores: 'all' (todos), 'true' (solo seguimiento), 'false' (solo no seguimiento)",
+                type=openapi.TYPE_STRING,
+                enum=['all', 'true', 'false']
+            )
+        ],
+        tags=["Instructor"]
+    )
+    @action(detail=False, methods=['get'], url_path='filtered')
+    def list_filtrado(self, request, *args, **kwargs):
+        is_followup = request.query_params.get('is_followup_instructor', 'all')
+        queryset = self.get_queryset()
+        if is_followup == 'true':
+            queryset = queryset.filter(is_followup_instructor=True)
+        elif is_followup == 'false':
+            queryset = queryset.filter(is_followup_instructor=False)
+        # Si es 'all' no se filtra
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+    
+
+    # ----------- CUSTOM UPDATE -----------
     @swagger_auto_schema(
         request_body=CreateInstructorSerializer,
         operation_description="Actualiza un instructor existente (nuevo endpoint avanzado).",
@@ -244,33 +193,59 @@ class InstructorViewset(BaseViewSet):
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+   
+    # ----------- CUSTOM UPDATE PARTIAL-----------
     @swagger_auto_schema(
-        operation_description="Elimina un instructor (delete persistencial, nuevo endpoint avanzado).",
+        method='patch',
+        operation_description="Actualiza solo los campos assigned_learners y max_assigned_learners de un instructor.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'assigned_learners': openapi.Schema(type=openapi.TYPE_INTEGER, description='Aprendices actualmente asignados', nullable=True),
+                'max_assigned_learners': openapi.Schema(type=openapi.TYPE_INTEGER, description='Límite máximo permitido', nullable=True)
+            },
+            required=[]
+        ),
+        responses={200: InstructorSerializer},
         tags=["Instructor"]
     )
-    @action(detail=True, methods=['delete'], url_path='Create-Instructor/destroy')
-    def custom_destroy(self, request, pk=None):
+    @action(detail=True, methods=['patch'], url_path='update-learners')
+    def update_learners(self, request, pk=None):
+        service = InstructorService()
+        assigned_learners = request.data.get('assigned_learners', None)
+        max_assigned_learners = request.data.get('max_assigned_learners', None)
         try:
-            self.service.delete_instructor(pk)
-            return Response({"detail": "Instructor eliminado correctamente."}, status=status.HTTP_204_NO_CONTENT)
-        except Instructor.DoesNotExist:
-            return Response({"detail": "Instructor no encontrado."}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
+            instructor = service.update_learners_fields(pk, assigned_learners, max_assigned_learners)
+        except ValueError as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        if not instructor:
+            return Response({"detail": "Instructor no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = InstructorSerializer(instructor)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    service_class = InstructorService
+    serializer_class = GetInstructorSerializer
 
 
+    # ----------- FILTER INSTRUCTORS -----------
     @swagger_auto_schema(
-        operation_description="Elimina lógicamente o reactiva un instructor y sus relaciones (nuevo endpoint avanzado).",
+        operation_description="Filtra instructores por nombre, número de documento y área de conocimiento.",
+        manual_parameters=[
+            openapi.Parameter('search', openapi.IN_QUERY, description="Buscar por nombre o número de documento", type=openapi.TYPE_STRING),
+            openapi.Parameter('knowledge_area_id', openapi.IN_QUERY, description="Filtrar por área de conocimiento (ID)", type=openapi.TYPE_INTEGER),
+        ],
+        responses={200: openapi.Response("Lista de instructores filtrados")},
         tags=["Instructor"]
     )
-    @action(detail=True, methods=['delete'], url_path='Create-Instructor/logical-delete')
-    def custom_logical_delete(self, request, pk=None):
-        try:
-            result = self.service.logical_delete_instructor(pk)
-            return Response({"detail": result}, status=status.HTTP_200_OK)
-        except Instructor.DoesNotExist:
-            return Response({"detail": "Instructor no encontrado."}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
+    @action(detail=False, methods=['get'], url_path='filter')
+    def filter_instructors(self, request):
+        search = request.query_params.get('search')
+        knowledge_area_id = request.query_params.get('knowledge_area_id')
+        if knowledge_area_id:
+            try:
+                knowledge_area_id = int(knowledge_area_id)
+            except ValueError:
+                return Response({"detail": "El ID de área de conocimiento debe ser un número."}, status=status.HTTP_400_BAD_REQUEST)
+        instructors = self.service_class().repository.get_filtered_instructors(search, knowledge_area_id)
+        serializer = self.get_serializer(instructors, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 

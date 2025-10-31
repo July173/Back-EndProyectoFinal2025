@@ -1,4 +1,5 @@
-from .Aprendiz import Aprendiz
+from .TypeContract import TypeContract
+from .Apprentice import Apprentice
 from .Center import Center
 from .Ficha import Ficha
 from .Instructor import Instructor
@@ -15,8 +16,8 @@ from .LegalDocument import LegalDocument
 from .LegalSection import LegalSection
 
 __all__ = [
-    'Aprendiz', 'Center', 'Ficha',
-    'Instructor', 'Program', 'Regional', 'Sede', 'PersonSede', 'KnowledgeArea'
-    'Colors', 'TypeOfQueries', 'SupportSchedule', 'SupportContact', 'LegalDocument', 
-    'LegalSection'
+    'Apprentice', 'Center', 'Ficha',
+    'Instructor', 'Program', 'Regional', 'Sede', 'PersonSede', 'KnowledgeArea',
+    'Colors', 'TypeOfQueries', 'SupportSchedule', 'SupportContact', 'LegalDocument',
+    'LegalSection', 'TypeContract'
 ]

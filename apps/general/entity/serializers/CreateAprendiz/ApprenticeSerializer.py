@@ -1,18 +1,18 @@
-from apps.general.entity.models import PersonSede, Sede
+from apps.general.entity.models import Apprentice, Ficha
 from apps.security.entity.models import Person
 from rest_framework import serializers
 
 
-class PersonSedeSerializer(serializers.ModelSerializer):
+class ApprenticeSerializer(serializers.ModelSerializer):
     # Use PrimaryKeyRelatedField for foreign keys
-    sede = serializers.PrimaryKeyRelatedField(queryset=Sede.objects.all(), required=True)
     person = serializers.PrimaryKeyRelatedField(queryset=Person.objects.all(), required=True)
+    ficha = serializers.PrimaryKeyRelatedField(queryset=Ficha.objects.all(), required=True)
 
     class Meta:
-        model = PersonSede
+        model = Apprentice
         fields = [
             'id',
-            'sede',
             'person',
-            'active',
+            'ficha',
+            'active'
         ]

@@ -43,12 +43,6 @@ class InstructorService(BaseService):
         """
         return Instructor.objects.all()
 
-    def get_instructor(self, instructor_id):
-        """
-        Devuelve el instructor por id o None si no existe.
-        """
-        return Instructor.objects.filter(pk=instructor_id).first()
-
     def create_instructor(self, person_data, user_data, instructor_data, sede_id):
         with transaction.atomic():
             # Obtener la sede y sus relaciones
@@ -157,34 +151,3 @@ class InstructorService(BaseService):
                 "instructor_id": instructor.id,
                 "sede_id": sede_id
             }
-
-    def delete_instructor(self, instructor_id):
-        with transaction.atomic():
-            instructor = Instructor.objects.get(pk=instructor_id)
-            self.repository.delete_all_dates_instructor(instructor)
-
-    def logical_delete_instructor(self, instructor_id):
-        with transaction.atomic():
-            instructor = Instructor.objects.get(pk=instructor_id)
-            if not instructor.active:
-                instructor.active = True
-                instructor.delete_at = None
-                instructor.save()
-                person = instructor.person
-                user = User.objects.filter(person=person).first()
-                if user:
-                    user.is_active = True
-                    user.deleted_at = None
-                    user.save()
-                person.active = True
-                person.delete_at = None
-                person.save()
-                person_sede = PersonSede.objects.filter(PersonId=person)
-                for ps in person_sede:
-                    ps.DeleteAt = None
-                    ps.save()
-                return "Instructor reactivado correctamente."
-            self.repository.set_active_state_dates_instructor(instructor, active=False)
-            return "Eliminación lógica realizada correctamente."
-
-

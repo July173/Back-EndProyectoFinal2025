@@ -89,19 +89,6 @@ class AprendizViewset(BaseViewSet):
         )
 #--------------------------------------------------------------------------------------------
 
-    # ----------- RETRIEVE (custom) -----------
-    @swagger_auto_schema(
-        operation_description="Obtiene un aprendiz por su ID (nuevo endpoint avanzado).",
-        responses={200: GetAprendizSerializer},
-        tags=["Aprendiz"]
-    )
-    @action(detail=True, methods=['get'], url_path='Create-Aprendiz/GetById')
-    def custom_retrieve(self, request, pk=None):
-        aprendiz = self.service.get_aprendiz(pk)
-        if aprendiz:
-            serializer = GetAprendizSerializer(aprendiz)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response({"detail": "Aprendiz no encontrado."}, status=status.HTTP_404_NOT_FOUND)
 
     # ----------- CREATE (custom) -----------
     @swagger_auto_schema(
@@ -152,35 +139,3 @@ class AprendizViewset(BaseViewSet):
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    # ----------- DELETE (custom) -----------
-    @swagger_auto_schema(
-        operation_description="Elimina un aprendiz (delete persistencial, nuevo endpoint avanzado).",
-        tags=["Aprendiz"]
-    )
-    @action(detail=True, methods=['delete'], url_path='Create-Aprendiz/delete')
-    def custom_destroy(self, request, pk=None):
-        try:
-            self.service.delete_aprendiz(pk)
-            return Response({"detail": "Aprendiz eliminado correctamente."}, status=status.HTTP_204_NO_CONTENT)
-        except Aprendiz.DoesNotExist:
-            return Response({"detail": "Aprendiz no encontrado."}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-    
-    # ----------- LOGICAL DELETE OR REACTIVATE -----------
-    @swagger_auto_schema(
-        operation_description="Elimina lógicamente o reactiva un aprendiz (nuevo endpoint avanzado).",
-        tags=["Aprendiz"]
-    )
-    @action(detail=True, methods=['delete'], url_path='Create-Aprendiz/logical-delete')
-    def custom_logical_delete(self, request, pk=None):
-        try:
-            result = self.service.logical_delete_aprendiz(pk)
-            return Response({"detail": result}, status=status.HTTP_200_OK)
-        except Aprendiz.DoesNotExist:
-            return Response({"detail": "Aprendiz no encontrado."}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        
-        

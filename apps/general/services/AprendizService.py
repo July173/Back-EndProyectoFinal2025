@@ -174,38 +174,9 @@ class AprendizService(BaseService):
                 user_data['role_id'] = 2
             self.repository.update_all_dates_apprentice(aprendiz, person_data, user_data, ficha)
             return aprendiz
-
-    def get_aprendiz(self, aprendiz_id):
-        """
-        Obtiene un aprendiz por id.
-        """
-        return Aprendiz.objects.filter(pk=aprendiz_id).first()
-
+    
     def list_aprendices(self):
         """
         Lista todos los aprendices.
         """
         return Aprendiz.objects.all()
-
-    def delete_aprendiz(self, aprendiz_id):
-        """
-        Elimina completamente un aprendiz y sus datos relacionados.
-        """
-        with transaction.atomic():
-            aprendiz = Aprendiz.objects.get(pk=aprendiz_id)
-            self.repository.delete_all_dates_apprentice(aprendiz)
-
-    def logical_delete_aprendiz(self, aprendiz_id):
-        """
-        Realiza borrado lógico o reactivación de aprendiz.
-        """
-        with transaction.atomic():
-            aprendiz = Aprendiz.objects.get(pk=aprendiz_id)
-            if not aprendiz.active:
-                self.repository.set_active_state_dates_apprentice(aprendiz, active=True)
-                return "Aprendiz reactivado correctamente."
-            else:
-                self.repository.set_active_state_dates_apprentice(aprendiz, active=False)
-                return "Eliminación lógica realizada correctamente."
-
-
