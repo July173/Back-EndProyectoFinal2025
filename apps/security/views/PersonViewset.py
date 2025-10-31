@@ -119,7 +119,7 @@ class PersonViewSet(BaseViewSet):
             )
         }
     )
-    @action(detail=False, methods=['post'], url_path='register-aprendiz')
+    @action(detail=False, methods=['post'], url_path='register-apprentice')
     def register_aprendiz(self, request):
         """
         Controller: Solo orquesta la llamada al servicio.
