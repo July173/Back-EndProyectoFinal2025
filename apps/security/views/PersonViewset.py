@@ -2,7 +2,6 @@ from rest_framework import status
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.security.services.PersonService import PersonService
 from apps.security.entity.serializers.person.PatchPersonSerializer import PatchPersonSerializer
@@ -14,121 +13,10 @@ from rest_framework import status
 
 
 class PersonViewSet(BaseViewSet):
-    parser_classes = (MultiPartParser, FormParser, JSONParser)
+
     service_class = PersonService
     serializer_class = PersonSerializer
-
-    def get_serializer_class(self):
-        if self.action == 'partial_update':
-            return PatchPersonSerializer
-        elif self.action == 'register_aprendiz':
-            print(f"DEBUG: Usando RegisterAprendizSerializer para action: {self.action}")
-            return RegisterAprendizSerializer
-        return PersonSerializer
-
-    #--- REGISTRO APRENDIZ ---
-    @swagger_auto_schema(
-        operation_description=(
-            "Registra un nuevo aprendiz en el sistema.\n\n"
-            "• **Correo**: Debe ser proporcionado por el usuario (formato: usuario@soy.sena.edu.co)\n"
-            "• **Contraseña**: Se establecerá cuando un administrador active la cuenta\n\n"
-            "El aprendiz queda registrado pero inactivo hasta que un administrador active su cuenta."
-        ),
-        operation_summary="Registro de Aprendiz con activación pendiente",
-        tags=["Person - Registro"],
-        request_body=RegisterAprendizSerializer,
-        responses={
-            201: openapi.Response(
-                description="Registro exitoso, pendiente de activación",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'persona': openapi.Schema(
-                            type=openapi.TYPE_OBJECT,
-                            properties={
-                                'id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                                'first_name': openapi.Schema(type=openapi.TYPE_STRING),
-                                'first_last_name': openapi.Schema(type=openapi.TYPE_STRING),
-                                'number_identification': openapi.Schema(type=openapi.TYPE_STRING),
-                                'phone_number': openapi.Schema(type=openapi.TYPE_STRING),
-                                'type_identification': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID de DocumentType"),
-                                'email': openapi.Schema(type=openapi.TYPE_STRING)
-                            }
-                        ),
-                        'usuario': openapi.Schema(
-                            type=openapi.TYPE_OBJECT,
-                            properties={
-                                'id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                                'email': openapi.Schema(
-                                    type=openapi.TYPE_STRING,
-                                    description="Correo proporcionado por el usuario"
-                                ),
-                                'is_active': openapi.Schema(
-                                    type=openapi.TYPE_BOOLEAN,
-                                    description="Siempre false inicialmente, requiere activación por administrador"
-                                ),
-                                'role': openapi.Schema(type=openapi.TYPE_INTEGER, description="Rol 2 = Aprendiz")
-                            }
-                        ),
-                        'aprendiz_id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                        'success': openapi.Schema(type=openapi.TYPE_STRING)
-                    }
-                ),
-                examples={
-                    'application/json': {
-                        'persona': {
-                            'id': 1,
-                            'first_name': 'Juan',
-                            'first_last_name': 'Pérez',
-                            'number_identification': '1234567890',
-                            'phone_number': '3001234567',
-                            'type_identification': 1,
-                            'email': 'juan.perez@soy.sena.edu.co'
-                        },
-                        'usuario': {
-                            'id': 1,
-                            'email': 'juan.perez@soy.sena.edu.co',
-                            'is_active': False,
-                            'role': 2
-                        },
-                        'aprendiz_id': 1,
-                        'success': 'Usuario registrado correctamente. Tu cuenta está pendiente de activación por un administrador.'
-                    }
-                }
-            ),
-            400: openapi.Response(
-                description="Error en el registro",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'error': openapi.Schema(
-                            type=openapi.TYPE_STRING,
-                            description="Descripción del error"
-                        ),
-                        'detalle': openapi.Schema(
-                            type=openapi.TYPE_OBJECT,
-                            description="Detalles específicos del error"
-                        )
-                    }
-                ),
-                examples={
-                    'application/json': {
-                        'error': 'El correo institucional ya está registrado.'
-                    }
-                }
-            )
-        }
-    )
-    @action(detail=False, methods=['post'], url_path='register-apprentice')
-    def register_aprendiz(self, request):
-        """
-        Controller: Solo orquesta la llamada al servicio.
-        No contiene validaciones ni lógica de negocio.
-        """
-        # Pasar los datos directamente al service sin validar en la vista
-        # El service y repository se encargan de la validación
-        result = self.service.register_aprendiz(request.data)
-        return Response(result['data'], status=result['status'])
+    
     # ----------- LIST -----------
     @swagger_auto_schema(
         operation_description=(
@@ -213,3 +101,29 @@ class PersonViewSet(BaseViewSet):
             {"detail": "No encontrado."},
             status=status.HTTP_404_NOT_FOUND
         )
+
+
+
+
+    #--- REGISTRO APRENDIZ ---
+    @swagger_auto_schema(
+        operation_description=(
+            "Registra un nuevo aprendiz en el sistema.\n\n"
+            "• **Correo**: Debe ser proporcionado por el usuario (formato: usuario@soy.sena.edu.co)\n"
+            "• **Contraseña**: Se establecerá cuando un administrador active la cuenta\n\n"
+            "El aprendiz queda registrado pero inactivo hasta que un administrador active su cuenta."
+        ),
+        operation_summary="Registro de Aprendiz con activación pendiente",
+        tags=["Person - Registro"],
+        request_body=RegisterAprendizSerializer,
+        responses={}
+    )
+    @action(detail=False, methods=['post'], url_path='register-apprentice')
+    def register_apprentice(self, request):
+        """
+        Controller: Solo orquesta la llamada al servicio.
+        No contiene validaciones ni lógica de negocio.
+        """
+        result = self.service.register_apprentice(request.data)
+        return self.render_message(result)
+    

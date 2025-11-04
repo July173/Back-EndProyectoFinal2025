@@ -5,7 +5,7 @@ from apps.general.entity.models import Apprentice, Ficha
 from apps.security.emails.CreacionCuentaUsers import send_account_created_email
 from django.db import transaction
 from django.db import models
-from core.utils.Validation import is_unique_email, is_unique_document_number, is_valid_phone_number
+from core.utils.Validation import is_unique_email, validate_document_number, validate_phone_number
 from apps.security.entity.models.DocumentType import DocumentType
 from django.utils.crypto import get_random_string
 from core.utils.Validation import is_soy_sena_email
@@ -68,9 +68,9 @@ class AprendizService(BaseService):
         # Validaciones de unicidad y formato
         if not is_unique_email(user_data['email'], User):
             raise ValueError('El correo ya está registrado.')
-        if not is_unique_document_number(person_data['number_identification'], Person):
+        if not validate_document_number(person_data['number_identification'], Person):
             raise ValueError('El número de documento ya está registrado.')
-        if person_data['phone_number'] and not is_valid_phone_number(person_data['phone_number']):
+        if person_data['phone_number'] and not validate_phone_number(person_data['phone_number']):
             raise ValueError('El número de teléfono debe tener exactamente 10 dígitos.')
 
         with transaction.atomic():
@@ -156,9 +156,9 @@ class AprendizService(BaseService):
         # Validaciones de unicidad y formato
         if not is_unique_email(user_data['email'], User, exclude_user_id=user.id if user else None):
             raise ValueError('El correo ya está registrado.')
-        if not is_unique_document_number(person_data['number_identification'], Person, exclude_person_id=aprendiz.person.id):
+        if not validate_document_number(person_data['number_identification'], Person, exclude_person_id=aprendiz.person.id):
             raise ValueError('El número de documento ya está registrado.')
-        if person_data['phone_number'] and not is_valid_phone_number(person_data['phone_number']):
+        if person_data['phone_number'] and not validate_phone_number(person_data['phone_number']):
             raise ValueError('El número de teléfono debe tener exactamente 10 dígitos.')
 
         with transaction.atomic():

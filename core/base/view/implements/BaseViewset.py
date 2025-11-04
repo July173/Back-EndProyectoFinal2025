@@ -9,6 +9,7 @@ from rest_framework.decorators import action
 from rest_framework.viewsets import ModelViewSet
 
 
+
 class BaseViewSet(ModelViewSet, IBaseViewSet):
     """
     Implementación concreta del ViewSet que sigue nuestra arquitectura.
@@ -101,3 +102,22 @@ class BaseViewSet(ModelViewSet, IBaseViewSet):
         if deleted:
             return Response({"detail": "Eliminado lógicamente correctamente."}, status=status.HTTP_204_NO_CONTENT)
         return Response({"detail": "No encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
+
+    def render_message(self, result, ok_status=status.HTTP_200_OK, error_status=status.HTTP_400_BAD_REQUEST):
+        # Determina el status_code correcto si está presente en el resultado
+        status_code = None
+        if isinstance(result, dict) and 'status_code' in result:
+            status_code = result['status_code']
+        # Si el resultado es un dict y tiene 'detail', retorna solo el contenido de 'detail'
+        if isinstance(result, dict) and 'detail' in result:
+            return Response(result['detail'], status=status_code or ok_status)
+        # Si es string plano, retorna tal cual
+        if isinstance(result, str):
+            return Response(result, status=status_code or ok_status)
+        # Si es dict con un solo key, retorna su valor
+        if isinstance(result, dict) and len(result) == 1:
+            key = list(result.keys())[0]
+            return Response(result[key], status=status_code or ok_status)
+        # Fallback
+        return Response('Sin información disponible', status=status_code or ok_status)

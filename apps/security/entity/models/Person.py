@@ -11,7 +11,7 @@ class Person(models.Model):
     first_last_name = models.CharField(max_length=100)
     second_last_name = models.CharField(max_length=100, null=True, blank=True)
     phone_number = models.BigIntegerField()
-    number_identification = models.BigIntegerField(unique=True)
+    number_identification = models.IntegerField(unique=True)
     image = models.ImageField(upload_to='personImages/', null=True, blank=True)
     active = models.BooleanField(default=True)
     delete_at = models.DateTimeField(null=True, blank=True)

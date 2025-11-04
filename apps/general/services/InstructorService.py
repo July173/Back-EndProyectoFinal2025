@@ -1,11 +1,11 @@
 from core.base.services.implements.baseService.BaseService import BaseService
 from apps.general.repositories.InstructorRepository import InstructorRepository
 from django.db import transaction
-from apps.general.entity.models import Sede, Center, Regional, PersonSede, KnowledgeArea
+from apps.general.entity.models import Sede, KnowledgeArea
 from apps.security.entity.models import User, Person
 from apps.general.entity.models import Instructor
 from apps.security.emails.CreacionCuentaUsers import send_account_created_email
-from core.utils.Validation import is_unique_email, is_unique_document_number, is_valid_phone_number
+from core.utils.Validation import is_unique_email, validate_document_number, validate_phone_number
 from django.utils.crypto import get_random_string
 from core.utils.Validation import is_sena_email
 from django.core.exceptions import ObjectDoesNotExist
@@ -77,9 +77,9 @@ class InstructorService(BaseService):
             # Validaciones reutilizables
             if not is_unique_email(user_data['email'], User):
                 raise ValueError('El correo ya está registrado.')
-            if not is_unique_document_number(person_data['number_identification'], Person):
+            if not validate_document_number(person_data['number_identification'], Person):
                 raise ValueError('El número de documento ya está registrado.')
-            if person_data.get('phone_number') and not is_valid_phone_number(person_data['phone_number']):
+            if person_data.get('phone_number') and not validate_phone_number(person_data['phone_number']):
                 raise ValueError('El número de teléfono debe tener exactamente 10 dígitos.')
 
             # Crear todo en una sola transacción
@@ -132,10 +132,10 @@ class InstructorService(BaseService):
                 raise ValueError('El correo ya está registrado.')
             # Permitir que el número de identificación sea el mismo que el actual
             if int(person_data['number_identification']) != int(person.number_identification):
-                if not is_unique_document_number(person_data['number_identification'], Person, exclude_person_id=person.id):
+                if not validate_document_number(person_data['number_identification'], Person, exclude_person_id=person.id):
                     raise ValueError('El número de documento ya está registrado.')
             # Validación de número de teléfono
-            if person_data.get('phone_number') and not is_valid_phone_number(person_data['phone_number']):
+            if person_data.get('phone_number') and not validate_phone_number(person_data['phone_number']):
                 raise ValueError('El número de teléfono debe tener exactamente 10 dígitos.')
 
             self.repository.update_all_dates_instructor(

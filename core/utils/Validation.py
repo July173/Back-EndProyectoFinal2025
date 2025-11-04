@@ -1,42 +1,81 @@
+from rest_framework import serializers
+
+
+def validate_document_number(value, person_model, exclude_person_id=None):
+	"""Valida el número de identificación. Retorna True si es válido, False si no, y un string con el mensaje de error."""
+	if not isinstance(value, int):
+		return False, "El número de identificación debe ser un número entero."
+	length = len(str(abs(value)))
+	if not (8 <= length <= 10):
+		return False, "El número de identificación debe tener entre 8 y 10 dígitos numéricos."
+	queryset = person_model.objects.filter(number_identification=value)
+	if exclude_person_id:
+		queryset = queryset.exclude(id=exclude_person_id)
+	if queryset.exists():
+		return False, "El número de documento ya está registrado."
+	return True, None
+
 def is_soy_sena_email(email):
-	"""Valida si el correo termina en @soy.sena.edu.co."""
+	"""Checks if the email ends with @soy.sena.edu.co."""
 	if not email:
 		return False
 	return email.endswith('@soy.sena.edu.co')
 
 def is_sena_email(email):
-	"""Valida si el correo termina en @sena.edu.co."""
+	"""Checks if the email ends with @sena.edu.co."""
 	if not email:
 		return False
 	return email.endswith('@sena.edu.co')
 
 def is_unique_email(email, user_model, exclude_user_id=None):
-	"""Valida que el correo sea único en el modelo dado. Puede excluir un usuario por id (para updates)."""
+	"""Checks that the email is unique in the given model. Can exclude a user by id (for updates)."""
 	if not email:
 		return False
-	qs = user_model.objects.filter(email=email)
+	queryset = user_model.objects.filter(email=email)
 	if exclude_user_id:
-		qs = qs.exclude(id=exclude_user_id)
-	return not qs.exists()
-
-def is_unique_document_number(number, person_model, exclude_person_id=None):
-	"""Valida que el número de documento sea único en el modelo dado. Puede excluir una persona por id (para updates)."""
-	if not number:
-		return False
-	qs = person_model.objects.filter(number_identification=number)
-	if exclude_person_id:
-		qs = qs.exclude(id=exclude_person_id)
-	return not qs.exists()
-
-def is_valid_phone_number(phone):
-	"""Valida que el número de teléfono tenga exactamente 10 dígitos numéricos."""
-	if not phone:
-		return False
-	return str(phone).isdigit() and len(str(phone)) == 10
+		queryset = queryset.exclude(id=exclude_user_id)
+	return not queryset.exists()
 
 def validate_phone_number(value):
-	"""Validador para Django Rest Framework que valida números de teléfono."""
-	from rest_framework import serializers
-	if not is_valid_phone_number(value):
-		raise serializers.ValidationError("El número de teléfono debe tener exactamente 10 dígitos numéricos")
-	return value
+	"""Valida el número de teléfono. Retorna True si es válido, False si no, y un string con el mensaje de error."""
+	if not isinstance(value, int):
+		return False, "El número de teléfono debe ser un número entero."
+	length = len(str(abs(value)))
+	if length != 10:
+		return False, "El número de teléfono debe tener exactamente 10 dígitos numéricos."
+	return True, None
+
+
+def format_response(message, success=True, type="info", status_code=200):
+	"""
+	Returns a standardized response dict for both success and error cases.
+	- message: The main message (string, exception, dict, etc.)
+	- success: True for success, False for error
+	- type: Custom type or code for the response
+	- status_code: HTTP status code (default 200 for success, 400 for error)
+	"""
+	# Clean up message if it's an exception or complex object
+	msg = message
+	if isinstance(message, dict) and 'detail' in message:
+		msg = message['detail']
+	elif hasattr(message, 'detail'):
+		msg = message.detail
+	elif hasattr(message, 'args') and len(message.args) > 0:
+		msg = message.args[0]
+	if isinstance(msg, (list, tuple)) and len(msg) > 0:
+		msg = msg[0]
+	# Si es ErrorDetail o similar, conviértelo a string plano
+	try:
+		from rest_framework.exceptions import ErrorDetail
+		if isinstance(msg, ErrorDetail):
+			msg = str(msg)
+	except ImportError:
+		pass
+	if hasattr(msg, 'code'):
+		msg = str(msg)
+	return {
+		"detail": str(msg),
+		"type": type,
+		"status": "success" if success else "error",
+		"status_code": status_code
+	}
