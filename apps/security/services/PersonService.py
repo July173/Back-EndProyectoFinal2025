@@ -20,11 +20,7 @@ class PersonService(BaseService):
 
 
     def register_apprentice(self, data):
-        """
-        Refactorizado: Crea persona, usuario y aprendiz usando los métodos create de cada service.
-        """
         try:
-            # Validaciones centralizadas usando Validation.py
             email = data.get('email')
             numero_identificacion = data.get('number_identification')
             phone_number = data.get('phone_number')
@@ -40,41 +36,41 @@ class PersonService(BaseService):
                 if not valid_phone:
                     return format_response(phone_msg, success=False, type='invalid_phone', status_code=400)
 
-            # Manejo transaccional de la creación de datos
+            # Transactional handling of data creation
             with transaction.atomic():
-                # 1. Crear persona
+                # 1. Create person
                 serializer = PersonSerializer(data=data)
                 serializer.is_valid(raise_exception=True)
                 person = serializer.save()
 
-                # 2. Crear usuario usando el método create de UserService
+                # 2. Create user using the create method of UserService
                 user_data = {
                     'email': data['email'],
                     'password': 'temporal_placeholder',
                     'person_id': person.id,
                     'is_active': False,
-                    'role_id': 2  # O usa type_role si prefieres
+                    'role_id': 2
                 }
                 user_result = UserService().create(user_data)
                 if isinstance(user_result, dict) and user_result.get('status') == 'error':
                     raise Exception('No se pudo crear el usuario')
                 user = user_result
 
-                # 3. Crear aprendiz usando el método create de AprendizService
+                # 3. Create apprentice
                 aprendiz_data = {
                     'person_id': person.id,
-                    'ficha': None  # Se asignará después
+                    'ficha': None  # It will be assigned later
                 }
                 aprendiz_result = AprendizService().create(aprendiz_data)
                 if isinstance(aprendiz_result, dict) and aprendiz_result.get('status') == 'error':
                     raise Exception('No se pudo crear el aprendiz')
                 aprendiz = aprendiz_result
 
-                # 4. Enviar correo de registro pendiente
+                # 4. Send pending registration email
                 fecha_registro = datetime.now().strftime('%d/%m/%Y')
                 enviar_registro_pendiente(data['email'], person.first_name + ' ' + person.first_last_name, fecha_registro)
 
-                # 5. Serializar usuario para la respuesta
+                # 5. Serialize user for the response
                 user_serializer = UserSerializer(user)
 
                 return format_response(
