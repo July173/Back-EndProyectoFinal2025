@@ -33,7 +33,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)
 
-    # Hacer estos campos opcionales temporalmente
+    login_code = models.CharField(max_length=10, null=True, blank=True, help_text="Código de verificación para 2FA por correo")
+    login_code_expiration = models.DateTimeField(null=True, blank=True, help_text="Fecha de expiración del código de 2FA")
+    login_code_used = models.BooleanField(null=True, default=False, help_text="Indica si el código de 2FA ya fue usado")
+    
     person = models.OneToOneField(
         Person,
         on_delete=models.CASCADE,
