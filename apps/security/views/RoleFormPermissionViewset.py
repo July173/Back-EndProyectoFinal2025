@@ -49,7 +49,7 @@ class RoleFormPermissionViewSet(BaseViewSet):
             'type_role': role.type_role,
             'description': role.description,
             'active': role.active,
-            'formularios': list(form_map.values())
+            'forms': list(form_map.values())
         }
         serializer = CreateRoleWithPermissionsSerializer(data)
         return Response(serializer.data, status=status.HTTP_200_OK)
