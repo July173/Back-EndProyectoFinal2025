@@ -1,6 +1,5 @@
 from core.base.repositories.implements.baseRepository.BaseRepository import BaseRepository
 from apps.security.entity.models import User
-from apps.security.entity.serializers.User.UserSerializer import UserSerializer
 from apps.security.entity.serializers.User.UserSimpleSerializer import UserSimpleSerializer
 
 

@@ -13,6 +13,7 @@ from rest_framework import status
 
 
 class UserViewSet(BaseViewSet):
+    
 
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update']:
@@ -104,7 +105,9 @@ class UserViewSet(BaseViewSet):
             {"detail": "No encontrado."},
             status=status.HTTP_404_NOT_FOUND
         )
-
+        
+        
+    #----------- RESET PASSWORD -----------
     @swagger_auto_schema(
         operation_description=(
             "Restablece la contraseña usando email y nueva contraseña."
@@ -134,7 +137,7 @@ class UserViewSet(BaseViewSet):
         return Response(result['data'], status=result['status'])
     
 
-
+    #----------- VALIDATE INSTITUTIONAL LOGIN -----------
     @swagger_auto_schema(
         operation_description=(
             "Valida correo institucional y contraseña, retorna JWT si es válido."
@@ -165,6 +168,8 @@ class UserViewSet(BaseViewSet):
         print("usuario 2 info: ", result)
         return Response(result['data'], status=result['status'])
 
+
+    #----------- REQUEST PASSWORD RESET -----------
     @swagger_auto_schema(
         operation_description=(
             "Solicita código de recuperación de contraseña, lo envía por email y lo retorna al frontend."
@@ -191,7 +196,9 @@ class UserViewSet(BaseViewSet):
         result = self.service.send_password_reset_code(email)
         return Response(result['data'], status=result['status'])
     
-
+    
+    
+    #----------- FILTER USERS -----------
     @swagger_auto_schema(
         operation_description="Filtra usuarios por rol y búsqueda en nombre o documento.",
         tags=["User"],
@@ -211,3 +218,33 @@ class UserViewSet(BaseViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
     service_class = UserService
     serializer_class = UserSerializer
+
+
+#----------- VALIDATE 2FA CODE -----------
+    @swagger_auto_schema(
+        operation_description=(
+            "Valida el código de verificación 2FA y retorna el JWT si es válido."
+        ),
+        tags=["User"],
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'email': openapi.Schema(type=openapi.TYPE_STRING, description='Correo institucional'),
+                'code': openapi.Schema(type=openapi.TYPE_STRING, description='Código de verificación 2FA'),
+            },
+            required=['email', 'code']
+        ),
+        responses={
+            200: openapi.Response("Autenticación 2FA exitosa"),
+            400: openapi.Response("Código inválido o expirado")
+        }
+    )
+    @action(detail=False, methods=['post'], url_path='validate-2fa-code')
+    def validate_2fa_code(self, request):
+        """
+        Valida el código de verificación 2FA y retorna el JWT si es válido.
+        """
+        email = request.data.get('email')
+        code = request.data.get('code')
+        result = self.service.validate_2fa_code(email, code)
+        return Response(result['data'], status=result['status'])

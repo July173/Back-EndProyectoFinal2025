@@ -1,16 +1,13 @@
 from core.base.services.implements.baseService.BaseService import BaseService
 from apps.security.repositories.PersonRepository import PersonRepository
 from apps.security.entity.serializers.User.UserSerializer import UserSerializer
-from rest_framework import status
 from datetime import datetime
 from apps.security.entity.models import Person, User
 from django.db import transaction
 from apps.security.services.UserService import UserService
-from apps.general.services.AprendizService import AprendizService
 from core.utils.Validation import is_soy_sena_email, is_unique_email, validate_document_number, validate_phone_number
 from apps.security.emails.SendEmails import enviar_registro_pendiente
 from apps.security.entity.serializers.person.PersonSerializer import PersonSerializer
-
 from core.utils.Validation import format_response
 
 
@@ -21,6 +18,7 @@ class PersonService(BaseService):
 
     def register_apprentice(self, data):
         try:
+            from apps.general.services.AprendizService import AprendizService
             email = data.get('email')
             numero_identificacion = data.get('number_identification')
             phone_number = data.get('phone_number')

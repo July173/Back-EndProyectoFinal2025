@@ -5,21 +5,22 @@ from rest_framework import status
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils.crypto import get_random_string
-from django.utils import timezone
-from datetime import timedelta
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
+from django.utils import timezone
+from datetime import timedelta
 from apps.security.entity.models import User
 from apps.security.emails.SendEmailsDesactivate import enviar_desactivacion_usuario
 from core.utils.Validation import is_soy_sena_email, is_sena_email
 from django.utils.crypto import get_random_string
 from apps.security.emails.SendEmailsActivate import enviar_activacion_usuario
+from apps.security.emails.SendEmails2FA import enviar_codigo_verificacion_2fa
 
 
 class UserService(BaseService):
-
     def __init__(self):
         self.repository = UserRepository()
+        
 
     def update(self, pk, data):
         # Si se envía una nueva contraseña, hashearla antes de actualizar
@@ -119,44 +120,7 @@ class UserService(BaseService):
         return inst
 
 
-    def validate_institutional_login(self, email, password):
-        # Validar correo institucional
-        if not (is_soy_sena_email(email) or is_sena_email(email)):
-            return {
-                'data': {'error': 'Solo se permiten correos institucionales (@soy.sena.edu.co o @sena.edu.co)'},
-                'status': status.HTTP_400_BAD_REQUEST
-            }
-        # Validar contraseña (mínimo 8 caracteres)
-        if not password or len(password) < 8:
-            return {
-                'data': {'error': 'La contraseña debe tener al menos 8 caracteres.'},
-                'status': status.HTTP_400_BAD_REQUEST
-            }
-        # Autenticación
-        user = authenticate(email=email, password=password)
-        if user is None:
-            return {
-                'data': {'error': 'Credenciales inválidas.'},
-                'status': status.HTTP_401_UNAUTHORIZED
-            }
-        print("userrr **** info xxxx : ", user.person.id)
-        # Generar JWT
-        refresh = RefreshToken.for_user(user)
-        return {
-            'data': {
-                'access': str(refresh.access_token),
-                'refresh': str(refresh),
-                'user': {
-                    'email': user.email,
-                    'id': user.id,
-                    'role': user.role.id if user.role else None,
-                    'person': user.person.id if user.person else None,  # Solo el id
-                    'registered': user.registered if hasattr(user, 'registered') else None
-                }
-            },
-            'status': status.HTTP_200_OK
-        }
-
+    
 
     def soft_delete(self, pk, motivo="Desactivación de cuenta"):
         try:
@@ -254,3 +218,99 @@ class UserService(BaseService):
                 models.Q(person__number_identification__icontains=search)
             )
         return list(queryset)
+
+
+#-------------------------Login------------------------
+
+    def validate_institutional_login(self, email, password):
+        # Validar correo institucional
+        if not (is_soy_sena_email(email) or is_sena_email(email)):
+            return {
+                'data': {'error': 'Solo se permiten correos institucionales (@soy.sena.edu.co o @sena.edu.co)'},
+                'status': status.HTTP_400_BAD_REQUEST
+            }
+        # Validar contraseña (mínimo 8 caracteres)
+        if not password or len(password) < 8:
+            return {
+                'data': {'error': 'La contraseña debe tener al menos 8 caracteres.'},
+                'status': status.HTTP_400_BAD_REQUEST
+            }
+        # Autenticación
+        user = authenticate(email=email, password=password)
+        if user is None:
+            return {
+                'data': {'error': 'Credenciales inválidas.'},
+                'status': status.HTTP_401_UNAUTHORIZED
+            }
+        # Generar y enviar código 2FA
+        return self.send_login_2fa_code(user)
+
+
+    def send_login_2fa_code(self, user):
+        """
+        Genera un código de 2FA, lo guarda en el usuario y lo envía por correo usando la función dedicada.
+        """
+        code = get_random_string(length=6, allowed_chars='0123456789')
+        expiration = timezone.now() + timedelta(minutes=5)
+        user.login_code = code
+        user.login_code_expiration = expiration
+        user.login_code_used = False
+        user.save()
+        nombre = user.person.first_name if user.person else user.email
+        fecha_expiracion = expiration.strftime('%d/%m/%Y %H:%M')
+        enviar_codigo_verificacion_2fa(user.email, nombre, code, fecha_expiracion)
+        return {
+            'data': {
+                'success': 'Código de verificación enviado al correo institucional.'
+            },
+            'status': status.HTTP_200_OK
+        }
+        
+    def validate_2fa_code(self, email, code):
+        """
+        Valida el código 2FA y entrega el JWT si es correcto.
+        """
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return {
+                'data': {'error': 'No existe un usuario con ese correo.'},
+                'status': status.HTTP_404_NOT_FOUND
+            }
+        # Validar código
+        now = timezone.now()
+        if user.login_code != code:
+            return {
+                'data': {'error': 'Código de verificación incorrecto.'},
+                'status': status.HTTP_400_BAD_REQUEST
+            }
+        if user.login_code_expiration is None or user.login_code_expiration < now:
+            return {
+                'data': {'error': 'El código de verificación ha expirado.'},
+                'status': status.HTTP_400_BAD_REQUEST
+            }
+        if user.login_code_used:
+            return {
+                'data': {'error': 'El código de verificación ya fue usado.'},
+                'status': status.HTTP_400_BAD_REQUEST
+            }
+        # Marcar como usado
+        user.login_code_used = True
+        user.save()
+        # Generar JWT
+        refresh = RefreshToken.for_user(user)
+        return {
+            'data': {
+                'access': str(refresh.access_token),
+                'refresh': str(refresh),
+                'user': {
+                    'email': user.email,
+                    'id': user.id,
+                    'role': user.role.id if user.role else None,
+                    'person': user.person.id if user.person else None,
+                    'registered': user.registered if hasattr(user, 'registered') else None
+                },
+                'success': 'Autenticación 2FA exitosa.'
+            },
+            'status': status.HTTP_200_OK
+        }
