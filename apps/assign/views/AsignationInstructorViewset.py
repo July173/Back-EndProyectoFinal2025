@@ -6,12 +6,14 @@ from drf_yasg import openapi
 from core.base.view.implements.BaseViewset import BaseViewSet
 from apps.assign.services.AsignationInstructorService import AsignationInstructorService
 from apps.assign.entity.serializers.AsignationInstructor.AsignationInstructorSerializer import AsignationInstructorSerializer
-
+from apps.general.entity.models import Instructor
+from apps.general.entity.serializers.CreateInstructor.InstructorSerializer import InstructorSerializer
 
 class AsignationInstructorViewset(BaseViewSet):
     service_class = AsignationInstructorService
     serializer_class = AsignationInstructorSerializer
     
+    #-- Get --
     @swagger_auto_schema(
         operation_description="Obtiene una lista de todas las asignaciones de instructor.",
         tags=["AsignationInstructor"]
@@ -19,6 +21,7 @@ class AsignationInstructorViewset(BaseViewSet):
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
+    #-- Post --
     @swagger_auto_schema(
         operation_description="Crea una nueva asignación de instructor.",
         tags=["AsignationInstructor"]
@@ -26,6 +29,7 @@ class AsignationInstructorViewset(BaseViewSet):
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
 
+    #-- Get by ID --
     @swagger_auto_schema(
         operation_description="Obtiene la información de una asignación específica.",
         tags=["AsignationInstructor"]
@@ -33,6 +37,7 @@ class AsignationInstructorViewset(BaseViewSet):
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
+    #-- Put --
     @swagger_auto_schema(
         operation_description="Actualiza la información completa de una asignación.",
         tags=["AsignationInstructor"]
@@ -40,6 +45,7 @@ class AsignationInstructorViewset(BaseViewSet):
     def update(self, request, *args, **kwargs):
         return super().update(request, *args, **kwargs)
 
+    #-- Patch --
     @swagger_auto_schema(
         operation_description="Actualiza solo algunos campos de una asignación.",
         tags=["AsignationInstructor"]
@@ -47,6 +53,7 @@ class AsignationInstructorViewset(BaseViewSet):
     def partial_update(self, request, *args, **kwargs):
         return super().partial_update(request, *args, **kwargs)
 
+    #-- Delete --
     @swagger_auto_schema(
         operation_description="Elimina físicamente una asignación de la base de datos.",
         tags=["AsignationInstructor"]
@@ -54,6 +61,7 @@ class AsignationInstructorViewset(BaseViewSet):
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)
 
+    #-- Soft Delete --
     @swagger_auto_schema(
         method='delete',
         operation_description="Realiza un borrado lógico (soft delete) de la asignación especificada.",
@@ -77,6 +85,7 @@ class AsignationInstructorViewset(BaseViewSet):
         )
 
 
+    #-- Custom Create --
     @swagger_auto_schema(
         method='post',
         operation_description="Crea una asignación de instructor personalizada (fecha automática)",
@@ -97,8 +106,7 @@ class AsignationInstructorViewset(BaseViewSet):
         result = service.create_custom(instructor_id, request_asignation_id)
         if isinstance(result, dict) and result.get('status') == 'error':
             return Response(result, status=status.HTTP_400_BAD_REQUEST)
-        from apps.general.entity.models import Instructor
-        from apps.general.entity.serializers.CreateInstructor.InstructorSerializer import InstructorSerializer
+        
         instructor = Instructor.objects.get(pk=instructor_id)
         instructor_data = InstructorSerializer(instructor).data
         serializer = self.serializer_class(result)

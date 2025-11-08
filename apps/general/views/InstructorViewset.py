@@ -117,10 +117,16 @@ class InstructorViewset(BaseViewSet):
         result = self.service.create_instructor(
             {k: data[k] for k in ['first_name', 'second_name', 'first_last_name', 'second_last_name', 'phone_number', 'type_identification', 'number_identification']},
             {k: data[k] for k in ['email', 'role_id', 'password'] if k in data},
-            {k: data[k] for k in ['contractType', 'contractStartDate', 'contractEndDate', 'knowledgeArea', 'is_followup_instructor'] if k in data},
+            {
+                'contract_type_id': data.get('contract_type_id'),
+                'contract_start_date': data.get('contract_start_date'),
+                'contract_end_date': data.get('contract_end_date'),
+                'knowledge_area_id': data.get('knowledge_area_id'),
+                'is_followup_instructor': data.get('is_followup_instructor')
+            },
             data['sede_id']
         )
-        return Response({"detail": "Instructor creado correctamente.", "ids": result}, status=status.HTTP_201_CREATED)
+        return self.render_message(result)
 
 
     # ----------- CUSTOM LIST -----------

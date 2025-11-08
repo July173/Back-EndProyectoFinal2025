@@ -1,12 +1,14 @@
 from django.db.models import Q
-   
-from django.utils import timezone
 from apps.security.entity.models import Person, User
+from apps.security.entity.models.DocumentType import DocumentType
 from core.base.repositories.implements.baseRepository.BaseRepository import BaseRepository
 from apps.general.entity.models import Instructor, PersonSede, Sede
 from django.db import transaction
 
 class InstructorRepository(BaseRepository):
+    def __init__(self):
+        super().__init__(Instructor)
+    
     def get_filtered_instructors(self, search=None, knowledge_area_id=None):
         queryset = self.model.objects.select_related('person', 'knowledgeArea').all()
         if search:
@@ -20,32 +22,7 @@ class InstructorRepository(BaseRepository):
         if knowledge_area_id:
             queryset = queryset.filter(knowledgeArea__id=knowledge_area_id)
         return list(queryset)
-    def __init__(self):
-        super().__init__(Instructor)
 
-    """
-    Repositorio optimizado para operaciones CRUD y de estado sobre Instructor, Persona, Usuario y PersonSede.
-    """
-    def create_all_dates_instructor(self, person_data, user_data, instructor_data, sede_id=None):
-        """
-        Crea persona, usuario, instructor y person_sede en una sola transacción.
-        Retorna instructor, user, person, person_sede.
-        """
-        with transaction.atomic():
-            person = Person.objects.create(**person_data)
-            if User.objects.filter(email=user_data['email']).exists():
-                raise ValueError("El correo ya está registrado.")
-            email = user_data.pop('email')
-            password = user_data.pop('password')
-            user = User.objects.create_user(email=email, password=password, person=person, **user_data)
-            user.registered = False
-            user.save()
-            instructor = Instructor.objects.create(person=person, **instructor_data)
-            person_sede = None
-            if sede_id:
-                sede_instance = Sede.objects.get(pk=sede_id)
-                person_sede = PersonSede.objects.create(PersonId=person, SedeId=sede_instance)
-            return instructor, user, person, person_sede
 
     def update_all_dates_instructor(self, instructor, person_data, user_data, instructor_data, sede_id=None):
         """

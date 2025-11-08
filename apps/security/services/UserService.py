@@ -1,3 +1,4 @@
+from apps.general import models
 from core.base.services.implements.baseService.BaseService import BaseService
 from apps.security.repositories.UserRepository import UserRepository
 from django.contrib.auth.hashers import make_password
@@ -205,7 +206,6 @@ class UserService(BaseService):
 
     
     def get_filtered_users(self, role=None, search=None):
-        from django.db import models
         queryset = self.repository.get_queryset()
         if role:
             queryset = queryset.filter(role__type_role__icontains=role)

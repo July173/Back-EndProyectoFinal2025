@@ -92,22 +92,18 @@ class AprendizViewset(BaseViewSet):
 
     # ----------- CREATE (custom) -----------
     @swagger_auto_schema(
-    request_body=CreateApprenticeSerializer,
         operation_description="Crea un nuevo aprendiz (nuevo endpoint avanzado).",
-        tags=["Aprendiz"]
+        tags=["Aprendiz"],
+        request_body=CreateApprenticeSerializer,
+        responses={}
     )
     @action(detail=False, methods=['post'], url_path='Create-Aprendiz/create')
     def custom_create(self, request, *args, **kwargs):
         serializer = CreateApprenticeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        aprendiz, user, person = self.service.create_aprendiz(serializer.validated_data)
-        return Response({
-            "detail": "Aprendiz creado correctamente.",
-            "id": aprendiz.id,
-            "user_id": user.id,
-            "person_id": person.id,
-            "email": user.email
-        }, status=status.HTTP_201_CREATED)
+        result = self.service.create_apprentice(serializer.validated_data)
+        return self.render_message(result, ok_status=status.HTTP_201_CREATED, error_status=status.HTTP_400_BAD_REQUEST)
+
 
     # ----------- LIST (custom) -----------
     @swagger_auto_schema(

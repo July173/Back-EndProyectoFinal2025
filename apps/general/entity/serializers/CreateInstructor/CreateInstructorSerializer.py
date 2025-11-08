@@ -1,7 +1,4 @@
 from rest_framework import serializers
-from apps.security.entity.models.DocumentType import DocumentType
-from apps.general.entity.models.TypeContract import TypeContract
-
 
 class CreateInstructorSerializer(serializers.Serializer):
     """
@@ -18,14 +15,14 @@ class CreateInstructorSerializer(serializers.Serializer):
     number_identification = serializers.IntegerField(required=True)
     # User fields
     email = serializers.EmailField()
-    role = serializers.IntegerField()
+    role_id = serializers.IntegerField()
     # Instructor fields
-    contract_type = serializers.IntegerField(required=True)
+    contract_type_id = serializers.IntegerField(required=True)
     contract_start_date = serializers.DateField()
     contract_end_date = serializers.DateField()
-    knowledge_area = serializers.IntegerField()
+    knowledge_area_id = serializers.IntegerField()
     # Relationship ID
-    sede = serializers.IntegerField()
+    sede_id = serializers.IntegerField()
     is_followup_instructor = serializers.BooleanField(required=False, default=False)
 
     class Meta:

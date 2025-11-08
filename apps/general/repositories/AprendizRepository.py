@@ -9,25 +9,6 @@ class AprendizRepository(BaseRepository):
     def __init__(self):
         super().__init__(Apprentice)
 
-    def create_all_dates_apprentice(self, person_data, user_data, file):
-        """
-        Crea persona, usuario y aprendiz en una sola transacción.
-        Retorna aprendiz, user y person.
-        """
-        
-        with transaction.atomic():
-            person = Person.objects.create(**person_data)
-            if User.objects.filter(email=user_data['email']).exists():
-                raise ValueError("El correo ya está registrado.")
-            email = user_data.pop('email')
-            password = user_data.pop('password')
-            # Eliminar person_id si existe en user_data para evitar sobrescribir el valor correcto
-            user_data.pop('person_id', None)
-            user = User.objects.create_user(email=email, password=password, person=person, **user_data)
-            user.registered = False
-            user.save()
-            apprentice = Apprentice.objects.create(person=person, ficha=file)
-            return apprentice, user, person
 
     def update_all_dates_apprentice(self, apprentice, person_data, user_data, file):
         """
